@@ -3,83 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>اپ کدنویس | نسخه ۲</title>
+<title>Code Editor Pro</title>
 
 <style>
-body{
-  font-family: sans-serif;
-  background:#f2f2f2;
-  margin:0;
-  padding:10px;
-  direction: rtl;
+:root{
+  --bg:#f3f3f3;
+  --panel:#ffffff;
+  --border:#ddd;
+  --accent:#0078d4;
+  --text:#222;
 }
-h2{ text-align:center; }
+
+body{
+  margin:0;
+  font-family: sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+header{
+  background:var(--panel);
+  padding:12px;
+  text-align:center;
+  font-weight:bold;
+  border-bottom:1px solid var(--border);
+}
+
+.tabs{
+  display:flex;
+}
+
+.tabs button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-bottom:2px solid transparent;
+  background:#eee;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:var(--panel);
+  border-bottom:2px solid var(--accent);
+  color:var(--accent);
+}
+
+.editor{
+  display:none;
+}
+
+.editor.active{
+  display:block;
+}
 
 textarea{
   width:100%;
-  height:120px;
-  margin:6px 0;
-  font-family: monospace;
+  height:160px;
+  border:none;
+  outline:none;
+  padding:10px;
+  font-family:monospace;
   font-size:14px;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
 }
 
-button{
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  font-size:16px;
-  border:none;
+.run{
+  background:var(--accent);
+  color:white;
+  padding:14px;
+  text-align:center;
+  font-weight:bold;
   cursor:pointer;
 }
 
-.run{ background:#4CAF50; color:#fff; }
-.clear{ background:#f44336; color:#fff; }
-
 iframe{
   width:100%;
-  height:300px;
-  border:1px solid #ccc;
-  background:#fff;
-  margin-top:10px;
+  height:260px;
+  border:none;
+  background:white;
 }
 </style>
 </head>
 
 <body>
 
-<h2>اپ کدنویس (HTML / CSS / JS)</h2>
-
-<textarea id="html" placeholder="کد HTML"></textarea>
-<textarea id="css" placeholder="کد CSS"></textarea>
-<textarea id="js" placeholder="کد JavaScript"></textarea>
-
-<button class="run" onclick="run()">▶ اجرا</button>
-<button class="clear" onclick="clearAll()">🗑 پاک‌کردن</button>
-
-<iframe id="result"></iframe>
-
-<script>
-function run(){
-  localStorage.setItem("html", html.value);
-  localStorage.setItem("css", css.value);
-  localStorage.setItem("js", js.value);
-
-  result.srcdoc =
-    html.value +
-    "<style>" + css.value + "</style>" +
-    "<script>" + js.value + "<\/script>";
-}
-
-function clearAll(){
-  html.value = css.value = js.value = "";
-  result.srcdoc = "";
-  localStorage.clear();
-}
-
-html.value = localStorage.getItem("html") || "";
-css.value = localStorage.getItem("css") || "";
-js.value = localStorage.getItem("js") || "";
-</script>
-
-</body>
-</html>
+<header>🧠
