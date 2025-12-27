@@ -1,30 +1,88 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>اپ کدنویس ساده</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اپ کدنویس دستوری</title>
 
-  <!-- اتصال CSS -->
-  <link rel="stylesheet" href="style.css">
+<style>
+body {
+  font-family: sans-serif;
+  background: #f5f5f5;
+  margin: 0;
+  padding: 15px;
+}
+
+h2 {
+  text-align: center;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+}
+
+#output {
+  margin-top: 15px;
+  padding: 10px;
+  background: white;
+  min-height: 80px;
+  border: 1px solid #ccc;
+}
+</style>
 </head>
 
 <body>
 
-  <h2>اپ کدنویس ساده (دستوری)</h2>
+<h2>🛠 اپ کدنویس دستوری</h2>
 
-  <input
-    id="command"
-    type="text"
-    placeholder="مثلاً بنویس: یک لیست بساز"
-  >
+<input id="command" placeholder="دستور بنویس (مثلاً: لیست بساز)">
 
-  <button id="runBtn">اجرا</button>
+<button id="runBtn">اجرا</button>
 
-  <div id="output"></div>
+<div id="output"></div>
 
-  <!-- اتصال JavaScript -->
-  <script src="script.js"></script>
+<script>
+const btn = document.getElementById("runBtn");
+const commandInput = document.getElementById("command");
+const output = document.getElementById("output");
+
+btn.addEventListener("click", () => {
+  const cmd = commandInput.value.trim();
+
+  if (cmd === "") {
+    output.innerHTML = "❌ دستور وارد نشده";
+    return;
+  }
+
+  if (cmd.includes("لیست")) {
+    output.innerHTML = `
+      <ul>
+        <li>آیتم اول</li>
+        <li>آیتم دوم</li>
+        <li>آیتم سوم</li>
+      </ul>
+    `;
+  } 
+  else if (cmd.includes("دکمه")) {
+    output.innerHTML = `<button>دکمه جدید</button>`;
+  }
+  else {
+    output.innerHTML = "⚠️ دستور شناخته نشد";
+  }
+});
+</script>
 
 </body>
 </html>
