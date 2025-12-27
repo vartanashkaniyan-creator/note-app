@@ -8,7 +8,7 @@
 <style>
 body {
   font-family: sans-serif;
-  background: #f5f5f5;
+  background: #f4f4f4;
   margin: 0;
   padding: 15px;
 }
@@ -19,14 +19,14 @@ h2 {
 
 input {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   font-size: 16px;
   margin-bottom: 10px;
 }
 
 button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   font-size: 16px;
   background: #4CAF50;
   color: white;
@@ -35,9 +35,9 @@ button {
 
 #output {
   margin-top: 15px;
-  padding: 10px;
+  padding: 12px;
   background: white;
-  min-height: 80px;
+  min-height: 120px;
   border: 1px solid #ccc;
 }
 </style>
@@ -45,43 +45,97 @@ button {
 
 <body>
 
-<h2>🛠 اپ کدنویس دستوری</h2>
+<h2>🧠 اپ کدنویس دستوری</h2>
 
-<input id="command" placeholder="دستور بنویس (مثلاً: لیست بساز)">
+<input id="command" placeholder="دستور بنویس | add item | اضافه خرید نان">
 
-<button id="runBtn">اجرا</button>
+<button id="runBtn">اجرا دستور</button>
 
 <div id="output"></div>
 
 <script>
+// ===== موتور اصلی =====
+let items = [];
+
+const input = document.getElementById("command");
 const btn = document.getElementById("runBtn");
-const commandInput = document.getElementById("command");
 const output = document.getElementById("output");
 
-btn.addEventListener("click", () => {
-  const cmd = commandInput.value.trim();
-
-  if (cmd === "") {
-    output.innerHTML = "❌ دستور وارد نشده";
+// نمایش لیست
+function renderList() {
+  if (items.length === 0) {
+    output.innerHTML = "📭 لیست خالی است";
     return;
   }
 
-  if (cmd.includes("لیست")) {
-    output.innerHTML = `
-      <ul>
-        <li>آیتم اول</li>
-        <li>آیتم دوم</li>
-        <li>آیتم سوم</li>
-      </ul>
-    `;
-  } 
-  else if (cmd.includes("دکمه")) {
-    output.innerHTML = `<button>دکمه جدید</button>`;
+  let html = "<ul>";
+  items.forEach((item, i) => {
+    html += `<li>${i + 1}. ${item}</li>`;
+  });
+  html += "</ul>";
+  output.innerHTML = html;
+}
+
+// پردازش دستور
+btn.onclick = () => {
+  const cmdRaw = input.value.trim();
+  const cmd = cmdRaw.toLowerCase();
+
+  if (cmd === "") {
+    output.innerHTML = "❗ دستور وارد نشده";
   }
+
+  // نمایش لیست
+  else if (cmd === "لیست" || cmd === "list") {
+    renderList();
+  }
+
+  // اضافه فارسی
+  else if (cmd.startsWith("اضافه")) {
+    const text = cmdRaw.replace("اضافه", "").trim();
+    if (text) {
+      items.push(text);
+      renderList();
+    } else {
+      output.innerHTML = "❌ متن آیتم مشخص نیست";
+    }
+  }
+
+  // حذف فارسی
+  else if (cmd.startsWith("حذف")) {
+    const n = parseInt(cmd.replace("حذف", "").trim()) - 1;
+    if (!isNaN(n) && items[n]) {
+      items.splice(n, 1);
+      renderList();
+    } else {
+      output.innerHTML = "❌ شماره نامعتبر";
+    }
+  }
+
+  // add انگلیسی
+  else if (cmd.startsWith("add")) {
+    const text = cmdRaw.replace(/add/i, "").trim();
+    if (text) {
+      items.push(text);
+      renderList();
+    }
+  }
+
+  // remove انگلیسی
+  else if (cmd.startsWith("remove")) {
+    const n = parseInt(cmd.replace("remove", "").trim()) - 1;
+    if (!isNaN(n) && items[n]) {
+      items.splice(n, 1);
+      renderList();
+    }
+  }
+
   else {
     output.innerHTML = "⚠️ دستور شناخته نشد";
   }
-});
+
+  input.value = "";
+};
 </script>
 
 </body>
