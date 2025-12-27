@@ -1,75 +1,52 @@
-// باز کردن یا ایجاد پایگاه داده (Database)
-let db;
-const request = indexedDB.open("CodeDatabase", 1);
+document.getElementById('generate-code').addEventListener('click', function() {
+    const language = document.getElementById('language').value;
+    const appType = document.getElementById('app-type').value;
 
-request.onerror = function(event) {
-  console.log("Database error: " + event.target.errorCode);
-};
+    let generatedCode = '';
 
-request.onsuccess = function(event) {
-  db = event.target.result;
-  console.log("Database opened successfully!");
-  loadCodeFromIndexedDB(); // بارگذاری کد ذخیره شده در صورت وجود
-};
+    if (language === 'Kotlin') {
+        generatedCode = `// Kotlin Code for Mobile App
+fun main() {
+    println("Hello, World!")
+}`;
+    } else if (language === 'React Native') {
+        generatedCode = `// React Native Code for Mobile App
+import React from 'react';
+import { View, Text } from 'react-native';
 
-// ایجاد شی (object store) برای ذخیره‌سازی کدها
-request.onupgradeneeded = function(event) {
-  db = event.target.result;
-  const objectStore = db.createObjectStore("codes", { keyPath: "id" });
-  objectStore.createIndex("code", "code", { unique: false });
-};
+export default function App() {
+  return (
+    <View>
+      <Text>Hello, World!</Text>
+    </View>
+  );
+}`;
+    } else if (language === 'Flutter') {
+        generatedCode = `// Flutter Code for Mobile App
+import 'package:flutter/material.dart';
 
-// ذخیره کد در IndexedDB
-function saveCodeToIndexedDB(code) {
-  const transaction = db.transaction(["codes"], "readwrite");
-  const objectStore = transaction.objectStore("codes");
-  const codeEntry = { id: 1, code: code }; // id می‌تواند عدد منحصر به فرد باشد
-  const request = objectStore.put(codeEntry);
-
-  request.onsuccess = function() {
-    console.log("Code saved to IndexedDB");
-  };
-
-  request.onerror = function() {
-    console.log("Error saving code to IndexedDB");
-  };
+void main() {
+  runApp(MyApp());
 }
 
-// بارگذاری کد از IndexedDB
-function loadCodeFromIndexedDB() {
-  const transaction = db.transaction(["codes"]);
-  const objectStore = transaction.objectStore("codes");
-  const request = objectStore.get(1); // دریافت کد با id برابر 1
-
-  request.onsuccess = function() {
-    if (request.result) {
-      console.log("Loaded code: ", request.result.code);
-      document.getElementById("output").innerText = request.result.code;
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: Text('Hello, World!')),
+      ),
+    );
+  }
+}`;
+    } else if (language === 'Java') {
+        generatedCode = `// Java Code for Mobile App
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
     }
-  };
-}
-
-// تولید کد
-function generateCode() {
-    const language = document.getElementById("language").value;
-    const appType = document.getElementById("appType").value;
-
-    let code = '';
-
-    // تولید کد برای زبان‌های مختلف
-    if (language === 'java') {
-        code = `// Java Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println("Hello, World!");\n  }\n}`;
-    } else if (language === 'kotlin') {
-        code = `// Kotlin Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\nfun main() {\n    println("Hello, World!")\n}`;
-    } else if (language === 'reactNative') {
-        code = `// React Native Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\nimport React from 'react';\nimport { Text, View } from 'react-native';\n\nconst App = () => {\n  return (\n    <View>\n      <Text>Hello, World!</Text>\n    </View>\n  );\n};\n\nexport default App;`;
-    } else if (language === 'flutter') {
-        code = `// Flutter Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\nimport 'package:flutter/material.dart';\n\nvoid main() {\n  runApp(MyApp());\n}\n\nclass MyApp extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp(\n      home: Scaffold(\n        body: Center(\n          child: Text('Hello, World!'),\n        ),\n      ),\n    );\n  }\n}`;
+}`;
     }
 
-    // نمایش کد تولید شده
-    document.getElementById("output").innerText = code;
-
-    // ذخیره کد در IndexedDB
-    saveCodeToIndexedDB(code);
-}
+    document.getElementById('code-output').textContent = generatedCode;
+});
