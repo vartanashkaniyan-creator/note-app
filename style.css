@@ -1,34 +1,102 @@
+/* استایل بدنه صفحه */
 body {
-  font-family: sans-serif;
-  background: #f5f5f5;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;  /* پس‌زمینه رنگی */
   margin: 0;
-  padding: 15px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
+/* استایل برای کانتینر اصلی */
+.container {
+  background-color: #fff;  /* پس‌زمینه سفید */
+  padding: 20px;
+  border-radius: 8px;  /* گوشه‌های گرد */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* سایه برای نمای زیبا */
+  width: 400px;
+  text-align: center;  /* تنظیم متن به مرکز */
+}
+
+/* استایل عنوان */
 h2 {
-  text-align: center;
+  color: #333;  /* رنگ متن */
+  margin-bottom: 20px;  /* فاصله از پایین */
 }
 
+/* استایل برای بخش ورودی */
+.input-section {
+  margin-bottom: 20px;
+}
+
+/* استایل ورودی‌ها (input) */
 input {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin-bottom: 10px;
+  padding: 10px;
+  width: 70%;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
+/* استایل برای دکمه‌ها */
 button {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  background: #4CAF50;
+  padding: 10px 15px;
+  background-color: #4CAF50;  /* رنگ سبز */
   color: white;
   border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;  /* اضافه کردن افکت تغییر رنگ */
 }
 
-#output {
-  margin-top: 15px;
+/* تغییر رنگ دکمه‌ها هنگام هاور */
+button:hover {
+  background-color: #45a049;  /* رنگ تیره‌تر برای هاور */
+}
+
+/* استایل منوی انتخاب زبان */
+#language-select {
   padding: 10px;
-  background: white;
-  min-height: 80px;
-  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+/* استایل لیست دستورات */
+#commands-list {
+  margin-top: 20px;
+}
+
+/* استایل هر دستور */
+.command-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+/* استایل دکمه‌های ویرایش و حذف */
+button.edit-btn {
+  background-color: #ffa500;  /* رنگ نارنجی برای ویرایش */
+}
+
+button.delete-btn {
+  background-color: #f44336;  /* رنگ قرمز برای حذف */
+}
+
+/* تغییر رنگ دکمه‌ها هنگام هاور */
+button.edit-btn:hover {
+  background-color: #ff9800;
+}
+
+button.delete-btn:hover {
+  background-color: #f44336;
+}
+
+/* استایل برای دکمه حذف و ویرایش */
+button:hover {
+  opacity: 0.8;
 }
