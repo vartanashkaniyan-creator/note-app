@@ -3,174 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مدیریت دستورات</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      width: 400px;
-    }
-    button {
-      padding: 10px 15px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
+  <title>اپلیکیشن کدنویس</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h2>مدیریت دستورات</h2>
-    
+    <h2>ساخت اپلیکیشن</h2>
     <div>
-      <label for="language-select">انتخاب زبان:</label>
-      <select id="language-select">
-        <option value="fa">فارسی</option>
-        <option value="en">English</option>
+      <label for="output-select">نوع خروجی:</label>
+      <select id="output-select">
+        <option value="mobile">موبایل (APK / IPA)</option>
+        <option value="desktop">کامپیوتر (Executable)</option>
+        <option value="web">وب</option>
       </select>
     </div>
 
-    <div class="input-section">
-      <input type="text" id="command-text" placeholder="دستور جدید" />
-      <button id="add-command-btn">افزودن دستور</button>
+    <div id="command-section">
+      <input type="text" id="command-text" placeholder="دستور جدید وارد کنید" />
+      <button id="generate-btn">تولید کد</button>
     </div>
 
-    <div>
-      <label for="category-select">دسته‌بندی دستور:</label>
-      <select id="category-select">
-        <option value="خرید">خرید</option>
-        <option value="کارهای روزانه">کارهای روزانه</option>
-        <option value="یادآوری‌ها">یادآوری‌ها</option>
-        <option value="دیگر">دیگر</option>
-      </select>
-    </div>
-
-    <div id="commands-list">
-      <!-- دستورات اضافه شده اینجا نمایش داده خواهند شد -->
-    </div>
+    <pre id="generated-code"></pre>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const commandInput = document.getElementById('command-text');
-      const addButton = document.getElementById('add-command-btn');
-      const commandsList = document.getElementById('commands-list');
-      const languageSelect = document.getElementById('language-select');
-      const categorySelect = document.getElementById('category-select');
-
-      // تغییر زبان
-      languageSelect.addEventListener('change', function() {
-        const language = this.value;
-        changeLanguage(language);
-      });
-
-      // تغییر زبان بر اساس انتخاب
-      function changeLanguage(language) {
-        if (language === 'fa') {
-          commandInput.setAttribute('placeholder', 'دستور جدید');
-          addButton.textContent = 'افزودن دستور';
-        } else {
-          commandInput.setAttribute('placeholder', 'New command');
-          addButton.textContent = 'Add Command';
-        }
-      }
-
-      // افزودن دستور جدید
-      addButton.addEventListener('click', function() {
-        const commandText = commandInput.value.trim();
-        const category = categorySelect.value;
-        
-        if (commandText) {
-          const newCommand = { text: commandText, category, id: Date.now() };
-          saveCommand(newCommand);
-          renderCommand(newCommand);
-          commandInput.value = ''; // پاک کردن ورودی
-        }
-      });
-
-      // ذخیره دستور جدید
-      function saveCommand(command) {
-        let commands = JSON.parse(localStorage.getItem('commands')) || [];
-        commands.push(command);
-        localStorage.setItem('commands', JSON.stringify(commands));
-      }
-
-      // نمایش دستور در صفحه
-      function renderCommand(command) {
-        const commandItem = document.createElement('div');
-        commandItem.classList.add('command-item');
-        commandItem.dataset.id = command.id;
-        commandItem.innerHTML = `
-          <span>${command.text} - ${command.category}</span>
-          <button class="edit-btn">ویرایش</button>
-          <button class="delete-btn">حذف</button>
-        `;
-        commandsList.appendChild(commandItem);
-
-        // افزودن قابلیت ویرایش و حذف
-        commandItem.querySelector('.edit-btn').addEventListener('click', function() {
-          const newText = prompt('ویرایش دستور:', command.text);
-          if (newText) {
-            command.text = newText;
-            saveAllCommands();
-            loadCommands();
-          }
-        });
-
-        commandItem.querySelector('.delete-btn').addEventListener('click', function() {
-          if (confirm('آیا مطمئن هستید که می‌خواهید این دستور را حذف کنید؟')) {
-            deleteCommand(command.id);
-          }
-        });
-      }
-
-      // حذف دستور
-      function deleteCommand(id) {
-        let commands = JSON.parse(localStorage.getItem('commands')) || [];
-        commands = commands.filter(command => command.id !== id);
-        localStorage.setItem('commands', JSON.stringify(commands));
-        loadCommands();
-      }
-
-      // ذخیره تمام دستورات در LocalStorage
-      function saveAllCommands() {
-        const allCommands = [];
-        document.querySelectorAll('.command-item').forEach(function(item) {
-          allCommands.push({
-            text: item.querySelector('span').textContent,
-            id: item.dataset.id,
-            category: item.querySelector('span').textContent.split(' - ')[1]
-          });
-        });
-        localStorage.setItem('commands', JSON.stringify(allCommands));
-      }
-
-      // بارگذاری دستورات از LocalStorage
-      function loadCommands() {
-        const commands = JSON.parse(localStorage.getItem('commands')) || [];
-        commands.forEach(renderCommand);
-      }
-
-      // بارگذاری دستورات هنگام بارگذاری صفحه
-      loadCommands();
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
