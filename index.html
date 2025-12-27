@@ -1,66 +1,62 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <title>یادداشت من</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body{
-      font-family: sans-serif;
-      background:#f5f5f5;
-      direction: rtl;
-      padding:20px;
-    }
-    h2{
-      text-align:center;
-    }
-    textarea{
-      width:100%;
-      height:150px;
-      font-size:16px;
-      padding:10px;
-      box-sizing:border-box;
-    }
-    button{
-      margin-top:10px;
-      width:100%;
-      padding:12px;
-      font-size:16px;
-      background:#4CAF50;
-      color:white;
-      border:none;
-      border-radius:6px;
-    }
-    .saved{
-      margin-top:10px;
-      color:green;
-      text-align:center;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اپ کدنویس</title>
+<style>
+body {
+  font-family: sans-serif;
+  background: #f5f5f5;
+  margin: 0;
+  padding: 10px;
+}
+textarea {
+  width: 100%;
+  height: 120px;
+  margin-bottom: 8px;
+  font-family: monospace;
+}
+button {
+  width: 100%;
+  padding: 12px;
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+}
+iframe {
+  width: 100%;
+  height: 250px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  background: #fff;
+}
+</style>
 </head>
 <body>
 
-  <h2>یادداشت من</h2>
+<h3>HTML</h3>
+<textarea id="html"></textarea>
 
-  <textarea id="note" placeholder="اینجا یادداشتت رو بنویس..."></textarea>
+<h3>CSS</h3>
+<textarea id="css"></textarea>
 
-  <button onclick="saveNote()">ذخیره</button>
+<h3>JavaScript</h3>
+<textarea id="js"></textarea>
 
-  <div class="saved" id="status"></div>
+<button onclick="run()">اجرا کد</button>
 
-  <script>
-    const textarea = document.getElementById("note");
-    const status = document.getElementById("status");
+<iframe id="result"></iframe>
 
-    // بارگذاری یادداشت قبلی
-    textarea.value = localStorage.getItem("myNote") || "";
-
-    function saveNote(){
-      localStorage.setItem("myNote", textarea.value);
-      status.innerText = "یادداشت ذخیره شد ✅";
-      setTimeout(()=> status.innerText="",2000);
-    }
-  </script>
+<script>
+function run() {
+  const html = document.getElementById("html").value;
+  const css = "<style>" + document.getElementById("css").value + "</style>";
+  const js = "<script>" + document.getElementById("js").value + "<\/script>";
+  document.getElementById("result").srcdoc = html + css + js;
+}
+</script>
 
 </body>
 </html>
