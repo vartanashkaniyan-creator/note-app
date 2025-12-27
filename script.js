@@ -1,103 +1,48 @@
-document.addEventListener('DOMContentLoaded', function() {
-  const commandInput = document.getElementById('command-text');
-  const addButton = document.getElementById('add-command-btn');
-  const commandsList = document.getElementById('commands-list');
-  const languageSelect = document.getElementById('language-select');
-  const categorySelect = document.getElementById('category-select');
+document.getElementById("generate-btn").addEventListener("click", function() {
+  const command = document.getElementById("command-text").value.trim();
+  const outputType = document.getElementById("output-select").value;
 
-  // تغییر زبان
-  languageSelect.addEventListener('change', function() {
-    const language = this.value;
-    changeLanguage(language);
-  });
-
-  // تغییر زبان بر اساس انتخاب
-  function changeLanguage(language) {
-    if (language === 'fa') {
-      commandInput.setAttribute('placeholder', 'دستور جدید');
-      addButton.textContent = 'افزودن دستور';
-    } else {
-      commandInput.setAttribute('placeholder', 'New command');
-      addButton.textContent = 'Add Command';
-    }
-  }
-
-  // افزودن دستور جدید
-  addButton.addEventListener('click', function() {
-    const commandText = commandInput.value.trim();
-    const category = categorySelect.value;
-    
-    if (commandText) {
-      const newCommand = { text: commandText, category, id: Date.now() };
-      saveCommand(newCommand);
-      renderCommand(newCommand);
-      commandInput.value = ''; // پاک کردن ورودی
-    }
-  });
-
-  // ذخیره دستور جدید
-  function saveCommand(command) {
-    let commands = JSON.parse(localStorage.getItem('commands')) || [];
-    commands.push(command);
-    localStorage.setItem('commands', JSON.stringify(commands));
-  }
-
-  // نمایش دستور در صفحه
-  function renderCommand(command) {
-    const commandItem = document.createElement('div');
-    commandItem.classList.add('command-item');
-    commandItem.dataset.id = command.id;
-    commandItem.innerHTML = `
-      <span>${command.text} - ${command.category}</span>
-      <button class="edit-btn">ویرایش</button>
-      <button class="delete-btn">حذف</button>
-    `;
-    commandsList.appendChild(commandItem);
-
-    // افزودن قابلیت ویرایش و حذف
-    commandItem.querySelector('.edit-btn').addEventListener('click', function() {
-      const newText = prompt('ویرایش دستور:', command.text);
-      if (newText) {
-        command.text = newText;
-        saveAllCommands();
-        loadCommands();
-      }
-    });
-
-    commandItem.querySelector('.delete-btn').addEventListener('click', function() {
-      if (confirm('آیا مطمئن هستید که می‌خواهید این دستور را حذف کنید؟')) {
-        deleteCommand(command.id);
-      }
-    });
-  }
-
-  // حذف دستور
-  function deleteCommand(id) {
-    let commands = JSON.parse(localStorage.getItem('commands')) || [];
-    commands = commands.filter(command => command.id !== id);
-    localStorage.setItem('commands', JSON.stringify(commands));
-    loadCommands();
-  }
-
-  // ذخیره تمام دستورات در LocalStorage
-  function saveAllCommands() {
-    const allCommands = [];
-    document.querySelectorAll('.command-item').forEach(function(item) {
-      allCommands.push({
-        text: item.querySelector('span').textContent,
-        id: item.dataset.id,
-        category: item.querySelector('span').textContent.split(' - ')[1]
-      });
-    });
-    localStorage.setItem('commands', JSON.stringify(allCommands));
-  }
-
-  // بارگذاری دستورات از LocalStorage
-  function loadCommands() {
-    const commands = JSON.parse(localStorage.getItem('commands')) || [];
-    commands.forEach(renderCommand);
-  }
-
-  // بارگذاری دستورات هنگام بارگذاری صفحه
-  loadCommands();
+  const generatedCode = generateCode(command, outputType);
+  document.getElementById("generated-code").textContent = generatedCode;
 });
+
+function generateCode(command, outputType) {
+  let code = "";
+
+  if (outputType === "mobile") {
+    if (command === "افزودن آیتم") {
+      code = "<ul><li>آیتم 1</li><li>آیتم 2</li></ul>";
+    } else if (command === "ساخت فرم") {
+      code = `
+        <form>
+          <label for="name">نام:</label>
+          <input type="text" id="name" name="name">
+          <input type="submit" value="ارسال">
+        </form>`;
+    }
+    code += "\n\n// این کد برای اپ موبایل (React Native یا Flutter) است.";
+  } else if (outputType === "desktop") {
+    code = `
+      // این کد برای ساخت اپ دسکتاپ با Electron است
+      const { app, BrowserWindow } = require('electron');
+      let win;
+      app.on('ready', () => {
+        win = new BrowserWindow({ width: 800, height: 600 });
+        win.loadFile('index.html');
+      });
+    `;
+  } else if (outputType === "web") {
+    code = `
+      // این کد برای اپ وب با React است
+      import React from 'react';
+      const App = () => {
+        return <h1>سلام، خوش آمدید به اپ وب!</h1>;
+      };
+      export default App;
+    `;
+  } else {
+    code = "دستور نامعتبر است.";
+  }
+
+  return code;
+}
