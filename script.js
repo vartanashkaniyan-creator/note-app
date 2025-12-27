@@ -1,3 +1,55 @@
+// باز کردن یا ایجاد پایگاه داده (Database)
+let db;
+const request = indexedDB.open("CodeDatabase", 1);
+
+request.onerror = function(event) {
+  console.log("Database error: " + event.target.errorCode);
+};
+
+request.onsuccess = function(event) {
+  db = event.target.result;
+  console.log("Database opened successfully!");
+  loadCodeFromIndexedDB(); // بارگذاری کد ذخیره شده در صورت وجود
+};
+
+// ایجاد شی (object store) برای ذخیره‌سازی کدها
+request.onupgradeneeded = function(event) {
+  db = event.target.result;
+  const objectStore = db.createObjectStore("codes", { keyPath: "id" });
+  objectStore.createIndex("code", "code", { unique: false });
+};
+
+// ذخیره کد در IndexedDB
+function saveCodeToIndexedDB(code) {
+  const transaction = db.transaction(["codes"], "readwrite");
+  const objectStore = transaction.objectStore("codes");
+  const codeEntry = { id: 1, code: code }; // id می‌تواند عدد منحصر به فرد باشد
+  const request = objectStore.put(codeEntry);
+
+  request.onsuccess = function() {
+    console.log("Code saved to IndexedDB");
+  };
+
+  request.onerror = function() {
+    console.log("Error saving code to IndexedDB");
+  };
+}
+
+// بارگذاری کد از IndexedDB
+function loadCodeFromIndexedDB() {
+  const transaction = db.transaction(["codes"]);
+  const objectStore = transaction.objectStore("codes");
+  const request = objectStore.get(1); // دریافت کد با id برابر 1
+
+  request.onsuccess = function() {
+    if (request.result) {
+      console.log("Loaded code: ", request.result.code);
+      document.getElementById("output").innerText = request.result.code;
+    }
+  };
+}
+
+// تولید کد
 function generateCode() {
     const language = document.getElementById("language").value;
     const appType = document.getElementById("appType").value;
@@ -17,4 +69,7 @@ function generateCode() {
 
     // نمایش کد تولید شده
     document.getElementById("output").innerText = code;
+
+    // ذخیره کد در IndexedDB
+    saveCodeToIndexedDB(code);
 }
