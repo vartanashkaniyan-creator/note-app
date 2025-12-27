@@ -81,6 +81,14 @@ function addNoteToList(note, index) {
     removeNoteFromList(index, li);
   };
   
+  // دکمه ویرایش یادداشت
+  const editButton = document.createElement("button");
+  editButton.textContent = "ویرایش";
+  editButton.onclick = function() {
+    editNote(index, li);
+  };
+
+  li.appendChild(editButton);
   li.appendChild(deleteButton);
   document.getElementById("notesList").appendChild(li);
 }
@@ -102,7 +110,21 @@ function removeNoteFromList(index, li) {
   savedNotes.splice(index, 1); // حذف یادداشت با استفاده از شناسه
   localStorage.setItem('notes', JSON.stringify(savedNotes));
 }
+
+// ویرایش یادداشت
+function editNote(index, li) {
+  const newNote = prompt("ویرایش یادداشت:", li.firstChild.textContent);
+  if (newNote && newNote.trim() !== "") {
+    li.firstChild.textContent = newNote;
+
+    // بروزرسانی یادداشت‌ها در localStorage
+    const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+    savedNotes[index] = newNote;
+    localStorage.setItem('notes', JSON.stringify(savedNotes));
+  }
+}
 </script>
 
 </body>
 </html>
+  
