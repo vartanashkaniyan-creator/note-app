@@ -3,127 +3,174 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>اپ لیست خرید</title>
+  <title>مدیریت دستورات</title>
   <style>
-    /* استایل‌های CSS */
-    ul {
-      list-style-type: none;
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
       padding: 0;
-      margin: 20px auto;
-      width: 80%;
-      max-width: 600px;
-    }
-    
-    li {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      background-color: #f1f1f1;
-      margin: 5px 0;
-      padding: 10px;
-      border-radius: 5px;
+      height: 100vh;
     }
-    
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
     button {
-      padding: 5px 10px;
-      background-color: #ff4c4c;
+      padding: 10px 15px;
+      background-color: #4CAF50;
       color: white;
       border: none;
+      border-radius: 4px;
       cursor: pointer;
-      margin-left: 10px;
     }
-    
     button:hover {
-      background-color: darkred;
-    }
-    
-    input {
-      padding: 10px;
-      width: 200px;
-      margin-right: 10px;
-      margin-bottom: 20px;
+      background-color: #45a049;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>مدیریت دستورات</h2>
+    
+    <div>
+      <label for="language-select">انتخاب زبان:</label>
+      <select id="language-select">
+        <option value="fa">فارسی</option>
+        <option value="en">English</option>
+      </select>
+    </div>
 
-  <h2>لیست خرید</h2>
-  
-  <ul id="itemList">
-    <!-- آیتم‌ها در اینجا اضافه می‌شوند -->
-  </ul>
-  
-  <input type="text" id="newItem" placeholder="آیتم جدید">
-  <button onclick="addItem()">آیتم جدید اضافه کن</button>
+    <div class="input-section">
+      <input type="text" id="command-text" placeholder="دستور جدید" />
+      <button id="add-command-btn">افزودن دستور</button>
+    </div>
 
-  <div>
-    <h3>جستجو:</h3>
-    <input type="text" id="searchInput" onkeyup="searchItems()" placeholder="جستجو کنید...">
+    <div>
+      <label for="category-select">دسته‌بندی دستور:</label>
+      <select id="category-select">
+        <option value="خرید">خرید</option>
+        <option value="کارهای روزانه">کارهای روزانه</option>
+        <option value="یادآوری‌ها">یادآوری‌ها</option>
+        <option value="دیگر">دیگر</option>
+      </select>
+    </div>
+
+    <div id="commands-list">
+      <!-- دستورات اضافه شده اینجا نمایش داده خواهند شد -->
+    </div>
   </div>
 
   <script>
-    // کد JavaScript برای ویرایش، حذف، ذخیره‌سازی و جستجو
-    function addItem() {
-      const newItemText = document.getElementById("newItem").value;
-      if (newItemText) {
-        const newItem = document.createElement("li");
-        newItem.innerHTML = newItemText + ' <button onclick="removeItem(this)">حذف</button> <button onclick="editItem(this)">ویرایش</button>';
-        document.getElementById("itemList").appendChild(newItem);
-        document.getElementById("newItem").value = ""; // پاک کردن فیلد ورودی
-        saveList(); // ذخیره‌سازی بعد از اضافه کردن آیتم
-      }
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const commandInput = document.getElementById('command-text');
+      const addButton = document.getElementById('add-command-btn');
+      const commandsList = document.getElementById('commands-list');
+      const languageSelect = document.getElementById('language-select');
+      const categorySelect = document.getElementById('category-select');
 
-    function removeItem(button) {
-      button.parentElement.remove();
-      saveList(); // ذخیره‌سازی پس از حذف آیتم
-    }
-
-    function editItem(button) {
-      const currentItem = button.parentElement;
-      const newText = prompt("ویرایش آیتم:", currentItem.firstChild.textContent.trim());
-      if (newText) {
-        currentItem.firstChild.textContent = newText;
-        saveList(); // ذخیره مجدد پس از ویرایش
-      }
-    }
-
-    function saveList() {
-      const items = [];
-      document.querySelectorAll('#itemList li').forEach(item => {
-        items.push(item.firstChild.textContent.trim());
+      // تغییر زبان
+      languageSelect.addEventListener('change', function() {
+        const language = this.value;
+        changeLanguage(language);
       });
-      localStorage.setItem('itemList', JSON.stringify(items));
-    }
 
-    function loadList() {
-      const items = JSON.parse(localStorage.getItem('itemList'));
-      if (items) {
-        items.forEach(itemText => {
-          const newItem = document.createElement("li");
-          newItem.innerHTML = itemText + ' <button onclick="removeItem(this)">حذف</button> <button onclick="editItem(this)">ویرایش</button>';
-          document.getElementById("itemList").appendChild(newItem);
-        });
-      }
-    }
-
-    function searchItems() {
-      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-      const items = document.querySelectorAll("#itemList li");
-      items.forEach(item => {
-        const text = item.firstChild.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-          item.style.display = "";
+      // تغییر زبان بر اساس انتخاب
+      function changeLanguage(language) {
+        if (language === 'fa') {
+          commandInput.setAttribute('placeholder', 'دستور جدید');
+          addButton.textContent = 'افزودن دستور';
         } else {
-          item.style.display = "none";
+          commandInput.setAttribute('placeholder', 'New command');
+          addButton.textContent = 'Add Command';
+        }
+      }
+
+      // افزودن دستور جدید
+      addButton.addEventListener('click', function() {
+        const commandText = commandInput.value.trim();
+        const category = categorySelect.value;
+        
+        if (commandText) {
+          const newCommand = { text: commandText, category, id: Date.now() };
+          saveCommand(newCommand);
+          renderCommand(newCommand);
+          commandInput.value = ''; // پاک کردن ورودی
         }
       });
-    }
 
-    // بارگذاری لیست از LocalStorage هنگام بارگذاری صفحه
-    window.onload = loadList;
-    // ذخیره‌سازی پس از هر تغییر
-    window.addEventListener('beforeunload', saveList);
+      // ذخیره دستور جدید
+      function saveCommand(command) {
+        let commands = JSON.parse(localStorage.getItem('commands')) || [];
+        commands.push(command);
+        localStorage.setItem('commands', JSON.stringify(commands));
+      }
+
+      // نمایش دستور در صفحه
+      function renderCommand(command) {
+        const commandItem = document.createElement('div');
+        commandItem.classList.add('command-item');
+        commandItem.dataset.id = command.id;
+        commandItem.innerHTML = `
+          <span>${command.text} - ${command.category}</span>
+          <button class="edit-btn">ویرایش</button>
+          <button class="delete-btn">حذف</button>
+        `;
+        commandsList.appendChild(commandItem);
+
+        // افزودن قابلیت ویرایش و حذف
+        commandItem.querySelector('.edit-btn').addEventListener('click', function() {
+          const newText = prompt('ویرایش دستور:', command.text);
+          if (newText) {
+            command.text = newText;
+            saveAllCommands();
+            loadCommands();
+          }
+        });
+
+        commandItem.querySelector('.delete-btn').addEventListener('click', function() {
+          if (confirm('آیا مطمئن هستید که می‌خواهید این دستور را حذف کنید؟')) {
+            deleteCommand(command.id);
+          }
+        });
+      }
+
+      // حذف دستور
+      function deleteCommand(id) {
+        let commands = JSON.parse(localStorage.getItem('commands')) || [];
+        commands = commands.filter(command => command.id !== id);
+        localStorage.setItem('commands', JSON.stringify(commands));
+        loadCommands();
+      }
+
+      // ذخیره تمام دستورات در LocalStorage
+      function saveAllCommands() {
+        const allCommands = [];
+        document.querySelectorAll('.command-item').forEach(function(item) {
+          allCommands.push({
+            text: item.querySelector('span').textContent,
+            id: item.dataset.id,
+            category: item.querySelector('span').textContent.split(' - ')[1]
+          });
+        });
+        localStorage.setItem('commands', JSON.stringify(allCommands));
+      }
+
+      // بارگذاری دستورات از LocalStorage
+      function loadCommands() {
+        const commands = JSON.parse(localStorage.getItem('commands')) || [];
+        commands.forEach(renderCommand);
+      }
+
+      // بارگذاری دستورات هنگام بارگذاری صفحه
+      loadCommands();
+    });
   </script>
 </body>
 </html>
