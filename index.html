@@ -1,108 +1,45 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ساخت اپلیکیشن</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #4CAF50;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            font-size: 14px;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .output {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f1f1f1;
-            border-radius: 4px;
-            text-align: center;
-            color: #4CAF50;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ساخت اپلیکیشن</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <div class="container">
-        <h1>ساخت اپلیکیشن</h1>
-        <div class="form-group">
-            <label for="outputType">نوع خروجی:</label>
-            <select id="outputType">
-                <option value="APK">موبایل (APK)</option>
-                <option value="IPA">موبایل (IPA)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="language">زبان کدنویسی:</label>
-            <select id="language">
-                <option value="React Native">React Native</option>
-                <option value="Flutter">Flutter</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="command">دستور بنویسید:</label>
-            <input type="text" id="command" placeholder="دستور مورد نظر خود را وارد کنید">
-        </div>
-        <button onclick="generateCode()">تولید کد</button>
+  <div class="container">
+    <h1>ساخت اپلیکیشن</h1>
 
-        <div class="output" id="outputArea">
-            <!-- نتیجه کد تولیدی اینجا نمایش داده می‌شود -->
-        </div>
+    <div class="form-group">
+      <label for="outputType">نوع خروجی:</label>
+      <select id="outputType">
+        <option value="mobile">موبایل (APK/IPA)</option>
+        <option value="web">وب</option>
+      </select>
     </div>
 
-    <script>
-        function generateCode() {
-            const outputType = document.getElementById('outputType').value;
-            const language = document.getElementById('language').value;
-            const command = document.getElementById('command').value;
+    <div class="form-group">
+      <label for="language">زبان کدنویسی:</label>
+      <select id="language">
+        <option value="React Native">React Native</option>
+        <option value="Flutter">Flutter</option>
+      </select>
+    </div>
 
-            let generatedCode = `
-            // این کد برای اپ ${outputType} با زبان ${language} است.
-            // دستور وارد شده: ${command}
-            `;
+    <div class="form-group">
+      <label for="command">دستورات:</label>
+      <input type="text" id="command" placeholder="دستور مورد نظر خود را وارد کنید">
+    </div>
 
-            document.getElementById('outputArea').innerText = generatedCode;
-        }
-    </script>
+    <button onclick="generateCode()">تولید کد</button>
+
+    <div class="output" id="outputArea">
+      <!-- نمایش نتیجه کد تولیدی -->
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 
 </body>
 </html>
