@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>اپ کدنویس</title>
-
 <style>
 body {
   font-family: sans-serif;
@@ -12,38 +11,12 @@ body {
   margin: 0;
   padding: 10px;
 }
-
-.editor {
-  display: flex;
-  border: 1px solid #ccc;
-  background: #fff;
-  margin-bottom: 10px;
-  height: 150px;
-}
-
-.lines {
-  background: #eee;
-  padding: 5px;
-  text-align: right;
-  user-select: none;
-  color: #666;
-}
-
-.lines div {
-  height: 18px;
-  font-size: 13px;
-}
-
 textarea {
-  flex: 1;
-  border: none;
-  resize: none;
-  padding: 5px;
+  width: 100%;
+  height: 120px;
+  margin-bottom: 8px;
   font-family: monospace;
-  font-size: 13px;
-  outline: none;
 }
-
 button {
   width: 100%;
   padding: 12px;
@@ -52,7 +25,6 @@ button {
   border: none;
   font-size: 16px;
 }
-
 iframe {
   width: 100%;
   height: 250px;
@@ -62,40 +34,40 @@ iframe {
 }
 </style>
 </head>
-
 <body>
 
-<h3>HTML</h3>
-<div class="editor">
-  <div class="lines" id="htmlLines"></div>
-  <textarea id="html" oninput="updateLines('html')"></textarea>
+<h3>انتخاب حالت:</h3>
+<button onclick="switchMode('simple')">حالت ساده</button>
+<button onclick="switchMode('advanced')">حالت حرفه‌ای</button>
+
+<!-- حالت ساده -->
+<div id="simpleEditor" style="display:block;">
+  <h3>HTML</h3>
+  <textarea id="html" placeholder="کد HTML خود را وارد کنید..."></textarea>
+  <button onclick="run()">اجرا</button>
+  <iframe id="result"></iframe>
 </div>
 
-<h3>CSS</h3>
-<div class="editor">
-  <div class="lines" id="cssLines"></div>
-  <textarea id="css" oninput="updateLines('css')"></textarea>
+<!-- حالت حرفه‌ای -->
+<div id="advancedEditor" style="display:none;">
+  <h3>HTML</h3>
+  <textarea id="html"></textarea>
+  <h3>CSS</h3>
+  <textarea id="css"></textarea>
+  <h3>JavaScript</h3>
+  <textarea id="js"></textarea>
+  <button onclick="run()">اجرا</button>
+  <iframe id="result"></iframe>
 </div>
-
-<h3>JavaScript</h3>
-<div class="editor">
-  <div class="lines" id="jsLines"></div>
-  <textarea id="js" oninput="updateLines('js')"></textarea>
-</div>
-
-<button onclick="run()">اجرا کد</button>
-
-<iframe id="result"></iframe>
 
 <script>
-function updateLines(type) {
-  const textarea = document.getElementById(type);
-  const linesDiv = document.getElementById(type + "Lines");
-  const count = textarea.value.split("\n").length;
-
-  linesDiv.innerHTML = "";
-  for (let i = 1; i <= count; i++) {
-    linesDiv.innerHTML += "<div>" + i + "</div>";
+function switchMode(mode) {
+  if (mode === 'simple') {
+    document.getElementById('simpleEditor').style.display = 'block';
+    document.getElementById('advancedEditor').style.display = 'none';
+  } else {
+    document.getElementById('simpleEditor').style.display = 'none';
+    document.getElementById('advancedEditor').style.display = 'block';
   }
 }
 
