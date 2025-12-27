@@ -1,3 +1,19 @@
+// ویرایش آیتم
+function editItem(button) {
+  const currentItem = button.parentElement;
+  const newText = prompt("ویرایش آیتم:", currentItem.firstChild.textContent.trim());
+  if (newText) {
+    currentItem.firstChild.textContent = newText;
+    saveList(); // ذخیره مجدد پس از ویرایش
+  }
+}
+
+// حذف آیتم
+function removeItem(button) {
+  button.parentElement.remove();
+  saveList(); // ذخیره‌سازی پس از حذف
+}
+
 // ذخیره‌سازی آیتم‌ها در LocalStorage
 function saveList() {
   const items = [];
