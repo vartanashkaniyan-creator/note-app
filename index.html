@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>اپ کدنویس</title>
+<title>اپ یادداشت</title>
 <style>
 body {
   font-family: sans-serif;
@@ -36,46 +36,51 @@ iframe {
 </head>
 <body>
 
-<h3>انتخاب حالت:</h3>
-<button onclick="switchMode('simple')">حالت ساده</button>
-<button onclick="switchMode('advanced')">حالت حرفه‌ای</button>
+<h3>HTML</h3>
+<textarea id="html" placeholder="کد HTML خود را وارد کنید..."></textarea>
 
-<!-- حالت ساده -->
-<div id="simpleEditor" style="display:block;">
-  <h3>HTML</h3>
-  <textarea id="html" placeholder="کد HTML خود را وارد کنید..."></textarea>
-  <button onclick="run()">اجرا</button>
-  <iframe id="result"></iframe>
-</div>
+<h3>CSS</h3>
+<textarea id="css"></textarea>
 
-<!-- حالت حرفه‌ای -->
-<div id="advancedEditor" style="display:none;">
-  <h3>HTML</h3>
-  <textarea id="html"></textarea>
-  <h3>CSS</h3>
-  <textarea id="css"></textarea>
-  <h3>JavaScript</h3>
-  <textarea id="js"></textarea>
-  <button onclick="run()">اجرا</button>
-  <iframe id="result"></iframe>
-</div>
+<h3>JavaScript</h3>
+<textarea id="js"></textarea>
+
+<button onclick="addNote()">افزودن یادداشت</button>
+
+<h3>یادداشت‌ها:</h3>
+<ul id="notesList"></ul>
 
 <script>
-function switchMode(mode) {
-  if (mode === 'simple') {
-    document.getElementById('simpleEditor').style.display = 'block';
-    document.getElementById('advancedEditor').style.display = 'none';
-  } else {
-    document.getElementById('simpleEditor').style.display = 'none';
-    document.getElementById('advancedEditor').style.display = 'block';
+// بارگذاری یادداشت‌ها از localStorage هنگام باز شدن صفحه
+window.onload = function() {
+  const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+  savedNotes.forEach(note => {
+    addNoteToList(note);
+  });
+}
+
+// افزودن یادداشت جدید
+function addNote() {
+  const note = document.getElementById("html").value;
+  if (note.trim() !== "") {
+    addNoteToList(note);
+    saveNoteToLocalStorage(note);
+    document.getElementById("html").value = ''; // پاک کردن textarea
   }
 }
 
-function run() {
-  const html = document.getElementById("html").value;
-  const css = "<style>" + document.getElementById("css").value + "</style>";
-  const js = "<script>" + document.getElementById("js").value + "<\/script>";
-  document.getElementById("result").srcdoc = html + css + js;
+// اضافه کردن یادداشت به لیست
+function addNoteToList(note) {
+  const li = document.createElement("li");
+  li.textContent = note;
+  document.getElementById("notesList").appendChild(li);
+}
+
+// ذخیره یادداشت‌ها در localStorage
+function saveNoteToLocalStorage(note) {
+  const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+  savedNotes.push(note);
+  localStorage.setItem('notes', JSON.stringify(savedNotes));
 }
 </script>
 
