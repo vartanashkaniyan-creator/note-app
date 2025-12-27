@@ -1,184 +1,50 @@
+
+  
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>اپ یادداشت</title>
-<style>
-/* استایل عمومی */
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f0f8ff;
-  margin: 0;
-  padding: 20px;
-  text-align: center;
-}
-
-/* استایل textarea */
-textarea {
-  width: 100%;
-  height: 120px;
-  margin-bottom: 8px;
-  font-family: monospace;
-  border-radius: 8px;
-  padding: 10px;
-  border: 1px solid #ccc;
-}
-
-/* استایل دکمه‌ها */
-button {
-  padding: 12px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-  width: 100%;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-/* استایل لیست یادداشت‌ها */
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
-  background: #ffffff;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* استایل آیکن‌ها */
-button.delete, button.edit {
-  background-color: #f44336;
-  border-radius: 5px;
-  margin-left: 10px;
-  padding: 6px 12px;
-}
-
-button.delete:hover, button.edit:hover {
-  background-color: #d32f2f;
-}
-
-/* واکنش‌گرا */
-@media (max-width: 600px) {
-  body {
-    padding: 10px;
-  }
-  button {
-    width: auto;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>واسط کاربری ساده</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    textarea { width: 80%; height: 100px; margin-bottom: 20px; padding: 10px; font-size: 14px; }
+    button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; font-size: 16px; cursor: pointer; }
+    iframe { width: 100%; height: 300px; border: 1px solid #ccc; margin-top: 20px; }
+  </style>
 </head>
 <body>
 
-<h1>اپ یادداشت</h1>
+<h2>دستور خود را وارد کنید:</h2>
+<textarea id="command" placeholder="مثلاً: یک دکمه بساز که وقتی کلیک شد، رنگش تغییر کند"></textarea><br>
+<button onclick="generateCode()">تولید کد</button>
 
-<h3>HTML</h3>
-<textarea id="html" placeholder="کد HTML خود را وارد کنید..."></textarea>
-
-<h3>CSS</h3>
-<textarea id="css"></textarea>
-
-<h3>JavaScript</h3>
-<textarea id="js"></textarea>
-
-<button onclick="addNote()">افزودن یادداشت</button>
-
-<h3>یادداشت‌ها:</h3>
-<ul id="notesList"></ul>
+<h3>پیش‌نمایش کد:</h3>
+<iframe id="result"></iframe>
 
 <script>
-// بارگذاری یادداشت‌ها از localStorage هنگام باز شدن صفحه
-window.onload = function() {
-  const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-  savedNotes.forEach((note, index) => {
-    addNoteToList(note, index);
-  });
-}
+  function generateCode() {
+    const command = document.getElementById("command").value.toLowerCase().trim();
+    let generatedCode = "";
+    
+    // بررسی دستورات ساده
+    if (command.includes("دکمه") && command.includes("رنگ")) {
+      generatedCode = `
+        <button id="myButton">کلیک کن</button>
+        <script>
+          document.getElementById("myButton").onclick = function() {
+            this.style.backgroundColor = "red";
+          };
+        </script>
+      `;
+    } else {
+      generatedCode = "<p>دستور شناسایی نشد!</p>";
+    }
 
-// افزودن یادداشت جدید
-function addNote() {
-  const note = document.getElementById("html").value;
-  if (note.trim() !== "") {
-    addNoteToList(note, Date.now()); // استفاده از زمان به عنوان شناسه یکتا
-    saveNoteToLocalStorage(note);
-    document.getElementById("html").value = ''; // پاک کردن textarea
-  } else {
-    alert("لطفاً یادداشت را وارد کنید!");
+    // نمایش کد در iframe
+    document.getElementById("result").srcdoc = generatedCode;
   }
-}
-
-// اضافه کردن یادداشت به لیست
-function addNoteToList(note, index) {
-  const li = document.createElement("li");
-  li.textContent = note;
-
-  // دکمه حذف یادداشت
-  const deleteButton = document.createElement("button");
-  deleteButton.textContent = "حذف";
-  deleteButton.className = "delete";
-  deleteButton.onclick = function() {
-    removeNoteFromList(index, li);
-  };
-
-  // دکمه ویرایش یادداشت
-  const editButton = document.createElement("button");
-  editButton.textContent = "ویرایش";
-  editButton.className = "edit";
-  editButton.onclick = function() {
-    editNote(index, li);
-  };
-
-  li.appendChild(editButton);
-  li.appendChild(deleteButton);
-  document.getElementById("notesList").appendChild(li);
-}
-
-// ذخیره یادداشت‌ها در localStorage
-function saveNoteToLocalStorage(note) {
-  const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-  savedNotes.push(note);
-  localStorage.setItem('notes', JSON.stringify(savedNotes));
-}
-
-// حذف یادداشت از لیست و localStorage
-function removeNoteFromList(index, li) {
-  // حذف یادداشت از لیست صفحه
-  li.remove();
-
-  // حذف یادداشت از localStorage
-  const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-  savedNotes.splice(index, 1); // حذف یادداشت با استفاده از شناسه
-  localStorage.setItem('notes', JSON.stringify(savedNotes));
-}
-
-// ویرایش یادداشت
-function editNote(index, li) {
-  const newNote = prompt("ویرایش یادداشت:", li.firstChild.textContent);
-  if (newNote && newNote.trim() !== "") {
-    li.firstChild.textContent = newNote;
-
-    // بروزرسانی یادداشت‌ها در localStorage
-    const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-    savedNotes[index] = newNote;
-    localStorage.setItem('notes', JSON.stringify(savedNotes));
-  }
-}
 </script>
 
 </body>
 </html>
-  
