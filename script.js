@@ -1,48 +1,76 @@
-document.getElementById("generate-btn").addEventListener("click", function() {
-  const command = document.getElementById("command-text").value.trim();
-  const outputType = document.getElementById("output-select").value;
+function generateCode() {
+  const outputType = document.getElementById('outputType').value;
+  const language = document.getElementById('language').value;
+  const command = document.getElementById('command').value.trim();
 
-  const generatedCode = generateCode(command, outputType);
-  document.getElementById("generated-code").textContent = generatedCode;
-});
-
-function generateCode(command, outputType) {
-  let code = "";
+  let generatedCode = `
+  // این کد برای اپ ${outputType} با زبان ${language} است.
+  // دستور وارد شده: ${command}
+  `;
 
   if (outputType === "mobile") {
-    if (command === "افزودن آیتم") {
-      code = "<ul><li>آیتم 1</li><li>آیتم 2</li></ul>";
-    } else if (command === "ساخت فرم") {
-      code = `
-        <form>
-          <label for="name">نام:</label>
-          <input type="text" id="name" name="name">
-          <input type="submit" value="ارسال">
-        </form>`;
-    }
-    code += "\n\n// این کد برای اپ موبایل (React Native یا Flutter) است.";
-  } else if (outputType === "desktop") {
-    code = `
-      // این کد برای ساخت اپ دسکتاپ با Electron است
-      const { app, BrowserWindow } = require('electron');
-      let win;
-      app.on('ready', () => {
-        win = new BrowserWindow({ width: 800, height: 600 });
-        win.loadFile('index.html');
-      });
+    generatedCode += `
+    // برای خروجی موبایل (APK/IPA) شما باید از React Native یا Flutter استفاده کنید.
+    // در اینجا کد موبایل تولید شده است:
+    // ${generateMobileCode(command, language)}
     `;
   } else if (outputType === "web") {
-    code = `
-      // این کد برای اپ وب با React است
-      import React from 'react';
-      const App = () => {
-        return <h1>سلام، خوش آمدید به اپ وب!</h1>;
-      };
-      export default App;
+    generatedCode += `
+    // برای خروجی وب:
+    // ${generateWebCode(command)}
     `;
-  } else {
-    code = "دستور نامعتبر است.";
   }
 
-  return code;
+  document.getElementById('outputArea').textContent = generatedCode;
+}
+
+function generateMobileCode(command, language) {
+  if (language === "React Native") {
+    return `// React Native - دستور: ${command}
+import React from 'react';
+import { View, Text } from 'react-native';
+
+export default function App() {
+  return (
+    <View>
+      <Text>دستور شما: ${command}</Text>
+    </View>
+  );
+}`;
+  } else if (language === "Flutter") {
+    return `// Flutter - دستور: ${command}
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('دستور شما: ${command}'),
+        ),
+      ),
+    );
+  }
+}`;
+  }
+}
+
+function generateWebCode(command) {
+  return `// Web - دستور: ${command}
+import React from 'react';
+
+function App() {
+  return (
+    <div>
+      <h1>دستور شما: ${command}</h1>
+    </div>
+  );
+}
+
+export default App;`;
 }
