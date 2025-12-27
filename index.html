@@ -54,8 +54,8 @@ iframe {
 // بارگذاری یادداشت‌ها از localStorage هنگام باز شدن صفحه
 window.onload = function() {
   const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-  savedNotes.forEach(note => {
-    addNoteToList(note);
+  savedNotes.forEach((note, index) => {
+    addNoteToList(note, index);
   });
 }
 
@@ -63,16 +63,25 @@ window.onload = function() {
 function addNote() {
   const note = document.getElementById("html").value;
   if (note.trim() !== "") {
-    addNoteToList(note);
+    addNoteToList(note, Date.now()); // استفاده از زمان به عنوان شناسه یکتا
     saveNoteToLocalStorage(note);
     document.getElementById("html").value = ''; // پاک کردن textarea
   }
 }
 
 // اضافه کردن یادداشت به لیست
-function addNoteToList(note) {
+function addNoteToList(note, index) {
   const li = document.createElement("li");
   li.textContent = note;
+
+  // دکمه حذف یادداشت
+  const deleteButton = document.createElement("button");
+  deleteButton.textContent = "حذف";
+  deleteButton.onclick = function() {
+    removeNoteFromList(index, li);
+  };
+  
+  li.appendChild(deleteButton);
   document.getElementById("notesList").appendChild(li);
 }
 
@@ -80,6 +89,17 @@ function addNoteToList(note) {
 function saveNoteToLocalStorage(note) {
   const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
   savedNotes.push(note);
+  localStorage.setItem('notes', JSON.stringify(savedNotes));
+}
+
+// حذف یادداشت از لیست و localStorage
+function removeNoteFromList(index, li) {
+  // حذف یادداشت از لیست صفحه
+  li.remove();
+
+  // حذف یادداشت از localStorage
+  const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
+  savedNotes.splice(index, 1); // حذف یادداشت با استفاده از شناسه
   localStorage.setItem('notes', JSON.stringify(savedNotes));
 }
 </script>
