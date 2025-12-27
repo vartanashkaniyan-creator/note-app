@@ -1,44 +1,39 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Code Generator with IndexedDB</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Software Builder</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <h1>Advanced Software Builder</h1>
+        <div class="select-options">
+            <label for="language">Select Language:</label>
+            <select id="language">
+                <option value="Kotlin">Kotlin</option>
+                <option value="React Native">React Native</option>
+                <option value="Flutter">Flutter</option>
+                <option value="Java">Java</option>
+            </select>
+        </div>
 
-  <div id="app">
-    <h1>Advanced Software Builder</h1>
+        <div class="app-type">
+            <label for="app-type">Select App Type:</label>
+            <select id="app-type">
+                <option value="APK">APK</option>
+                <option value="IPA">IPA</option>
+            </select>
+        </div>
 
-    <!-- انتخاب زبان -->
-    <div class="form-group">
-      <label for="language">Select Language:</label>
-      <select id="language">
-        <option value="java">Java</option>
-        <option value="kotlin">Kotlin</option>
-        <option value="reactNative">React Native</option>
-        <option value="flutter">Flutter</option>
-      </select>
+        <button id="generate-code">Generate Code</button>
+
+        <div id="generated-code">
+            <pre id="code-output"></pre>
+        </div>
     </div>
 
-    <!-- انتخاب نوع اپلیکیشن -->
-    <div class="form-group">
-      <label for="appType">Select App Type:</label>
-      <select id="appType">
-        <option value="mobile">Mobile (APK/IPA)</option>
-        <option value="desktop">Desktop App</option>
-      </select>
-    </div>
-
-    <!-- دکمه برای تولید کد -->
-    <button onclick="generateCode()">Generate Code</button>
-
-    <!-- نمایش کد تولید شده -->
-    <div id="output"></div>
-  </div>
-
-  <script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
