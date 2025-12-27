@@ -3,40 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ساخت اپلیکیشن</title>
+  <title>Advanced Code Generator</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div class="container">
-    <h1>ساخت اپلیکیشن</h1>
+  <div id="app">
+    <h1>Advanced Software Builder</h1>
 
+    <!-- انتخاب زبان -->
     <div class="form-group">
-      <label for="outputType">نوع خروجی:</label>
-      <select id="outputType">
-        <option value="mobile">موبایل (APK/IPA)</option>
-        <option value="web">وب</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="language">زبان کدنویسی:</label>
+      <label for="language">Select Language:</label>
       <select id="language">
-        <option value="React Native">React Native</option>
-        <option value="Flutter">Flutter</option>
+        <option value="java">Java</option>
+        <option value="kotlin">Kotlin</option>
+        <option value="reactNative">React Native</option>
+        <option value="flutter">Flutter</option>
       </select>
     </div>
 
+    <!-- انتخاب نوع اپلیکیشن -->
     <div class="form-group">
-      <label for="command">دستورات:</label>
-      <input type="text" id="command" placeholder="دستور مورد نظر خود را وارد کنید">
+      <label for="appType">Select App Type:</label>
+      <select id="appType">
+        <option value="mobile">Mobile (APK/IPA)</option>
+        <option value="desktop">Desktop App</option>
+      </select>
     </div>
 
-    <button onclick="generateCode()">تولید کد</button>
+    <!-- دکمه برای تولید کد -->
+    <button onclick="generateCode()">Generate Code</button>
 
-    <div class="output" id="outputArea">
-      <!-- نمایش نتیجه کد تولیدی -->
-    </div>
+    <!-- نمایش کد تولید شده -->
+    <div id="output"></div>
   </div>
 
   <script src="script.js"></script>
