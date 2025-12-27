@@ -1,142 +1,129 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>اپ کدنویس دستوری</title>
-
-<style>
-body {
-  font-family: sans-serif;
-  background: #f4f4f4;
-  margin: 0;
-  padding: 15px;
-}
-
-h2 {
-  text-align: center;
-}
-
-input {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-}
-
-#output {
-  margin-top: 15px;
-  padding: 12px;
-  background: white;
-  min-height: 120px;
-  border: 1px solid #ccc;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اپ لیست خرید</title>
+  <style>
+    /* استایل‌های CSS */
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 600px;
+    }
+    
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f1f1f1;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    button {
+      padding: 5px 10px;
+      background-color: #ff4c4c;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    
+    button:hover {
+      background-color: darkred;
+    }
+    
+    input {
+      padding: 10px;
+      width: 200px;
+      margin-right: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
-
 <body>
 
-<h2>🧠 اپ کدنویس دستوری</h2>
+  <h2>لیست خرید</h2>
+  
+  <ul id="itemList">
+    <!-- آیتم‌ها در اینجا اضافه می‌شوند -->
+  </ul>
+  
+  <input type="text" id="newItem" placeholder="آیتم جدید">
+  <button onclick="addItem()">آیتم جدید اضافه کن</button>
 
-<input id="command" placeholder="دستور بنویس | add item | اضافه خرید نان">
+  <div>
+    <h3>جستجو:</h3>
+    <input type="text" id="searchInput" onkeyup="searchItems()" placeholder="جستجو کنید...">
+  </div>
 
-<button id="runBtn">اجرا دستور</button>
-
-<div id="output"></div>
-
-<script>
-// ===== موتور اصلی =====
-let items = [];
-
-const input = document.getElementById("command");
-const btn = document.getElementById("runBtn");
-const output = document.getElementById("output");
-
-// نمایش لیست
-function renderList() {
-  if (items.length === 0) {
-    output.innerHTML = "📭 لیست خالی است";
-    return;
-  }
-
-  let html = "<ul>";
-  items.forEach((item, i) => {
-    html += `<li>${i + 1}. ${item}</li>`;
-  });
-  html += "</ul>";
-  output.innerHTML = html;
-}
-
-// پردازش دستور
-btn.onclick = () => {
-  const cmdRaw = input.value.trim();
-  const cmd = cmdRaw.toLowerCase();
-
-  if (cmd === "") {
-    output.innerHTML = "❗ دستور وارد نشده";
-  }
-
-  // نمایش لیست
-  else if (cmd === "لیست" || cmd === "list") {
-    renderList();
-  }
-
-  // اضافه فارسی
-  else if (cmd.startsWith("اضافه")) {
-    const text = cmdRaw.replace("اضافه", "").trim();
-    if (text) {
-      items.push(text);
-      renderList();
-    } else {
-      output.innerHTML = "❌ متن آیتم مشخص نیست";
+  <script>
+    // کد JavaScript برای ویرایش، حذف، ذخیره‌سازی و جستجو
+    function addItem() {
+      const newItemText = document.getElementById("newItem").value;
+      if (newItemText) {
+        const newItem = document.createElement("li");
+        newItem.innerHTML = newItemText + ' <button onclick="removeItem(this)">حذف</button> <button onclick="editItem(this)">ویرایش</button>';
+        document.getElementById("itemList").appendChild(newItem);
+        document.getElementById("newItem").value = ""; // پاک کردن فیلد ورودی
+        saveList(); // ذخیره‌سازی بعد از اضافه کردن آیتم
+      }
     }
-  }
 
-  // حذف فارسی
-  else if (cmd.startsWith("حذف")) {
-    const n = parseInt(cmd.replace("حذف", "").trim()) - 1;
-    if (!isNaN(n) && items[n]) {
-      items.splice(n, 1);
-      renderList();
-    } else {
-      output.innerHTML = "❌ شماره نامعتبر";
+    function removeItem(button) {
+      button.parentElement.remove();
+      saveList(); // ذخیره‌سازی پس از حذف آیتم
     }
-  }
 
-  // add انگلیسی
-  else if (cmd.startsWith("add")) {
-    const text = cmdRaw.replace(/add/i, "").trim();
-    if (text) {
-      items.push(text);
-      renderList();
+    function editItem(button) {
+      const currentItem = button.parentElement;
+      const newText = prompt("ویرایش آیتم:", currentItem.firstChild.textContent.trim());
+      if (newText) {
+        currentItem.firstChild.textContent = newText;
+        saveList(); // ذخیره مجدد پس از ویرایش
+      }
     }
-  }
 
-  // remove انگلیسی
-  else if (cmd.startsWith("remove")) {
-    const n = parseInt(cmd.replace("remove", "").trim()) - 1;
-    if (!isNaN(n) && items[n]) {
-      items.splice(n, 1);
-      renderList();
+    function saveList() {
+      const items = [];
+      document.querySelectorAll('#itemList li').forEach(item => {
+        items.push(item.firstChild.textContent.trim());
+      });
+      localStorage.setItem('itemList', JSON.stringify(items));
     }
-  }
 
-  else {
-    output.innerHTML = "⚠️ دستور شناخته نشد";
-  }
+    function loadList() {
+      const items = JSON.parse(localStorage.getItem('itemList'));
+      if (items) {
+        items.forEach(itemText => {
+          const newItem = document.createElement("li");
+          newItem.innerHTML = itemText + ' <button onclick="removeItem(this)">حذف</button> <button onclick="editItem(this)">ویرایش</button>';
+          document.getElementById("itemList").appendChild(newItem);
+        });
+      }
+    }
 
-  input.value = "";
-};
-</script>
+    function searchItems() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const items = document.querySelectorAll("#itemList li");
+      items.forEach(item => {
+        const text = item.firstChild.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          item.style.display = "";
+        } else {
+          item.style.display = "none";
+        }
+      });
+    }
 
+    // بارگذاری لیست از LocalStorage هنگام بارگذاری صفحه
+    window.onload = loadList;
+    // ذخیره‌سازی پس از هر تغییر
+    window.addEventListener('beforeunload', saveList);
+  </script>
 </body>
 </html>
