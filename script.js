@@ -1,76 +1,20 @@
 function generateCode() {
-  const outputType = document.getElementById('outputType').value;
-  const language = document.getElementById('language').value;
-  const command = document.getElementById('command').value.trim();
+    const language = document.getElementById("language").value;
+    const appType = document.getElementById("appType").value;
 
-  let generatedCode = `
-  // این کد برای اپ ${outputType} با زبان ${language} است.
-  // دستور وارد شده: ${command}
-  `;
+    let code = '';
 
-  if (outputType === "mobile") {
-    generatedCode += `
-    // برای خروجی موبایل (APK/IPA) شما باید از React Native یا Flutter استفاده کنید.
-    // در اینجا کد موبایل تولید شده است:
-    // ${generateMobileCode(command, language)}
-    `;
-  } else if (outputType === "web") {
-    generatedCode += `
-    // برای خروجی وب:
-    // ${generateWebCode(command)}
-    `;
-  }
+    // تولید کد برای زبان‌های مختلف
+    if (language === 'java') {
+        code = `// Java Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println("Hello, World!");\n  }\n}`;
+    } else if (language === 'kotlin') {
+        code = `// Kotlin Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\nfun main() {\n    println("Hello, World!")\n}`;
+    } else if (language === 'reactNative') {
+        code = `// React Native Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\nimport React from 'react';\nimport { Text, View } from 'react-native';\n\nconst App = () => {\n  return (\n    <View>\n      <Text>Hello, World!</Text>\n    </View>\n  );\n};\n\nexport default App;`;
+    } else if (language === 'flutter') {
+        code = `// Flutter Code for ${appType === 'mobile' ? 'Mobile App' : 'Desktop App'}\n\nimport 'package:flutter/material.dart';\n\nvoid main() {\n  runApp(MyApp());\n}\n\nclass MyApp extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return MaterialApp(\n      home: Scaffold(\n        body: Center(\n          child: Text('Hello, World!'),\n        ),\n      ),\n    );\n  }\n}`;
+    }
 
-  document.getElementById('outputArea').textContent = generatedCode;
-}
-
-function generateMobileCode(command, language) {
-  if (language === "React Native") {
-    return `// React Native - دستور: ${command}
-import React from 'react';
-import { View, Text } from 'react-native';
-
-export default function App() {
-  return (
-    <View>
-      <Text>دستور شما: ${command}</Text>
-    </View>
-  );
-}`;
-  } else if (language === "Flutter") {
-    return `// Flutter - دستور: ${command}
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('دستور شما: ${command}'),
-        ),
-      ),
-    );
-  }
-}`;
-  }
-}
-
-function generateWebCode(command) {
-  return `// Web - دستور: ${command}
-import React from 'react';
-
-function App() {
-  return (
-    <div>
-      <h1>دستور شما: ${command}</h1>
-    </div>
-  );
-}
-
-export default App;`;
+    // نمایش کد تولید شده
+    document.getElementById("output").innerText = code;
 }
