@@ -1,24 +1,26 @@
-const btn = document.getElementById("runBtn");
-const commandInput = document.getElementById("command");
-const output = document.getElementById("output");
+// ذخیره‌سازی آیتم‌ها در LocalStorage
+function saveList() {
+  const items = [];
+  document.querySelectorAll('#itemList li').forEach(item => {
+    items.push(item.firstChild.textContent.trim());
+  });
+  localStorage.setItem('itemList', JSON.stringify(items));
+}
 
-btn.addEventListener("click", () => {
-  const cmd = commandInput.value.trim();
-
-  if (cmd === "") {
-    output.innerHTML = "❌ دستور وارد نشده";
-    return;
+// بارگذاری آیتم‌ها از LocalStorage
+function loadList() {
+  const items = JSON.parse(localStorage.getItem('itemList'));
+  if (items) {
+    items.forEach(itemText => {
+      const newItem = document.createElement('li');
+      newItem.innerHTML = itemText + ' <button onclick="removeItem(this)">حذف</button> <button onclick="editItem(this)">ویرایش</button>';
+      document.getElementById('itemList').appendChild(newItem);
+    });
   }
+}
 
-  if (cmd.includes("لیست")) {
-    output.innerHTML = `
-      <ul>
-        <li>آیتم اول</li>
-        <li>آیتم دوم</li>
-        <li>آیتم سوم</li>
-      </ul>
-    `;
-  } else {
-    output.innerHTML = "⚠️ دستور شناخته نشد";
-  }
-});
+// ذخیره‌سازی بعد از هر تغییر
+window.addEventListener('beforeunload', saveList);
+
+// بارگذاری لیست هنگام بارگذاری صفحه
+loadList();
