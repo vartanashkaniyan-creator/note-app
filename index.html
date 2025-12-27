@@ -5,75 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Software Builder</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 80%;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        .select-options, .app-type {
-            margin-bottom: 15px;
-        }
-
-        label {
-            font-size: 16px;
-            color: #333;
-        }
-
-        select {
-            padding: 8px;
-            font-size: 16px;
-            width: 100%;
-            margin-top: 5px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        #generated-code {
-            margin-top: 20px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: "Courier New", Courier, monospace;
-        }
+        /* CSS here */
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Advanced Software Builder</h1>
+        <h1 id="title">Advanced Software Builder</h1>
+        
+        <label for="language">Select Language:</label>
+        <select id="language" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="fa">فارسی</option>
+        </select>
+
         <div class="select-options">
             <label for="language">Select Language:</label>
-            <select id="language">
+            <select id="code-language">
                 <option value="Kotlin">Kotlin</option>
                 <option value="React Native">React Native</option>
                 <option value="Flutter">Flutter</option>
@@ -96,60 +44,7 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('generate-code').addEventListener('click', function() {
-            const language = document.getElementById('language').value;
-            const appType = document.getElementById('app-type').value;
-
-            let generatedCode = '';
-
-            if (language === 'Kotlin') {
-                generatedCode = `// Kotlin Code for Mobile App
-fun main() {
-    println("Hello, World!")
-}`;
-            } else if (language === 'React Native') {
-                generatedCode = `// React Native Code for Mobile App
-import React from 'react';
-import { View, Text } from 'react-native';
-
-export default function App() {
-  return (
-    <View>
-      <Text>Hello, World!</Text>
-    </View>
-  );
-}`;
-            } else if (language === 'Flutter') {
-                generatedCode = `// Flutter Code for Mobile App
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text('Hello, World!')),
-      ),
-    );
-  }
-}`;
-            } else if (language === 'Java') {
-                generatedCode = `// Java Code for Mobile App
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-    }
-}`;
-            }
-
-            document.getElementById('code-output').textContent = generatedCode;
-        });
-    </script>
+    <script src="script.js"></script>
 
 </body>
 </html>
