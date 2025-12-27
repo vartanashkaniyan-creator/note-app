@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fa">
 <head>
@@ -14,19 +13,42 @@ body {
   padding: 10px;
 }
 
+.editor {
+  display: flex;
+  border: 1px solid #ccc;
+  background: #fff;
+  margin-bottom: 10px;
+  height: 150px;
+}
+
+.lines {
+  background: #eee;
+  padding: 5px;
+  text-align: right;
+  user-select: none;
+  color: #666;
+}
+
+.lines div {
+  height: 18px;
+  font-size: 13px;
+}
+
 textarea {
-  width: 100%;
-  height: 120px;
-  margin-bottom: 8px;
+  flex: 1;
+  border: none;
+  resize: none;
+  padding: 5px;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 13px;
+  outline: none;
 }
 
 button {
   width: 100%;
   padding: 12px;
   background: #4CAF50;
-  color: white;
+  color: #fff;
   border: none;
   font-size: 16px;
 }
@@ -36,7 +58,7 @@ iframe {
   height: 250px;
   border: 1px solid #ccc;
   margin-top: 10px;
-  background: white;
+  background: #fff;
 }
 </style>
 </head>
@@ -44,37 +66,43 @@ iframe {
 <body>
 
 <h3>HTML</h3>
-<textarea id="html"></textarea>
+<div class="editor">
+  <div class="lines" id="htmlLines"></div>
+  <textarea id="html" oninput="updateLines('html')"></textarea>
+</div>
 
 <h3>CSS</h3>
-<textarea id="css"></textarea>
+<div class="editor">
+  <div class="lines" id="cssLines"></div>
+  <textarea id="css" oninput="updateLines('css')"></textarea>
+</div>
 
 <h3>JavaScript</h3>
-<textarea id="js"></textarea>
+<div class="editor">
+  <div class="lines" id="jsLines"></div>
+  <textarea id="js" oninput="updateLines('js')"></textarea>
+</div>
 
-<button onclick="run()">اجرای کد</button>
+<button onclick="run()">اجرا کد</button>
 
 <iframe id="result"></iframe>
 
 <script>
-// --- Auto Save ---
-const htmlBox = document.getElementById("html");
-const cssBox  = document.getElementById("css");
-const jsBox   = document.getElementById("js");
+function updateLines(type) {
+  const textarea = document.getElementById(type);
+  const linesDiv = document.getElementById(type + "Lines");
+  const count = textarea.value.split("\n").length;
 
-htmlBox.value = localStorage.getItem("html") || "";
-cssBox.value  = localStorage.getItem("css")  || "";
-jsBox.value   = localStorage.getItem("js")   || "";
+  linesDiv.innerHTML = "";
+  for (let i = 1; i <= count; i++) {
+    linesDiv.innerHTML += "<div>" + i + "</div>";
+  }
+}
 
-htmlBox.oninput = () => localStorage.setItem("html", htmlBox.value);
-cssBox.oninput  = () => localStorage.setItem("css", cssBox.value);
-jsBox.oninput   = () => localStorage.setItem("js", jsBox.value);
-
-// --- Run Code ---
 function run() {
-  const html = htmlBox.value;
-  const css = "<style>" + cssBox.value + "</style>";
-  const js = "<script>" + jsBox.value + "<\/script>";
+  const html = document.getElementById("html").value;
+  const css = "<style>" + document.getElementById("css").value + "</style>";
+  const js = "<script>" + document.getElementById("js").value + "<\/script>";
   document.getElementById("result").srcdoc = html + css + js;
 }
 </script>
