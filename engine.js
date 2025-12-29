@@ -1,21 +1,48 @@
-let canGoPreview = false;
+const Engine = {
+  build(command) {
+    if (command.includes("ماشین حساب")) {
+      return this.calculatorApp();
+    }
 
-function buildApp(command) {
-  if (!command || command.trim() === "") {
-    alert("دستور خالیه");
-    return;
-  }
+    return `<h2>دستور شناخته نشد</h2>`;
+  },
 
-  console.log("Command:", command);
-  canGoPreview = true;
-  alert("اپ ساخته شد");
+  calculatorApp() {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: sans-serif; padding:20px; }
+button { margin:5px; }
+</style>
+</head>
+<body>
+
+<h2>ماشین حساب</h2>
+
+<input id="a" type="number">
+<input id="b" type="number">
+
+<br><br>
+
+<button onclick="add()">+</button>
+<button onclick="sub()">-</button>
+
+<h3 id="result"></h3>
+
+<script>
+function add(){
+  result.innerText = Number(a.value) + Number(b.value);
 }
-
-function goPreview() {
-  if (!canGoPreview) {
-    alert("اول اپ رو بساز");
-    return;
-  }
-
-  window.location.href = "preview.html";
+function sub(){
+  result.innerText = Number(a.value) - Number(b.value);
 }
+</script>
+
+</body>
+</html>
+`;
+  }
+};
