@@ -2,26 +2,22 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>Advanced Software Builder</title>
+  <title>Advanced App Builder</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Advanced Software Builder</h1>
+  <h1>Advanced App Builder</h1>
 
-<textarea id="command" rows="4" style="width:90%">
-اپ ماشین حساب ساده با دکمه جمع و تفریق بساز
-</textarea>
-<br><br>
+  <!-- این تنها کانتینر کل برنامه‌ست -->
+  <div id="app"></div>
 
-<button onclick="generateApp()">ساخت اپ</button>
-<button onclick="previewApp()">پیش‌نمایش</button>
+  <!-- ترتیب خیلی مهمه -->
+  <script src="storage.js"></script>
+  <script src="router.js"></script>
+  <script src="ui.js"></script>
+  <script src="engine.js"></script>
+  <script src="main.js"></script>
 
-<hr>
-
-<iframe id="previewFrame" style="width:100%; height:400px;"></iframe>
-
-<script src="engine.js"></script>
-<script src="main.js"></script>
 </body>
 </html>
