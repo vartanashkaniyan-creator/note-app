@@ -1,13 +1,19 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const buildBtn = document.getElementById("buildBtn");
-  const previewBtn = document.getElementById("previewBtn");
+function generateApp() {
+  const command = document.getElementById("command").value;
+  const code = Engine.build(command);
 
-  buildBtn.addEventListener("click", () => {
-    const command = document.getElementById("command").value;
-    buildApp(command);
-  });
+  localStorage.setItem("generatedApp", code);
+  alert("اپ ساخته شد ✅ حالا پیش‌نمایش بزن");
+}
 
-  previewBtn.addEventListener("click", () => {
-    goPreview();
-  });
-});
+function previewApp() {
+  const iframe = document.getElementById("previewFrame");
+  const code = localStorage.getItem("generatedApp");
+
+  if (!code) {
+    alert("اول اپ رو بساز");
+    return;
+  }
+
+  iframe.srcdoc = code;
+}
