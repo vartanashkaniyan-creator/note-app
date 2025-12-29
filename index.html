@@ -2,17 +2,26 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>App Builder</title>
+  <title>Advanced Software Builder</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <textarea id="command" placeholder="دستور ساخت اپ رو بنویس"></textarea>
-  <br><br>
+<h1>Advanced Software Builder</h1>
 
-  <button id="buildBtn">ساخت اپ</button>
-  <button id="previewBtn">پیش‌نمایش</button>
+<textarea id="command" rows="4" style="width:90%">
+اپ ماشین حساب ساده با دکمه جمع و تفریق بساز
+</textarea>
+<br><br>
 
-  <script src="engine.js"></script>
-  <script src="main.js"></script>
+<button onclick="generateApp()">ساخت اپ</button>
+<button onclick="previewApp()">پیش‌نمایش</button>
+
+<hr>
+
+<iframe id="previewFrame" style="width:100%; height:400px;"></iframe>
+
+<script src="engine.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
