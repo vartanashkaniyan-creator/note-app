@@ -1,48 +1,19 @@
-const Engine = {
-  build(command) {
-    if (command.includes("ماشین حساب")) {
-      return this.calculatorApp();
-    }
+// engine.js
+function generateApp() {
+  const text = document.getElementById("command").value.toLowerCase();
 
-    return `<h2>دستور شناخته نشد</h2>`;
-  },
-
-  calculatorApp() {
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-body { font-family: sans-serif; padding:20px; }
-button { margin:5px; }
-</style>
-</head>
-<body>
-
-<h2>ماشین حساب</h2>
-
-<input id="a" type="number">
-<input id="b" type="number">
-
-<br><br>
-
-<button onclick="add()">+</button>
-<button onclick="sub()">-</button>
-
-<h3 id="result"></h3>
-
-<script>
-function add(){
-  result.innerText = Number(a.value) + Number(b.value);
-}
-function sub(){
-  result.innerText = Number(a.value) - Number(b.value);
-}
-</script>
-
-</body>
-</html>
-`;
+  if (!text.includes("ساخت اپ")) {
+    alert("دستور نامعتبر است");
+    return;
   }
-};
+
+  const type = text.split(":")[1]?.trim();
+
+  if (!AppTemplates[type]) {
+    alert("این نوع اپ وجود ندارد");
+    return;
+  }
+
+  Storage.save("currentApp", AppTemplates[type]);
+  Router.go("preview");
+}
