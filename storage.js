@@ -1,10 +1,11 @@
 const Storage = {
-  save(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
+  save(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
   },
 
-  load(key, def = []) {
-    return JSON.parse(localStorage.getItem(key)) || def;
+  load(key, defaultValue = null) {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : defaultValue;
   },
 
   remove(key) {
