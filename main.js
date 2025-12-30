@@ -1,17 +1,19 @@
-const app = document.getElementById("app");
-
-function renderHome() {
-  app.innerHTML = `
-    <h2>Home</h2>
-    <p>اپ ساز شخصی شما آماده است 🚀</p>
-
-    <button onclick="goTo('note')">نوت</button>
-    <button onclick="goTo('calculator')">ماشین حساب</button>
-  `;
+function saveCurrentNote() {
+  const text = document.getElementById("noteText").value;
+  saveNote(text);
+  alert("Saved!");
 }
 
-function goTo(page) {
-  location.hash = page;
-}
+// صفحه شروع
+window.addEventListener("load", () => {
+  if (!location.hash) {
+    loadPage("home");
+  } else {
+    loadPage(location.hash.replace("#", ""));
+  }
+});
 
-renderHome();
+// واکنش به تغییر route
+window.addEventListener("hashchange", () => {
+  loadPage(location.hash.replace("#", ""));
+});
