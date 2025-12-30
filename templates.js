@@ -1,54 +1,35 @@
-// templates.js
-const AppTemplates = {
-  calculator: {
-    name: "Calculator",
-    ui: `
-      <h2>ماشین حساب</h2>
-      <input id="a" type="number">
-      <input id="b" type="number">
-      <button onclick="calc('+')">+</button>
-      <button onclick="calc('-')">-</button>
-      <p id="result"></p>
-    `,
-    logic: `
-      function calc(op){
-        const a = Number(document.getElementById('a').value);
-        const b = Number(document.getElementById('b').value);
-        document.getElementById('result').innerText =
-          op === '+' ? a + b : a - b;
-      }
-    `
-  },
+window.templates = window.templates || {};
 
-  todo: {
-    name: "ToDo",
-    ui: `
-      <h2>لیست کارها</h2>
-      <input id="task">
-      <button onclick="addTask()">افزودن</button>
-      <ul id="list"></ul>
-    `,
-    logic: `
-      function addTask(){
-        const li = document.createElement('li');
-        li.innerText = task.value;
-        list.appendChild(li);
-        task.value = '';
-      }
-    `
-  },
+templates.calculator = `
+  <h2>Calculator</h2>
 
-  "language-learning": {
-    name: "Language Learning",
-    ui: `
-      <h2>آموزش زبان</h2>
-      <p>Hello = سلام</p>
-      <button onclick="next()">درس بعد</button>
-    `,
-    logic: `
-      function next(){
-        alert("درس بعدی اضافه می‌شود");
-      }
-    `
-  }
-};
+  <input id="calcDisplay" type="text" readonly style="width:160px;margin-bottom:8px;" />
+
+  <div>
+    <button onclick="calcPress('7')">7</button>
+    <button onclick="calcPress('8')">8</button>
+    <button onclick="calcPress('9')">9</button>
+    <button onclick="calcPress('/')">÷</button>
+  </div>
+
+  <div>
+    <button onclick="calcPress('4')">4</button>
+    <button onclick="calcPress('5')">5</button>
+    <button onclick="calcPress('6')">6</button>
+    <button onclick="calcPress('*')">×</button>
+  </div>
+
+  <div>
+    <button onclick="calcPress('1')">1</button>
+    <button onclick="calcPress('2')">2</button>
+    <button onclick="calcPress('3')">3</button>
+    <button onclick="calcPress('-')">−</button>
+  </div>
+
+  <div>
+    <button onclick="calcPress('0')">0</button>
+    <button onclick="calcClear()">C</button>
+    <button onclick="calcEqual()">=</button>
+    <button onclick="calcPress('+')">+</button>
+  </div>
+`;
