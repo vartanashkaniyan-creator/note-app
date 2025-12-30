@@ -4,17 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Advanced App Builder</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <h1>Advanced App Builder</h1>
 
-  <!-- اینجا تمام صفحه‌ها رندر میشن -->
-  <div id="app"></div>
+  <div id="app">
+    <!-- منوی ساده -->
+    <button onclick="go('home')">Home</button>
+    <button onclick="go('notes')">Notes</button>
+    <button onclick="go('calculator')">Calculator</button>
 
-  <!-- فایل‌ها به ترتیب درست -->
+    <!-- محتوای صفحه -->
+    <div id="page"></div>
+  </div>
+
+  <!-- فایل‌ها -->
   <script src="storage.js"></script>
   <script src="calculator.js"></script>
   <script src="router.js"></script>
