@@ -1,15 +1,5 @@
-function generateApp(commandText) {
-  commandText = commandText.toLowerCase();
-
-  if (commandText.includes("calculator") || commandText.includes("ماشین")) {
-    router.navigate("calculator");
-    return;
+const Engine = {
+  run(command) {
+    console.log('Command:', command)
   }
-
-  if (commandText.includes("note") || commandText.includes("یادداشت")) {
-    router.navigate("notes");
-    return;
-  }
-
-  alert("اپ مورد نظر شناخته نشد");
 }
