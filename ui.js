@@ -1,20 +1,21 @@
-const UI = {
-  button(text, onClick) {
-    const btn = document.createElement("button");
-    btn.textContent = text;
-    btn.onclick = onClick;
-    return btn;
-  },
+let calcValue = "";
 
-  input(placeholder = "") {
-    const input = document.createElement("input");
-    input.placeholder = placeholder;
-    return input;
-  },
+function calcPress(val) {
+  calcValue += val;
+  document.getElementById("calcDisplay").value = calcValue;
+}
 
-  title(text) {
-    const h = document.createElement("h2");
-    h.textContent = text;
-    return h;
+function calcClear() {
+  calcValue = "";
+  document.getElementById("calcDisplay").value = "";
+}
+
+function calcEqual() {
+  try {
+    calcValue = eval(calcValue).toString();
+    document.getElementById("calcDisplay").value = calcValue;
+  } catch {
+    document.getElementById("calcDisplay").value = "Error";
+    calcValue = "";
   }
-};
+}
