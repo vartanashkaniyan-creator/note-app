@@ -1,11 +1,12 @@
-window.onload = () => {
-  ui.init();
+runBtn.onclick = () => {
+  const result = runEngine(textArea.value);
 
-  if (location.hash) {
-    loadPage(location.hash.replace("#", ""));
+  const app = document.getElementById("app");
+  app.innerHTML = result.ui;
+
+  if (result.logic) {
+    const s = document.createElement("script");
+    s.innerHTML = result.logic;
+    document.body.appendChild(s);
   }
-
-  window.onhashchange = () => {
-    loadPage(location.hash.replace("#", ""));
-  };
 };
