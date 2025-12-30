@@ -1,36 +1,41 @@
-function generateApp(type) {
+function runEngine(command) {
+  command = command.trim().toLowerCase();
 
-  if (type === "note") {
-    return `
-      <h2>📝 یادداشت</h2>
-      <textarea id="noteText" placeholder="یادداشت بنویس..."></textarea>
-      <button onclick="saveNote()">ذخیره</button>
-      <button onclick="goTo('home')">بازگشت</button>
-    `;
+  if (command === "calculator") {
+    return {
+      ui: `
+        <h2>Calculator</h2>
+        <input id="a" type="number" placeholder="A">
+        <input id="b" type="number" placeholder="B">
+        <button onclick="calc()">+</button>
+        <p id="result"></p>
+      `,
+      logic: `
+        function calc() {
+          const a = Number(document.getElementById("a").value);
+          const b = Number(document.getElementById("b").value);
+          document.getElementById("result").innerText = a + b;
+        }
+      `
+    };
   }
 
-  if (type === "calculator") {
-    return `
-      <h2>🧮 ماشین حساب</h2>
-      <input id="a" type="number" placeholder="عدد اول">
-      <input id="b" type="number" placeholder="عدد دوم">
-      <button onclick="calc()">جمع</button>
-      <p id="result"></p>
-      <button onclick="goTo('home')">بازگشت</button>
-    `;
+  if (command === "note") {
+    return {
+      ui: `
+        <h2>Note</h2>
+        <textarea id="noteText"></textarea>
+        <button onclick="saveNote()">Save</button>
+      `,
+      logic: `
+        function saveNote() {
+          const text = document.getElementById("noteText").value;
+          localStorage.setItem("note", text);
+          alert("Saved");
+        }
+      `
+    };
   }
 
-  return "<p>اپ پیدا نشد</p>";
-}
-
-function saveNote() {
-  const text = document.getElementById("noteText").value;
-  localStorage.setItem("note", text);
-  alert("ذخیره شد ✅");
-}
-
-function calc() {
-  const a = Number(document.getElementById("a").value);
-  const b = Number(document.getElementById("b").value);
-  document.getElementById("result").innerText = a + b;
+  return null;
 }
