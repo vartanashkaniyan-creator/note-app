@@ -1,39 +1,32 @@
 function generateApp(type) {
 
-  // NOTE APP
   if (type === "note") {
     return `
-      <h2>Note</h2>
-
-      <textarea id="noteText" rows="10" cols="30"></textarea>
-      <br><br>
-      <button onclick="saveCurrentNote()">Save</button>
+      <h2>📝 یادداشت</h2>
+      <textarea id="noteText" placeholder="یادداشت بنویس..."></textarea>
+      <button onclick="saveNote()">ذخیره</button>
+      <button onclick="goTo('home')">بازگشت</button>
     `;
   }
 
-  // CALCULATOR APP
   if (type === "calculator") {
     return `
-      <h2>Calculator</h2>
-
-      <input id="a" type="number">
-      <input id="b" type="number">
-      <br><br>
-      <button onclick="calc()">+</button>
-
+      <h2>🧮 ماشین حساب</h2>
+      <input id="a" type="number" placeholder="عدد اول">
+      <input id="b" type="number" placeholder="عدد دوم">
+      <button onclick="calc()">جمع</button>
       <p id="result"></p>
+      <button onclick="goTo('home')">بازگشت</button>
     `;
   }
 
-  return "<p>App not found</p>";
+  return "<p>اپ پیدا نشد</p>";
 }
 
-// ===== FUNCTIONS =====
-
-function saveCurrentNote() {
+function saveNote() {
   const text = document.getElementById("noteText").value;
   localStorage.setItem("note", text);
-  alert("Saved ✅");
+  alert("ذخیره شد ✅");
 }
 
 function calc() {
