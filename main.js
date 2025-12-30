@@ -1,8 +1,8 @@
-// main.js – Core Notes Engine (FA + EN)
+// main.js – Calculator Engine (FA + EN)
 
 const state = {
   lang: "fa",
-  notes: JSON.parse(localStorage.getItem("notes") || "[]")
+  expr: ""
 };
 
 function t(fa, en) {
@@ -12,60 +12,48 @@ function t(fa, en) {
 function render() {
   document.body.innerHTML = `
     <div style="padding:16px;font-family:sans-serif">
-      <h2>${t("یادداشت‌ها", "Notes")}</h2>
+      <h2>${t("ماشین‌حساب", "Calculator")}</h2>
 
-      <textarea id="noteInput" placeholder="${t(
-        "یادداشت جدید...",
-        "New note..."
-      )}" style="width:100%;height:80px"></textarea>
+      <input id="display" value="${state.expr}" disabled
+        style="width:100%;height:40px;font-size:18px"/>
 
-      <br/><br/>
-
-      <button onclick="addNote()">
-        ${t("افزودن", "Add")}
-      </button>
-
-      <button onclick="toggleLang()">
-        ${t("English", "فارسی")}
-      </button>
-
-      <hr/>
-
-      <ul>
-        ${state.notes
-          .map(
-            (n, i) =>
-              `<li>
-                ${n}
-                <button onclick="removeNote(${i})">❌</button>
-              </li>`
-          )
+      <div style="margin-top:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        ${["7","8","9","/",
+           "4","5","6","*",
+           "1","2","3","-",
+           "0",".","=","+"]
+          .map(b => `<button onclick="press('${b}')">${b}</button>`)
           .join("")}
-      </ul>
+      </div>
+
+      <br/>
+
+      <button onclick="clearAll()">${t("پاک‌کردن", "Clear")}</button>
+      <button onclick="toggleLang()">${t("English", "فارسی")}</button>
     </div>
   `;
 }
 
-function addNote() {
-  const input = document.getElementById("noteInput");
-  if (!input.value.trim()) return;
-  state.notes.push(input.value);
-  input.value = "";
-  save();
+function press(v) {
+  if (v === "=") {
+    try {
+      state.expr = String(eval(state.expr));
+    } catch {
+      state.expr = "";
+    }
+  } else {
+    state.expr += v;
+  }
+  render();
 }
 
-function removeNote(index) {
-  state.notes.splice(index, 1);
-  save();
+function clearAll() {
+  state.expr = "";
+  render();
 }
 
 function toggleLang() {
   state.lang = state.lang === "fa" ? "en" : "fa";
-  render();
-}
-
-function save() {
-  localStorage.setItem("notes", JSON.stringify(state.notes));
   render();
 }
 
