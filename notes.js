@@ -1,42 +1,55 @@
-let notes = JSON.parse(localStorage.getItem("notes")) || [];
+// NOTES APP
 
-function saveNotes() {
-  localStorage.setItem("notes", JSON.stringify(notes));
+const notesKey = "my_notes";
+
+function getNotes() {
+  return JSON.parse(localStorage.getItem(notesKey)) || [];
+}
+
+function saveNotes(notes) {
+  localStorage.setItem(notesKey, JSON.stringify(notes));
+}
+
+function renderNotes() {
+  const notes = getNotes();
+
+  app.innerHTML = `
+    <h2>📝 نوت‌ها</h2>
+
+    <textarea id="noteText" placeholder="نوت جدید بنویس..."></textarea>
+    <br>
+    <button onclick="addNote()">➕ افزودن</button>
+    <button onclick="goTo('home')">⬅ بازگشت</button>
+
+    <div id="notesList"></div>
+  `;
+
+  const list = document.getElementById("notesList");
+
+  notes.forEach((note, index) => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <p>${note}</p>
+      <button onclick="deleteNote(${index})">🗑 حذف</button>
+    `;
+    list.appendChild(div);
+  });
 }
 
 function addNote() {
-  const input = document.getElementById("noteInput");
-  const text = input.value.trim();
+  const text = document.getElementById("noteText").value.trim();
+  if (!text) return;
 
-  if (text === "") return;
-
+  const notes = getNotes();
   notes.push(text);
-  saveNotes();
-  input.value = "";
+  saveNotes(notes);
   renderNotes();
 }
 
 function deleteNote(index) {
+  const notes = getNotes();
   notes.splice(index, 1);
-  saveNotes();
+  saveNotes(notes);
   renderNotes();
 }
-
-function renderNotes() {
-  const list = document.getElementById("notesList");
-  list.innerHTML = "";
-
-  notes.forEach((note, index) => {
-    const li = document.createElement("li");
-    li.textContent = note;
-
-    const btn = document.createElement("button");
-    btn.textContent = "X";
-    btn.onclick = () => deleteNote(index);
-
-    li.appendChild(btn);
-    list.appendChild(li);
-  });
-}
-
-renderNotes();
