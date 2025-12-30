@@ -39,6 +39,7 @@ routes.calculator = function () {
   `
 }
 
+
 /* ---------- ROUTER CORE ---------- */
 function loadRoute() {
   const route = location.hash.replace('#', '') || 'home'
@@ -47,3 +48,12 @@ function loadRoute() {
 
 window.addEventListener('hashchange', loadRoute)
 window.addEventListener('load', loadRoute)
+routes.generator = function () {
+  app.innerHTML = `
+    <h2>Generator</h2>
+    <p>Coming soon...</p>
+    <button onclick="go('home')">Back</button>
+  `;
+};
+
+
