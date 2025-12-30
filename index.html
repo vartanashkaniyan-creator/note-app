@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Advanced App Builder</title>
-  <link rel="stylesheet" href="style.css">
-</head>
 
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
 <body>
 
   <h1>Advanced App Builder</h1>
 
   <div id="app">
-    <!-- منوی ساده -->
-    <button onclick="go('home')">Home</button>
-    <button onclick="go('notes')">Notes</button>
-    <button onclick="go('calculator')">Calculator</button>
+    <input type="text" placeholder="نام پروژه" />
 
-    <!-- محتوای صفحه -->
-    <div id="page"></div>
+    <textarea placeholder="دستور یا توضیح اپ را اینجا بنویس..."></textarea>
+
+    <button id="runBtn">اجرا</button>
+    <button id="clearBtn">پاک کردن</button>
   </div>
 
-  <!-- فایل‌ها -->
+  <!-- JS files -->
   <script src="storage.js"></script>
   <script src="calculator.js"></script>
   <script src="router.js"></script>
