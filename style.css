@@ -13,28 +13,23 @@ body {
   align-items: center;
 }
 
-/* Title */
 h1 {
   margin: 20px 0;
-  font-size: 26px;
-  text-align: center;
 }
 
-/* Main Card */
 #app {
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   background: #1e1e1e;
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,.4);
 }
 
-/* Buttons */
 button {
   width: 100%;
-  padding: 12px;
   margin-top: 10px;
+  padding: 12px;
   background: #2c2c2c;
   color: #fff;
   border: none;
@@ -42,25 +37,12 @@ button {
   font-size: 16px;
 }
 
-button:active {
-  transform: scale(0.97);
-  background: #3a3a3a;
-}
-
-/* Inputs */
-input,
-textarea {
+input, textarea {
   width: 100%;
+  margin-top: 10px;
   padding: 10px;
-  margin-top: 8px;
   background: #2a2a2a;
   border: none;
   border-radius: 10px;
   color: #fff;
-  font-size: 15px;
-}
-
-textarea {
-  resize: none;
-  min-height: 100px;
 }
