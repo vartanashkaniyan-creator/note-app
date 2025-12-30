@@ -1,11 +1,14 @@
-function saveCurrentNote() {
-  const text = document.getElementById("noteText").value;
-  saveNote(text);
+window.onload = () => {
+  // اگر آدرس هَش داشت (مثلاً #note)
+  if (location.hash) {
+    loadPage(location.hash.replace("#", ""));
+  } else {
+    // صفحه پیش‌فرض
+    loadPage("home");
+  }
 
-  const msg = document.getElementById("saveMsg");
-  msg.innerText = "یادداشت ذخیره شد ✔";
-  
-  setTimeout(() => {
-    msg.innerText = "";
-  }, 1500);
-}
+  // تغییر صفحه با هَش
+  window.onhashchange = () => {
+    loadPage(location.hash.replace("#", ""));
+  };
+};
