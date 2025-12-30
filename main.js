@@ -1,55 +1,30 @@
 window.onload = () => {
-  // بارگذاری صفحه پیش‌فرض
-  if (location.hash) {
-    loadPage(location.hash.replace("#", ""));
-  } else {
-    loadPage("home");
-  }
-
-  // تغییر صفحه با hash
-  window.onhashchange = () => {
-    loadPage(location.hash.replace("#", ""));
-  };
+  handleRoute();
+  window.addEventListener("hashchange", handleRoute);
 };
 
-function loadPage(page) {
+function handleRoute() {
+  const page = location.hash.replace("#", "") || "home";
   const app = document.getElementById("app");
   if (!app) return;
 
-  switch (page) {
-    case "home":
-      app.innerHTML = `
-        <div class="card">
-          <h2>Home</h2>
-          <p>Home Loaded ✅</p>
-        </div>
-      `;
-      break;
-
-    case "note":
-      app.innerHTML = `
-        <div class="card">
-          <h2>Note</h2>
-          <textarea placeholder="Write your note..."></textarea>
-        </div>
-      `;
-      break;
-
-    case "calculator":
-      app.innerHTML = `
-        <div class="card">
-          <h2>Calculator</h2>
-          <p>Calculator Ready ✅</p>
-        </div>
-      `;
-      break;
-
-    default:
-      app.innerHTML = `
-        <div class="card">
-          <h2>404</h2>
-          <p>Page not found</p>
-        </div>
-      `;
+  if (page === "home") {
+    app.innerHTML = `
+      <h1>Home</h1>
+      <p>صفحه اصلی لود شد ✅</p>
+      <button onclick="go('notes')">Notes</button>
+    `;
   }
+
+  if (page === "notes") {
+    app.innerHTML = `
+      <h1>Notes</h1>
+      <textarea placeholder="یادداشت بنویس..."></textarea>
+      <button onclick="go('home')">Back</button>
+    `;
+  }
+}
+
+function go(page) {
+  location.hash = page;
 }
