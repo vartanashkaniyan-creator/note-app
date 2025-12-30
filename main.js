@@ -1,8 +1,3 @@
-function generateAppFromInput() {
-  const input = document.getElementById("commandInput").value;
-  generateApp(input);
+if (!location.hash) {
+  location.hash = 'home';
 }
-
-window.onload = () => {
-  router.navigate("home");
-};
