@@ -1,5 +1,37 @@
 body {
-  background: #eee;
-  font-family: serif;
+  font-family: sans-serif;
+  background: #f2f2ee;
+  margin: 0;
   padding: 20px;
+}
+
+h1, h2 {
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 6px 12px;
+  margin: 5px 5px 5px 0;
+  border: 1px solid #999;
+  background: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #e0e0e0;
+}
+
+input, textarea {
+  width: 200px;
+  padding: 6px;
+  margin: 5px 5px 5px 0;
+  border: 1px solid #999;
+}
+
+textarea {
+  height: 80px;
+}
+
+#app {
+  margin-top: 20px;
 }
