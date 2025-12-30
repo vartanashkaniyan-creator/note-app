@@ -1,5 +1,7 @@
-function saveNote() {
-  const text = document.getElementById('note').value
-  localStorage.setItem('note', text)
-  alert('Saved')
+function saveNote(text) {
+  localStorage.setItem("note", text);
+}
+
+function loadNote() {
+  return localStorage.getItem("note") || "";
 }
