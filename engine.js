@@ -1,50 +1,59 @@
-function runEngine(command) {
-  command = command.toLowerCase();
+function runEngine(input) {
+  let data;
 
-  // NOTE
-  if (command.includes("note") || command.includes("یادداشت")) {
+  // 1️⃣ parse امن ورودی
+  try {
+    data = typeof input === "string" ? JSON.parse(input) : input;
+  } catch (e) {
     return {
-      ui: `
-        <h2>📝 Note</h2>
-        <textarea id="noteText" placeholder="یادداشت بنویس..."></textarea>
-        <br>
-        <button onclick="saveNote()">ذخیره</button>
-        <button onclick="goHome()">بازگشت</button>
-      `,
-      logic: `
-        function saveNote() {
-          const text = document.getElementById("noteText").value;
-          localStorage.setItem("note", text);
-          alert("ذخیره شد ✅");
-        }
-      `
+      ui: `<pre style="color:red">JSON نامعتبره</pre>`,
+      logic: ""
     };
   }
 
-  // CALCULATOR
-  if (command.includes("calculator") || command.includes("ماشین")) {
+  // 2️⃣ خروجی‌ها
+  let ui = "";
+  let logic = "";
+
+  // 3️⃣ screen
+  if (!data.screen) {
     return {
-      ui: `
-        <h2>🧮 Calculator</h2>
-        <input id="a" type="number">
-        <input id="b" type="number">
-        <button onclick="calc()">جمع</button>
-        <p id="result"></p>
-        <button onclick="goHome()">بازگشت</button>
-      `,
-      logic: `
-        function calc() {
-          const a = Number(document.getElementById("a").value);
-          const b = Number(document.getElementById("b").value);
-          document.getElementById("result").innerText = a + b;
-        }
-      `
+      ui: `<pre style="color:red">screen تعریف نشده</pre>`,
+      logic: ""
     };
   }
 
-  // DEFAULT
-  return {
-    ui: "<p>❌ دستور شناخته نشد</p><button onclick='goHome()'>بازگشت</button>",
-    logic: ""
-  };
+  // title
+  if (data.screen.title) {
+    ui += `<h2>${data.screen.title}</h2>`;
+  }
+
+  // components
+  if (Array.isArray(data.screen.components)) {
+    data.screen.components.forEach((c, i) => {
+
+      // TEXT
+      if (c.type === "text") {
+        ui += `<p>${c.value || ""}</p>`;
+      }
+
+      // BUTTON
+      if (c.type === "button") {
+        const id = `btn_${i}`;
+        ui += `<button id="${id}">${c.text || "Button"}</button>`;
+
+        if (c.onClick) {
+          logic += `
+            document.getElementById("${id}").onclick = function () {
+              ${c.onClick}
+            };
+          `;
+        }
+      }
+
+    });
+  }
+
+  // 4️⃣ خروجی نهایی
+  return { ui, logic };
 }
