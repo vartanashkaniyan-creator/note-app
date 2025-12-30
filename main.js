@@ -1,19 +1,11 @@
 function saveCurrentNote() {
   const text = document.getElementById("noteText").value;
   saveNote(text);
-  alert("Saved!");
+
+  const msg = document.getElementById("saveMsg");
+  msg.innerText = "یادداشت ذخیره شد ✔";
+  
+  setTimeout(() => {
+    msg.innerText = "";
+  }, 1500);
 }
-
-// صفحه شروع
-window.addEventListener("load", () => {
-  if (!location.hash) {
-    loadPage("home");
-  } else {
-    loadPage(location.hash.replace("#", ""));
-  }
-});
-
-// واکنش به تغییر route
-window.addEventListener("hashchange", () => {
-  loadPage(location.hash.replace("#", ""));
-});
