@@ -8,11 +8,6 @@ function generateApp(type) {
       <textarea id="noteText" rows="10" cols="30"></textarea>
       <br><br>
       <button onclick="saveCurrentNote()">Save</button>
-
-      <script>
-        document.getElementById("noteText").value =
-          localStorage.getItem("note") || "";
-      </script>
     `;
   }
 
@@ -27,16 +22,22 @@ function generateApp(type) {
       <button onclick="calc()">+</button>
 
       <p id="result"></p>
-
-      <script>
-        function calc() {
-          const a = Number(document.getElementById("a").value);
-          const b = Number(document.getElementById("b").value);
-          document.getElementById("result").innerText = a + b;
-        }
-      </script>
     `;
   }
 
-  return "<p>Unknown app type</p>";
+  return "<p>App not found</p>";
+}
+
+// ===== FUNCTIONS =====
+
+function saveCurrentNote() {
+  const text = document.getElementById("noteText").value;
+  localStorage.setItem("note", text);
+  alert("Saved ✅");
+}
+
+function calc() {
+  const a = Number(document.getElementById("a").value);
+  const b = Number(document.getElementById("b").value);
+  document.getElementById("result").innerText = a + b;
 }
