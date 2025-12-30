@@ -44,10 +44,12 @@ button {
 
 button:active {
   transform: scale(0.97);
+  background: #3a3a3a;
 }
 
-/* Inputs & textarea */
-input, textarea {
+/* Inputs */
+input,
+textarea {
   width: 100%;
   padding: 10px;
   margin-top: 8px;
@@ -60,4 +62,5 @@ input, textarea {
 
 textarea {
   resize: none;
+  min-height: 100px;
 }
