@@ -1,36 +1,33 @@
+// ===== ENGINE =====
+
 function parseCommand(input) {
-  const parts = input.trim().split(" ");
+  const parts = input.trim().toLowerCase().split(" ");
   return {
-    type: parts[0] || "",
-    value: parts[1] || ""
+    action: parts[0] || "",
+    target: parts[1] || ""
   };
 }
 
 function runEngine(command) {
   const cmd = parseCommand(command);
 
-  // صفحه Note
-  if (cmd.type === "screen" && cmd.value === "note") {
+  if (cmd.action === "screen" && cmd.target === "note") {
     return {
       screen: "note",
       ui: {
         title: "Note",
         fields: [
-          {
-            id: "noteText",
-            type: "textarea",
-            placeholder: "یادداشت..."
-          }
+          { id: "noteText", type: "textarea", placeholder: "یادداشت..." }
         ],
         buttons: [
-          { id: "save", label: "ذخیره" },
-          { id: "back", label: "بازگشت" }
+          { id: "save", label: "ذخیره", action: "saveNote" },
+          { id: "back", label: "بازگشت", action: "goHome" }
         ]
       }
     };
   }
 
-  // صفحه Home (پیش‌فرض)
+  // HOME (default)
   return {
     screen: "home",
     ui: {
@@ -43,7 +40,7 @@ function runEngine(command) {
         }
       ],
       buttons: [
-        { id: "run", label: "اجرا" }
+        { id: "run", label: "اجرا", action: "runCommand" }
       ]
     }
   };
