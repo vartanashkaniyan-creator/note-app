@@ -1,28 +1,34 @@
-// ===== STATE =====
-let currentScreen = "home";
+// main.js
 
-// ===== ACTIONS =====
-const actions = {
-  runCommand() {
-    const cmd = document.getElementById("commandInput").value;
-    const result = runEngine(cmd);
-    render(result.ui);
-  },
-
-  goHome() {
-    render(runEngine("").ui);
-  },
-
-  saveNote() {
-    const text = document.getElementById("noteText").value;
-    localStorage.setItem("note", text);
-    alert("ذخیره شد ✅");
-  }
+window.onload = () => {
+  renderHome();
 };
 
-// ===== RENDER =====
-function render(ui) {
+function renderHome() {
   const app = document.getElementById("app");
+
+  app.innerHTML = `
+    <h2>Advanced App Builder</h2>
+    <textarea id="commandInput" placeholder="مثال:
+set title تست
+screen note"></textarea>
+    <button id="runBtn">اجرا</button>
+  `;
+
+  document.getElementById("runBtn").onclick = runCommand;
+}
+
+function runCommand() {
+  const input = document.getElementById("commandInput").value;
+  const result = runEngine(input);
+
+  renderUI(result.ui);
+}
+
+// ===== UI RENDERER =====
+function renderUI(ui) {
+  const app = document.getElementById("app");
+
   let html = `<h2>${ui.title}</h2>`;
 
   ui.fields.forEach(f => {
@@ -32,21 +38,19 @@ function render(ui) {
   });
 
   ui.buttons.forEach(b => {
-    html += `<button id="${b.id}">${b.label}</button>`;
+    html += `<button onclick="${b.action}()">${b.label}</button>`;
   });
 
   app.innerHTML = html;
-
-  ui.buttons.forEach(b => {
-    const btn = document.getElementById(b.id);
-    if (btn && actions[b.action]) {
-      btn.onclick = actions[b.action];
-    }
-  });
 }
 
-// ===== INIT =====
-window.onload = () => {
-  const result = runEngine("");
-  render(result.ui);
-};
+// ===== ACTIONS =====
+function goHome() {
+  renderHome();
+}
+
+function saveNote() {
+  const text = document.getElementById("noteText").value;
+  localStorage.setItem("note", text);
+  alert("ذخیره شد ✅");
+}
