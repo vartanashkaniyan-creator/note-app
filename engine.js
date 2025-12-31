@@ -9,40 +9,42 @@ function parseCommand(input) {
 function runEngine(command) {
   const cmd = parseCommand(command);
 
+  // صفحه Note
   if (cmd.type === "screen" && cmd.value === "note") {
     return {
       screen: "note",
       ui: {
         title: "Note",
         fields: [
-          { id: "noteText", type: "textarea", placeholder: "یادداشت..." }
+          {
+            id: "noteText",
+            type: "textarea",
+            placeholder: "یادداشت..."
+          }
         ],
         buttons: [
           { id: "save", label: "ذخیره" },
           { id: "back", label: "بازگشت" }
         ]
-      },
-      actions: {
-        save: "saveNote",
-        back: "goHome"
       }
     };
   }
 
-  // home
+  // صفحه Home (پیش‌فرض)
   return {
     screen: "home",
     ui: {
       title: "Advanced App Builder",
       fields: [
-        { id: "commandInput", type: "textarea", placeholder: "مثال: screen note" }
+        {
+          id: "commandInput",
+          type: "textarea",
+          placeholder: "مثال: screen note"
+        }
       ],
       buttons: [
         { id: "run", label: "اجرا" }
       ]
-    },
-    actions: {
-      run: "runCommand"
     }
   };
 }
