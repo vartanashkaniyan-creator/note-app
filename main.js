@@ -1,46 +1,31 @@
 // main.js
 
 window.onload = () => {
-  showHome();
+  goHome();
 };
 
 // ===== HOME =====
-function showHome() {
-  const app = document.getElementById("app");
-
-  app.innerHTML = `
-    <h2>Advanced App Builder</h2>
-
-    <textarea
-      id="commandInput"
-      placeholder="مثال:
-set title تست
-screen note"
-      rows="5"
-    ></textarea>
-
-    <button id="runBtn">اجرا</button>
-  `;
-
-  document.getElementById("runBtn").onclick = runCommand;
+function goHome() {
+  const result = runEngine("");
+  renderSchema(result.schema);
 }
 
 // ===== RUN COMMAND =====
 function runCommand() {
-  const input = document.getElementById("commandInput").value.trim();
-  if (!input) return;
-
+  const input = document.getElementById("commandInput").value;
   const result = runEngine(input);
-  renderFromSchema(result.schema);
+  renderSchema(result.schema);
 }
 
-// ===== RENDERER (خیلی مهم) =====
-function renderFromSchema(schema) {
+// ===== RENDER ENGINE OUTPUT =====
+function renderSchema(schema) {
   const app = document.getElementById("app");
+  if (!schema) return;
 
-  let html = `<h2>${schema.title}</h2>`;
+  let html = `<h2>${schema.title || ""}</h2>`;
 
   schema.components.forEach(c => {
+
     if (c.type === "textarea") {
       html += `
         <textarea
@@ -63,12 +48,12 @@ function renderFromSchema(schema) {
 }
 
 // ===== ACTIONS =====
-function goHome() {
-  showHome();
-}
-
 function saveNote() {
   const text = document.getElementById("noteText").value;
   localStorage.setItem("note", text);
   alert("ذخیره شد ✅");
+}
+
+function goHomeAction() {
+  goHome();
 }
