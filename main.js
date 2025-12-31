@@ -1,31 +1,27 @@
 // main.js
 
 window.onload = () => {
-  goHome();
+  renderFromEngine("");
 };
 
-// ===== HOME =====
-function goHome() {
-  const result = runEngine("");
-  renderSchema(result.schema);
-}
-
-// ===== RUN COMMAND =====
+// ===== CORE =====
 function runCommand() {
-  const input = document.getElementById("commandInput").value;
-  const result = runEngine(input);
-  renderSchema(result.schema);
+  const input = document.getElementById("commandInput")?.value || "";
+  renderFromEngine(input);
 }
 
-// ===== RENDER ENGINE OUTPUT =====
-function renderSchema(schema) {
-  const app = document.getElementById("app");
-  if (!schema) return;
+function renderFromEngine(input) {
+  const result = runEngine(input);
+  renderUI(result.schema);
+}
 
-  let html = `<h2>${schema.title || ""}</h2>`;
+// ===== UI RENDERER =====
+function renderUI(schema) {
+  const app = document.getElementById("app");
+
+  let html = `<h2>${schema.title}</h2>`;
 
   schema.components.forEach(c => {
-
     if (c.type === "textarea") {
       html += `
         <textarea
@@ -37,7 +33,7 @@ function renderSchema(schema) {
 
     if (c.type === "button") {
       html += `
-        <button onclick="${c.action}()">
+        <button onclick="dispatchAction('${c.action}')">
           ${c.label}
         </button>
       `;
@@ -47,13 +43,26 @@ function renderSchema(schema) {
   app.innerHTML = html;
 }
 
-// ===== ACTIONS =====
-function saveNote() {
-  const text = document.getElementById("noteText").value;
-  localStorage.setItem("note", text);
-  alert("ذخیره شد ✅");
+// ===== ACTION DISPATCHER =====
+function dispatchAction(actionName) {
+  if (actions[actionName]) {
+    actions[actionName]();
+  } else {
+    alert("اکشن ناشناخته ❌");
+  }
 }
 
-function goHomeAction() {
-  goHome();
-}
+// ===== ACTIONS =====
+const actions = {
+  runCommand,
+
+  goHomeAction() {
+    renderFromEngine("");
+  },
+
+  saveNote() {
+    const text = document.getElementById("noteText").value;
+    localStorage.setItem("note", text);
+    alert("ذخیره شد ✅");
+  }
+};
