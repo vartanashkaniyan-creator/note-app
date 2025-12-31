@@ -1,5 +1,8 @@
 function runEngine(command) {
-  if (command.includes("note")) {
+  command = command.toLowerCase().trim();
+
+  // صفحه نوت
+  if (command === "note") {
     return {
       screen: "note",
       ui: {
@@ -11,10 +14,15 @@ function runEngine(command) {
           { id: "save", label: "ذخیره" },
           { id: "back", label: "بازگشت" }
         ]
+      },
+      actions: {
+        save: "saveNote",
+        back: "goHome"
       }
     };
   }
 
+  // صفحه اصلی
   return {
     screen: "home",
     ui: {
@@ -25,6 +33,9 @@ function runEngine(command) {
       buttons: [
         { id: "run", label: "اجرا" }
       ]
+    },
+    actions: {
+      run: "runCommand"
     }
   };
 }
