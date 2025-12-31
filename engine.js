@@ -1,37 +1,37 @@
 // engine.js
+// موتور پایه حرفه‌ای (Pure Function)
 
-function runEngine(command) {
-  command = command.trim().toLowerCase();
+function runEngine(input) {
+  const command = input.trim().toLowerCase();
 
-  // NOTE APP
-  if (command.includes("note")) {
-    return {
-      ui: `
-        <h2>📝 Notes</h2>
-        <textarea id="noteText" placeholder="یادداشت بنویس..."></textarea>
-        <button onclick="saveNote()">ذخیره</button>
-      `,
-      logic: `
-        function saveNote() {
-          const text = document.getElementById("noteText").value;
-          localStorage.setItem("note", text);
-          alert("ذخیره شد ✅");
-        }
-      `
-    };
-  }
-
-  // CALCULATOR (فعلاً خالی طبق حرف خودت)
-  if (command.includes("calculator")) {
-    return {
-      ui: "<h2>Calculator (Disabled)</h2>",
-      logic: ""
-    };
-  }
-
-  // UNKNOWN COMMAND
-  return {
-    ui: "<p>❌ دستور شناخته نشد</p>",
+  // خروجی پیش‌فرض
+  let result = {
+    ui: `<p>دستور نامعتبر</p>`,
     logic: ""
   };
+
+  // دستور note
+  if (command === "note") {
+    result.ui = `
+      <h2>Note</h2>
+      <textarea id="noteText" placeholder="یادداشت..."></textarea>
+      <button onclick="saveNote()">ذخیره</button>
+    `;
+
+    result.logic = `
+      function saveNote() {
+        const text = document.getElementById("noteText").value;
+        localStorage.setItem("note", text);
+        alert("ذخیره شد");
+      }
+    `;
+  }
+
+  // دستور calculator (فعلاً خالی طبق خواسته تو)
+  else if (command === "calculator") {
+    result.ui = `<p>Calculator فعلاً غیرفعال است</p>`;
+    result.logic = "";
+  }
+
+  return result;
 }
