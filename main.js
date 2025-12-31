@@ -6,7 +6,8 @@ window.onload = () => {
 
 // ===== CORE =====
 function runCommand() {
-  const input = document.getElementById("commandInput")?.value || "";
+  const inputEl = document.getElementById("commandInput");
+  const input = inputEl ? inputEl.value : "";
   renderFromEngine(input);
 }
 
@@ -18,6 +19,7 @@ function renderFromEngine(input) {
 // ===== UI RENDERER =====
 function renderUI(schema) {
   const app = document.getElementById("app");
+
   let html = `<h2>${schema.title}</h2>`;
 
   schema.components.forEach(c => {
@@ -26,28 +28,28 @@ function renderUI(schema) {
         <textarea
           id="${c.id}"
           placeholder="${c.placeholder || ""}"
-        >${c.value || ""}</textarea>
+        ></textarea>
       `;
     }
 
     if (c.type === "button") {
       html += `
-        <button onclick="dispatchAction('${c.action}')">
+        <button data-action="${c.action}">
           ${c.label}
         </button>
       `;
     }
-
-    if (c.type === "list") {
-      html += `<ul id="${c.id}">`;
-      (c.items || []).forEach(item => {
-        html += `<li>${item}</li>`;
-      });
-      html += `</ul>`;
-    }
   });
 
   app.innerHTML = html;
+
+  // اتصال اکشن‌ها بعد از رندر
+  app.querySelectorAll("button[data-action]").forEach(btn => {
+    btn.onclick = () => {
+      const action = btn.getAttribute("data-action");
+      dispatchAction(action);
+    };
+  });
 }
 
 // ===== ACTION DISPATCHER =====
@@ -64,19 +66,12 @@ const actions = {
   runCommand,
 
   goHomeAction() {
-    goHome();
     renderFromEngine("");
   },
 
   saveNote() {
     const text = document.getElementById("noteText")?.value || "";
-    setNoteText(text);
-    alert("یادداشت ذخیره شد ✅");
-  },
-
-  addItem() {
-    const text = document.getElementById("itemInput")?.value || "";
-    addListItem(text);
-    renderFromEngine("");
+    localStorage.setItem("note", text);
+    alert("ذخیره شد ✅");
   }
 };
