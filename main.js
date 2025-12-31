@@ -1,5 +1,12 @@
 // main.js
 
+// ===== GLOBAL STATE =====
+const AppState = {
+  lastCommand: "",
+  note: localStorage.getItem("note") || "",
+  list: JSON.parse(localStorage.getItem("list") || "[]")
+};
+
 window.onload = () => {
   renderFromEngine("");
 };
@@ -8,6 +15,8 @@ window.onload = () => {
 function runCommand() {
   const inputEl = document.getElementById("commandInput");
   const input = inputEl ? inputEl.value : "";
+
+  AppState.lastCommand = input;
   renderFromEngine(input);
 }
 
@@ -24,38 +33,39 @@ function renderUI(schema) {
 
   schema.components.forEach(c => {
     if (c.type === "textarea") {
-      html += `
-        <textarea
-          id="${c.id}"
-          placeholder="${c.placeholder || ""}"
-        ></textarea>
-      `;
+      html += `<textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>`;
     }
 
     if (c.type === "button") {
-      html += `
-        <button data-action="${c.action}">
-          ${c.label}
-        </button>
-      `;
+      html += `<button data-action="${c.action}">${c.label}</button>`;
+    }
+
+    if (c.type === "list") {
+      html += "<ul>";
+      AppState.list.forEach(item => {
+        html += `<li>${item}</li>`;
+      });
+      html += "</ul>";
     }
   });
 
   app.innerHTML = html;
 
-  // اتصال اکشن‌ها بعد از رندر
   app.querySelectorAll("button[data-action]").forEach(btn => {
     btn.onclick = () => {
-      const action = btn.getAttribute("data-action");
-      dispatchAction(action);
+      dispatchAction(btn.dataset.action);
     };
   });
+
+  // پر کردن نوت قبلی
+  const noteEl = document.getElementById("noteText");
+  if (noteEl) noteEl.value = AppState.note;
 }
 
 // ===== ACTION DISPATCHER =====
-function dispatchAction(actionName) {
-  if (actions[actionName]) {
-    actions[actionName]();
+function dispatchAction(name) {
+  if (actions[name]) {
+    actions[name]();
   } else {
     alert("اکشن ناشناخته ❌");
   }
@@ -66,12 +76,23 @@ const actions = {
   runCommand,
 
   goHomeAction() {
-    renderFromEngine("");
+    renderFromEngine(AppState.lastCommand);
   },
 
   saveNote() {
     const text = document.getElementById("noteText")?.value || "";
+    AppState.note = text;
     localStorage.setItem("note", text);
     alert("ذخیره شد ✅");
+  },
+
+  addItem() {
+    const input = document.getElementById("itemInput");
+    if (!input || !input.value.trim()) return;
+
+    AppState.list.push(input.value.trim());
+    localStorage.setItem("list", JSON.stringify(AppState.list));
+    input.value = "";
+    renderFromEngine(AppState.lastCommand);
   }
 };
