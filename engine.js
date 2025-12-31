@@ -1,8 +1,15 @@
-function runEngine(command) {
-  command = command.toLowerCase().trim();
+function parseCommand(input) {
+  const parts = input.trim().split(" ");
+  return {
+    type: parts[0] || "",
+    value: parts[1] || ""
+  };
+}
 
-  // صفحه نوت
-  if (command === "note") {
+function runEngine(command) {
+  const cmd = parseCommand(command);
+
+  if (cmd.type === "screen" && cmd.value === "note") {
     return {
       screen: "note",
       ui: {
@@ -22,13 +29,13 @@ function runEngine(command) {
     };
   }
 
-  // صفحه اصلی
+  // home
   return {
     screen: "home",
     ui: {
       title: "Advanced App Builder",
       fields: [
-        { id: "commandInput", type: "textarea", placeholder: "دستور را وارد کن..." }
+        { id: "commandInput", type: "textarea", placeholder: "مثال: screen note" }
       ],
       buttons: [
         { id: "run", label: "اجرا" }
