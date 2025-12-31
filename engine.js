@@ -9,7 +9,6 @@ function runEngine(input) {
   let title = "Advanced App Builder";
   let screen = "home";
 
-  // ===== PARSE COMMANDS =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
@@ -28,50 +27,33 @@ function runEngine(input) {
       schema: {
         title,
         components: [
-          {
-            type: "textarea",
-            id: "noteText",
-            placeholder: "یادداشت بنویس..."
-          },
-          {
-            type: "button",
-            label: "ذخیره",
-            action: "saveNote"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
+          { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
+          { type: "button", label: "ذخیره", action: "saveNote" },
+          { type: "button", label: "بازگشت", action: "goHomeAction" }
         ]
       }
     };
   }
 
-  // ===== CALCULATOR SCREEN =====
-  if (screen === "calculator") {
+  // ===== LIST SCREEN =====
+  if (screen === "list") {
     return {
       schema: {
         title,
         components: [
           {
-            type: "input",
-            id: "a",
-            placeholder: "عدد اول"
-          },
-          {
-            type: "input",
-            id: "b",
-            placeholder: "عدد دوم"
+            type: "textarea",
+            id: "itemInput",
+            placeholder: "آیتم جدید..."
           },
           {
             type: "button",
-            label: "جمع",
-            action: "calcAdd"
+            label: "اضافه کن",
+            action: "addItem"
           },
           {
-            type: "text",
-            id: "result"
+            type: "list",
+            id: "itemList"
           },
           {
             type: "button",
@@ -83,7 +65,7 @@ function runEngine(input) {
     };
   }
 
-  // ===== HOME SCREEN =====
+  // ===== HOME =====
   return {
     schema: {
       title,
@@ -91,7 +73,7 @@ function runEngine(input) {
         {
           type: "textarea",
           id: "commandInput",
-          placeholder: "مثال:\nset title تست\nscreen note\nscreen calculator"
+          placeholder: "مثال:\nset title تست\nscreen note\nscreen list"
         },
         {
           type: "button",
