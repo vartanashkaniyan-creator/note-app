@@ -1,71 +1,28 @@
 // ===== STATE =====
 let currentScreen = "home";
 
-// ===== ENGINE =====
-function parseCommand(input) {
-  const parts = input.trim().split(" ");
-  return {
-    action: parts[0] || "",
-    target: parts[1] || ""
-  };
-}
+// ===== ACTIONS =====
+const actions = {
+  runCommand() {
+    const cmd = document.getElementById("commandInput").value;
+    const result = runEngine(cmd);
+    render(result.ui);
+  },
 
-function handleCommand(command) {
-  const cmd = parseCommand(command);
+  goHome() {
+    render(runEngine("").ui);
+  },
 
-  if (cmd.action === "screen") {
-    if (cmd.target === "note") currentScreen = "note";
-    if (cmd.target === "about") currentScreen = "about";
-    if (cmd.target === "home") currentScreen = "home";
+  saveNote() {
+    const text = document.getElementById("noteText").value;
+    localStorage.setItem("note", text);
+    alert("ذخیره شد ✅");
   }
-}
-
-// ===== SCREENS =====
-function getScreen() {
-  if (currentScreen === "note") {
-    return {
-      title: "Note",
-      fields: [
-        { id: "noteText", type: "textarea", placeholder: "یادداشت..." }
-      ],
-      buttons: [
-        { id: "save", label: "ذخیره" },
-        { id: "back", label: "بازگشت" }
-      ]
-    };
-  }
-
-  if (currentScreen === "about") {
-    return {
-      title: "About",
-      fields: [],
-      buttons: [
-        { id: "back", label: "بازگشت" }
-      ]
-    };
-  }
-
-  // HOME
-  return {
-    title: "Advanced App Builder",
-    fields: [
-      {
-        id: "commandInput",
-        type: "textarea",
-        placeholder: "مثال: screen note | screen about"
-      }
-    ],
-    buttons: [
-      { id: "run", label: "اجرا" }
-    ]
-  };
-}
+};
 
 // ===== RENDER =====
-function render() {
-  const ui = getScreen();
+function render(ui) {
   const app = document.getElementById("app");
-
   let html = `<h2>${ui.title}</h2>`;
 
   ui.fields.forEach(f => {
@@ -80,33 +37,16 @@ function render() {
 
   app.innerHTML = html;
 
-  // events
   ui.buttons.forEach(b => {
     const btn = document.getElementById(b.id);
-    if (!btn) return;
-
-    if (b.id === "run") {
-      btn.onclick = () => {
-        const cmd = document.getElementById("commandInput").value;
-        handleCommand(cmd);
-        render();
-      };
-    }
-
-    if (b.id === "back") {
-      btn.onclick = () => {
-        currentScreen = "home";
-        render();
-      };
-    }
-
-    if (b.id === "save") {
-      btn.onclick = () => {
-        alert("یادداشت ذخیره شد (مرحله بعدی ذخیره واقعی)");
-      };
+    if (btn && actions[b.action]) {
+      btn.onclick = actions[b.action];
     }
   });
 }
 
 // ===== INIT =====
-window.onload = render;
+window.onload = () => {
+  const result = runEngine("");
+  render(result.ui);
+};
