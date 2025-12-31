@@ -1,80 +1,30 @@
-// engine.js
-// Engine v6 — FIXED Back Button
+function runEngine(command) {
+  if (command.includes("note")) {
+    return {
+      screen: "note",
+      ui: {
+        title: "Note",
+        fields: [
+          { id: "noteText", type: "textarea", placeholder: "یادداشت..." }
+        ],
+        buttons: [
+          { id: "save", label: "ذخیره" },
+          { id: "back", label: "بازگشت" }
+        ]
+      }
+    };
+  }
 
-function runEngine(input) {
-  let result = {
-    ui: "<p>دستور نامعتبر</p>",
-    logic: ""
+  return {
+    screen: "home",
+    ui: {
+      title: "Advanced App Builder",
+      fields: [
+        { id: "commandInput", type: "textarea", placeholder: "دستور را وارد کن..." }
+      ],
+      buttons: [
+        { id: "run", label: "اجرا" }
+      ]
+    }
   };
-
-  if (!input || !input.trim()) return result;
-
-  input = input.toLowerCase();
-
-  let type = null;
-  if (input.includes("note")) type = "note";
-  if (input.includes("calc")) type = "calculator";
-
-  if (!type) return result;
-
-  const hasSave = input.includes("save");
-  const hasBack = input.includes("back");
-
-  return buildApp(type, { hasSave, hasBack });
-}
-
-// ===== BUILDER =====
-function buildApp(type, options) {
-
-  // NOTE
-  if (type === "note") {
-    return {
-      ui: `
-        <h2>Note</h2>
-        <textarea id="noteText" placeholder="یادداشت..."></textarea>
-
-        ${options.hasSave ? `<button onclick="saveNote()">ذخیره</button>` : ``}
-        ${options.hasBack ? `<button onclick="goHome()">بازگشت</button>` : ``}
-      `,
-      logic: `
-        function saveNote() {
-          const text = document.getElementById("noteText").value;
-          localStorage.setItem("note", text);
-          alert("ذخیره شد");
-        }
-
-        function goHome() {
-          renderHome();
-        }
-      `
-    };
-  }
-
-  // CALCULATOR
-  if (type === "calculator") {
-    return {
-      ui: `
-        <h2>Calculator</h2>
-        <input id="a" type="number">
-        <input id="b" type="number">
-        <button onclick="calc()">+</button>
-        <p id="result"></p>
-
-        ${options.hasBack ? `<button onclick="goHome()">بازگشت</button>` : ``}
-      `,
-      logic: `
-        function calc() {
-          const a = Number(document.getElementById("a").value);
-          const b = Number(document.getElementById("b").value);
-          document.getElementById("result").innerText = a + b;
-        }
-
-        function goHome() {
-          renderHome();
-        }
-      `
-    };
-  }
-
-  return { ui: "", logic: "" };
 }
