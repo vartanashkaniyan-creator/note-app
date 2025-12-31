@@ -1,14 +1,52 @@
 window.onload = () => {
   const app = document.getElementById("app");
 
-  app.innerHTML = `
-    <textarea id="commandInput" placeholder="دستور را وارد کن..."></textarea>
-    <button id="runBtn">اجرا</button>
-  `;
+  function renderScreen(screenData) {
+    let html = `<h2>${screenData.ui.title}</h2>`;
 
-  document.getElementById("runBtn").onclick = () => {
-    const cmd = document.getElementById("commandInput").value;
-    const result = runEngine(cmd);
-    app.innerHTML = result.ui;
-  };
+    // فیلدها
+    screenData.ui.fields.forEach(field => {
+      if (field.type === "textarea") {
+        html += `
+          <textarea id="${field.id}" placeholder="${field.placeholder}"></textarea>
+        `;
+      }
+    });
+
+    // دکمه‌ها
+    screenData.ui.buttons.forEach(btn => {
+      html += `
+        <button data-action="${btn.id}">${btn.label}</button>
+      `;
+    });
+
+    app.innerHTML = html;
+
+    // اکشن دکمه‌ها
+    app.querySelectorAll("button").forEach(button => {
+      button.onclick = () => handleAction(button.dataset.action);
+    });
+  }
+
+  function handleAction(action) {
+    if (action === "run") {
+      const command = document.getElementById("commandInput").value;
+      const result = runEngine(command);
+      renderScreen(result);
+    }
+
+    if (action === "back") {
+      const result = runEngine("");
+      renderScreen(result);
+    }
+
+    if (action === "save") {
+      const text = document.getElementById("noteText").value;
+      alert("ذخیره شد:\n" + text);
+    }
+  }
+
+  // اجرای صفحه اولیه
+  const home = runEngine("");
+  renderScreen(home);
 };
