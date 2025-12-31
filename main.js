@@ -1,42 +1,17 @@
-// main.js
-
-window.onload = () => {
-  renderHome();
-};
-
-function renderHome() {
+function render(ui) {
   const app = document.getElementById("app");
 
-  app.innerHTML = `
-    <textarea id="commandInput" placeholder="دستور را وارد کن..."></textarea>
-    <button id="runBtn">اجرا</button>
-  `;
+  let html = `<h2>${ui.title}</h2>`;
 
-  const runBtn = document.getElementById("runBtn");
-  const textArea = document.getElementById("commandInput");
-
-  runBtn.onclick = () => {
-    const result = runEngine(textArea.value);
-
-    // UI اپ
-    app.innerHTML = result.ui;
-
-    // پاک‌سازی اسکریپت‌های قبلی
-    document.querySelectorAll(".dynamic-script").forEach(s => s.remove());
-
-    // منطق اپ
-    if (result.logic) {
-      const script = document.createElement("script");
-      script.className = "dynamic-script";
-      script.innerHTML = result.logic;
-      document.body.appendChild(script);
+  ui.fields.forEach(f => {
+    if (f.type === "textarea") {
+      html += `<textarea id="${f.id}" placeholder="${f.placeholder}"></textarea>`;
     }
-  };
-}
+  });
 
-// تابع بازگشت به خانه (برای دکمه Back داخل اپ‌ها)
-function goHome() {
-  // پاک‌سازی اسکریپت‌های داینامیک
-  document.querySelectorAll(".dynamic-script").forEach(s => s.remove());
-  renderHome();
+  ui.buttons.forEach(b => {
+    html += `<button id="${b.id}">${b.label}</button>`;
+  });
+
+  app.innerHTML = html;
 }
