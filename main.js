@@ -22,23 +22,23 @@ function runCommand() {
   const input = document.getElementById("commandInput").value;
   const result = runEngine(input);
 
-  renderUI(result.ui);
+  renderSchema(result.schema);
 }
 
-// ===== UI RENDERER =====
-function renderUI(ui) {
+// ===== SCHEMA RENDERER (مهم) =====
+function renderSchema(schema) {
   const app = document.getElementById("app");
 
-  let html = `<h2>${ui.title}</h2>`;
+  let html = `<h2>${schema.title}</h2>`;
 
-  ui.fields.forEach(f => {
-    if (f.type === "textarea") {
-      html += `<textarea id="${f.id}" placeholder="${f.placeholder}"></textarea>`;
+  schema.components.forEach(c => {
+    if (c.type === "textarea") {
+      html += `<textarea id="${c.id}" placeholder="${c.placeholder}"></textarea>`;
     }
-  });
 
-  ui.buttons.forEach(b => {
-    html += `<button onclick="${b.action}()">${b.label}</button>`;
+    if (c.type === "button") {
+      html += `<button onclick="${c.action}()">${c.label}</button>`;
+    }
   });
 
   app.innerHTML = html;
@@ -47,6 +47,10 @@ function renderUI(ui) {
 // ===== ACTIONS =====
 function goHome() {
   renderHome();
+}
+
+function runCommandAction() {
+  runCommand();
 }
 
 function saveNote() {
