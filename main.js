@@ -18,21 +18,18 @@ function renderFromEngine(input) {
 // ===== UI RENDERER =====
 function renderUI(schema) {
   const app = document.getElementById("app");
-
   let html = `<h2>${schema.title}</h2>`;
 
   schema.components.forEach(c => {
-    // TEXTAREA
     if (c.type === "textarea") {
       html += `
         <textarea
           id="${c.id}"
           placeholder="${c.placeholder || ""}"
-        ></textarea>
+        >${c.value || ""}</textarea>
       `;
     }
 
-    // BUTTON
     if (c.type === "button") {
       html += `
         <button onclick="dispatchAction('${c.action}')">
@@ -41,10 +38,12 @@ function renderUI(schema) {
       `;
     }
 
-    // LIST
     if (c.type === "list") {
-      html += `<ul id="${c.id}"></ul>`;
-      renderList(c.id);
+      html += `<ul id="${c.id}">`;
+      (c.items || []).forEach(item => {
+        html += `<li>${item}</li>`;
+      });
+      html += `</ul>`;
     }
   });
 
@@ -65,39 +64,19 @@ const actions = {
   runCommand,
 
   goHomeAction() {
+    goHome();
     renderFromEngine("");
   },
 
   saveNote() {
     const text = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", text);
-    alert("ذخیره شد ✅");
+    setNoteText(text);
+    alert("یادداشت ذخیره شد ✅");
   },
 
   addItem() {
-    const input = document.getElementById("itemInput");
-    if (!input.value) return;
-
-    const items = JSON.parse(localStorage.getItem("items") || "[]");
-    items.push(input.value);
-    localStorage.setItem("items", JSON.stringify(items));
-
-    input.value = "";
-    renderList("itemList");
+    const text = document.getElementById("itemInput")?.value || "";
+    addListItem(text);
+    renderFromEngine("");
   }
 };
-
-// ===== HELPERS =====
-function renderList(listId) {
-  const listEl = document.getElementById(listId);
-  if (!listEl) return;
-
-  const items = JSON.parse(localStorage.getItem("items") || "[]");
-  listEl.innerHTML = "";
-
-  items.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = item;
-    listEl.appendChild(li);
-  });
-}
