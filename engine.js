@@ -1,51 +1,30 @@
-// ===== ENGINE v5 =====
-
-const EngineState = {
-  vars: {}
-};
-
 function runEngine(input) {
-  const lines = input
-    .split("\n")
-    .map(l => l.trim())
-    .filter(l => l);
+  const lines = input.trim().split("\n");
 
-  let lastUI = null;
+  let title = "Advanced App Builder";
+  let screen = "home";
 
   lines.forEach(line => {
-    const parts = line.split(" ");
-    const cmd = parts[0];
+    const parts = line.trim().split(" ");
 
-    // ===== SET VARIABLE =====
-    if (cmd === "set") {
-      const key = parts[1];
-      const value = parts.slice(2).join(" ");
-      EngineState.vars[key] = value;
+    if (parts[0] === "set" && parts[1] === "title") {
+      title = parts.slice(2).join(" ");
     }
 
-    // ===== SCREEN =====
-    if (cmd === "screen") {
-      const target = parts[1];
-      lastUI = buildScreen(target);
+    if (parts[0] === "screen") {
+      screen = parts[1];
     }
   });
 
-  // اگر دستوری نبود → Home
-  return lastUI || buildScreen("home");
-}
-
-// ===== SCREENS =====
-function buildScreen(name) {
-  if (name === "note") {
+  if (screen === "note") {
     return {
-      ui: {
-        title: EngineState.vars.title || "Note",
-        fields: [
-          { id: "noteText", type: "textarea", placeholder: "یادداشت..." }
-        ],
-        buttons: [
-          { id: "save", label: "ذخیره", action: "saveNote" },
-          { id: "back", label: "بازگشت", action: "goHome" }
+      screen: "note",
+      schema: {
+        title,
+        components: [
+          { type: "textarea", id: "noteText", placeholder: "یادداشت..." },
+          { type: "button", label: "ذخیره", action: "saveNote" },
+          { type: "button", label: "بازگشت", action: "goHome" }
         ]
       }
     };
@@ -53,17 +32,12 @@ function buildScreen(name) {
 
   // HOME
   return {
-    ui: {
-      title: "Advanced App Builder",
-      fields: [
-        {
-          id: "commandInput",
-          type: "textarea",
-          placeholder: "مثال:\nset title تست\nscreen note"
-        }
-      ],
-      buttons: [
-        { id: "run", label: "اجرا", action: "runCommand" }
+    screen: "home",
+    schema: {
+      title,
+      components: [
+        { type: "textarea", id: "commandInput", placeholder: "مثال: screen note" },
+        { type: "button", label: "اجرا", action: "runCommand" }
       ]
     }
   };
