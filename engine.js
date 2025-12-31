@@ -1,21 +1,45 @@
-// ===== ENGINE =====
+// ===== ENGINE v5 =====
 
-function parseCommand(input) {
-  const parts = input.trim().toLowerCase().split(" ");
-  return {
-    action: parts[0] || "",
-    target: parts[1] || ""
-  };
+const EngineState = {
+  vars: {}
+};
+
+function runEngine(input) {
+  const lines = input
+    .split("\n")
+    .map(l => l.trim())
+    .filter(l => l);
+
+  let lastUI = null;
+
+  lines.forEach(line => {
+    const parts = line.split(" ");
+    const cmd = parts[0];
+
+    // ===== SET VARIABLE =====
+    if (cmd === "set") {
+      const key = parts[1];
+      const value = parts.slice(2).join(" ");
+      EngineState.vars[key] = value;
+    }
+
+    // ===== SCREEN =====
+    if (cmd === "screen") {
+      const target = parts[1];
+      lastUI = buildScreen(target);
+    }
+  });
+
+  // اگر دستوری نبود → Home
+  return lastUI || buildScreen("home");
 }
 
-function runEngine(command) {
-  const cmd = parseCommand(command);
-
-  if (cmd.action === "screen" && cmd.target === "note") {
+// ===== SCREENS =====
+function buildScreen(name) {
+  if (name === "note") {
     return {
-      screen: "note",
       ui: {
-        title: "Note",
+        title: EngineState.vars.title || "Note",
         fields: [
           { id: "noteText", type: "textarea", placeholder: "یادداشت..." }
         ],
@@ -27,16 +51,15 @@ function runEngine(command) {
     };
   }
 
-  // HOME (default)
+  // HOME
   return {
-    screen: "home",
     ui: {
       title: "Advanced App Builder",
       fields: [
         {
           id: "commandInput",
           type: "textarea",
-          placeholder: "مثال: screen note"
+          placeholder: "مثال:\nset title تست\nscreen note"
         }
       ],
       buttons: [
