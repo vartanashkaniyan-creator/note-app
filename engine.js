@@ -1,59 +1,37 @@
-function runEngine(input) {
-  let data;
+// engine.js
 
-  // 1️⃣ parse امن ورودی
-  try {
-    data = typeof input === "string" ? JSON.parse(input) : input;
-  } catch (e) {
+function runEngine(command) {
+  command = command.trim().toLowerCase();
+
+  // NOTE APP
+  if (command.includes("note")) {
     return {
-      ui: `<pre style="color:red">JSON نامعتبره</pre>`,
-      logic: ""
-    };
-  }
-
-  // 2️⃣ خروجی‌ها
-  let ui = "";
-  let logic = "";
-
-  // 3️⃣ screen
-  if (!data.screen) {
-    return {
-      ui: `<pre style="color:red">screen تعریف نشده</pre>`,
-      logic: ""
-    };
-  }
-
-  // title
-  if (data.screen.title) {
-    ui += `<h2>${data.screen.title}</h2>`;
-  }
-
-  // components
-  if (Array.isArray(data.screen.components)) {
-    data.screen.components.forEach((c, i) => {
-
-      // TEXT
-      if (c.type === "text") {
-        ui += `<p>${c.value || ""}</p>`;
-      }
-
-      // BUTTON
-      if (c.type === "button") {
-        const id = `btn_${i}`;
-        ui += `<button id="${id}">${c.text || "Button"}</button>`;
-
-        if (c.onClick) {
-          logic += `
-            document.getElementById("${id}").onclick = function () {
-              ${c.onClick}
-            };
-          `;
+      ui: `
+        <h2>📝 Notes</h2>
+        <textarea id="noteText" placeholder="یادداشت بنویس..."></textarea>
+        <button onclick="saveNote()">ذخیره</button>
+      `,
+      logic: `
+        function saveNote() {
+          const text = document.getElementById("noteText").value;
+          localStorage.setItem("note", text);
+          alert("ذخیره شد ✅");
         }
-      }
-
-    });
+      `
+    };
   }
 
-  // 4️⃣ خروجی نهایی
-  return { ui, logic };
+  // CALCULATOR (فعلاً خالی طبق حرف خودت)
+  if (command.includes("calculator")) {
+    return {
+      ui: "<h2>Calculator (Disabled)</h2>",
+      logic: ""
+    };
+  }
+
+  // UNKNOWN COMMAND
+  return {
+    ui: "<p>❌ دستور شناخته نشد</p>",
+    logic: ""
+  };
 }
