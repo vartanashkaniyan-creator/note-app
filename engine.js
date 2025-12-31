@@ -1,5 +1,5 @@
 // engine.js
-// Engine v4 — JSON + Text Commands
+// Engine v5 — Smart Text Commands
 
 function runEngine(input) {
   let result = {
@@ -7,39 +7,26 @@ function runEngine(input) {
     logic: ""
   };
 
-  if (!input || !input.trim()) {
-    return result;
-  }
+  if (!input || !input.trim()) return result;
 
-  input = input.trim().toLowerCase();
+  input = input.toLowerCase();
 
-  // ---------- JSON MODE ----------
-  if (input.startsWith("{")) {
-    try {
-      const cmd = JSON.parse(input);
-      return handleCommand(cmd.type);
-    } catch (e) {
-      return {
-        ui: "<p>JSON نامعتبر است</p>",
-        logic: ""
-      };
-    }
-  }
+  // تشخیص نوع اپ
+  let type = null;
+  if (input.includes("note")) type = "note";
+  if (input.includes("calc")) type = "calculator";
 
-  // ---------- TEXT MODE ----------
-  if (input.includes("note")) {
-    return handleCommand("note");
-  }
+  if (!type) return result;
 
-  if (input.includes("calc")) {
-    return handleCommand("calculator");
-  }
+  // قابلیت‌ها
+  const hasSave = input.includes("save");
+  const hasBack = input.includes("back");
 
-  return result;
+  return buildApp(type, { hasSave, hasBack });
 }
 
-// ===== COMMAND HANDLER =====
-function handleCommand(type) {
+// ===== APP BUILDER =====
+function buildApp(type, options) {
 
   // ---------- NOTE ----------
   if (type === "note") {
@@ -47,13 +34,19 @@ function handleCommand(type) {
       ui: `
         <h2>Note</h2>
         <textarea id="noteText" placeholder="یادداشت..."></textarea>
-        <button onclick="saveNote()">ذخیره</button>
+
+        ${options.hasSave ? `<button onclick="saveNote()">ذخیره</button>` : ``}
+        ${options.hasBack ? `<button onclick="goHome()">بازگشت</button>` : ``}
       `,
       logic: `
         function saveNote() {
           const text = document.getElementById("noteText").value;
           localStorage.setItem("note", text);
           alert("ذخیره شد");
+        }
+
+        function goHome() {
+          location.reload();
         }
       `
     };
@@ -68,6 +61,8 @@ function handleCommand(type) {
         <input id="b" type="number">
         <button onclick="calc()">+</button>
         <p id="result"></p>
+
+        ${options.hasBack ? `<button onclick="goHome()">بازگشت</button>` : ``}
       `,
       logic: `
         function calc() {
@@ -75,12 +70,13 @@ function handleCommand(type) {
           const b = Number(document.getElementById("b").value);
           document.getElementById("result").innerText = a + b;
         }
+
+        function goHome() {
+          location.reload();
+        }
       `
     };
   }
 
-  return {
-    ui: "<p>اپ پشتیبانی نمی‌شود</p>",
-    logic: ""
-  };
+  return { ui: "", logic: "" };
 }
