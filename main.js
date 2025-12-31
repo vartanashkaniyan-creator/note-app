@@ -1,43 +1,61 @@
 // main.js
 
 window.onload = () => {
-  renderHome();
+  showHome();
 };
 
-function renderHome() {
+// ===== HOME =====
+function showHome() {
   const app = document.getElementById("app");
 
   app.innerHTML = `
     <h2>Advanced App Builder</h2>
-    <textarea id="commandInput" placeholder="مثال:
+
+    <textarea
+      id="commandInput"
+      placeholder="مثال:
 set title تست
-screen note"></textarea>
+screen note"
+      rows="5"
+    ></textarea>
+
     <button id="runBtn">اجرا</button>
   `;
 
   document.getElementById("runBtn").onclick = runCommand;
 }
 
+// ===== RUN COMMAND =====
 function runCommand() {
-  const input = document.getElementById("commandInput").value;
-  const result = runEngine(input);
+  const input = document.getElementById("commandInput").value.trim();
+  if (!input) return;
 
-  renderSchema(result.schema);
+  const result = runEngine(input);
+  renderFromSchema(result.schema);
 }
 
-// ===== SCHEMA RENDERER (مهم) =====
-function renderSchema(schema) {
+// ===== RENDERER (خیلی مهم) =====
+function renderFromSchema(schema) {
   const app = document.getElementById("app");
 
   let html = `<h2>${schema.title}</h2>`;
 
   schema.components.forEach(c => {
     if (c.type === "textarea") {
-      html += `<textarea id="${c.id}" placeholder="${c.placeholder}"></textarea>`;
+      html += `
+        <textarea
+          id="${c.id}"
+          placeholder="${c.placeholder || ""}"
+        ></textarea>
+      `;
     }
 
     if (c.type === "button") {
-      html += `<button onclick="${c.action}()">${c.label}</button>`;
+      html += `
+        <button onclick="${c.action}()">
+          ${c.label}
+        </button>
+      `;
     }
   });
 
@@ -46,11 +64,7 @@ function renderSchema(schema) {
 
 // ===== ACTIONS =====
 function goHome() {
-  renderHome();
-}
-
-function runCommandAction() {
-  runCommand();
+  showHome();
 }
 
 function saveNote() {
