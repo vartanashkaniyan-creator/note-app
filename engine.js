@@ -8,7 +8,10 @@ function runEngine(input) {
 
   let state = {
     title: "Advanced App Builder",
-    screen: "home"
+    screen: "home",
+    alerts: [],
+    logs: [],
+    clear: false
   };
 
   lines.forEach(line => {
@@ -23,6 +26,21 @@ function runEngine(input) {
     if (parts[0] === "screen") {
       state.screen = parts[1];
     }
+
+    // alert ...
+    if (parts[0] === "alert") {
+      state.alerts.push(parts.slice(1).join(" "));
+    }
+
+    // log ...
+    if (parts[0] === "log") {
+      state.logs.push(parts.slice(1).join(" "));
+    }
+
+    // clear
+    if (parts[0] === "clear") {
+      state.clear = true;
+    }
   });
 
   return buildScreen(state);
@@ -30,33 +48,36 @@ function runEngine(input) {
 
 // ===== SCREEN FACTORY =====
 function buildScreen(state) {
+
+  // اجرای alertها
+  state.alerts.forEach(msg => alert(msg));
+  state.logs.forEach(msg => console.log("ENGINE:", msg));
+
+  if (state.clear) {
+    return {
+      screen: "clear",
+      schema: {
+        title: state.title,
+        components: []
+      }
+    };
+  }
+
   if (state.screen === "note") {
     return {
       screen: "note",
       schema: {
         title: state.title,
         components: [
-          {
-            type: "textarea",
-            id: "noteText",
-            placeholder: "یادداشت..."
-          },
-          {
-            type: "button",
-            label: "ذخیره",
-            action: "saveNote"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHome"
-          }
+          { type: "textarea", id: "noteText", placeholder: "یادداشت..." },
+          { type: "button", label: "ذخیره", action: "saveNote" },
+          { type: "button", label: "بازگشت", action: "goHome" }
         ]
       }
     };
   }
 
-  // HOME (پیش‌فرض)
+  // HOME
   return {
     screen: "home",
     schema: {
@@ -65,14 +86,14 @@ function buildScreen(state) {
         {
           type: "textarea",
           id: "commandInput",
-          placeholder: "مثال:\nset title تست\nscreen note"
+          placeholder:
+`مثال:
+set title تست
+alert سلام
+screen note`
         },
-        {
-          type: "button",
-          label: "اجرا",
-          action: "runCommand"
-        }
+        { type: "button", label: "اجرا", action: "runCommand" }
       ]
     }
   };
-}
+           }
