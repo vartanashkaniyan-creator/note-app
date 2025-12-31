@@ -1,6 +1,5 @@
-function render(ui) {
+function render(ui, actions) {
   const app = document.getElementById("app");
-
   let html = `<h2>${ui.title}</h2>`;
 
   ui.fields.forEach(f => {
@@ -14,4 +13,10 @@ function render(ui) {
   });
 
   app.innerHTML = html;
+
+  // اتصال اکشن‌ها
+  Object.keys(actions).forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.onclick = () => handleAction(actions[btnId]);
+  });
 }
