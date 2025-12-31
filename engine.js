@@ -1,83 +1,78 @@
 // engine.js
 
 function runEngine(input) {
-  const lines = input.trim().split("\n").map(l => l.trim()).filter(Boolean);
+  const lines = input
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
 
-  let title = "Advanced App Builder";
-  let screen = "home";
-  let alertText = null;
+  let state = {
+    title: "Advanced App Builder",
+    screen: "home"
+  };
 
   lines.forEach(line => {
     const parts = line.split(" ");
 
     // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
-      title = parts.slice(2).join(" ");
+      state.title = parts.slice(2).join(" ");
     }
 
-    // screen note | home | calculator
+    // screen note / home
     if (parts[0] === "screen") {
-      screen = parts[1];
-    }
-
-    // alert ...
-    if (parts[0] === "alert") {
-      alertText = parts.slice(1).join(" ");
+      state.screen = parts[1];
     }
   });
 
-  // ===== SCREENS =====
+  return buildScreen(state);
+}
 
-  if (screen === "note") {
+// ===== SCREEN FACTORY =====
+function buildScreen(state) {
+  if (state.screen === "note") {
     return {
-      ui: {
-        title,
-        fields: [
-          { type: "textarea", id: "noteText", placeholder: "یادداشت..." }
-        ],
-        buttons: [
-          { label: "ذخیره", action: "saveNote" },
-          { label: "بازگشت", action: "goHome" }
+      screen: "note",
+      schema: {
+        title: state.title,
+        components: [
+          {
+            type: "textarea",
+            id: "noteText",
+            placeholder: "یادداشت..."
+          },
+          {
+            type: "button",
+            label: "ذخیره",
+            action: "saveNote"
+          },
+          {
+            type: "button",
+            label: "بازگشت",
+            action: "goHome"
+          }
         ]
-      },
-      logic: alertText ? `alert("${alertText}")` : ""
+      }
     };
   }
 
-  if (screen === "calculator") {
-    return {
-      ui: {
-        title,
-        fields: [
-          { type: "input", id: "a", placeholder: "عدد اول" },
-          { type: "input", id: "b", placeholder: "عدد دوم" }
-        ],
-        buttons: [
-          { label: "جمع", action: "calcSum" },
-          { label: "بازگشت", action: "goHome" }
-        ]
-      },
-      logic: `
-        function calcSum() {
-          const a = Number(document.getElementById("a").value);
-          const b = Number(document.getElementById("b").value);
-          alert(a + b);
-        }
-      `
-    };
-  }
-
-  // ===== HOME (DEFAULT) =====
+  // HOME (پیش‌فرض)
   return {
-    ui: {
-      title,
-      fields: [
-        { type: "textarea", id: "commandInput", placeholder: "مثال:\nscreen note\nalert سلام" }
-      ],
-      buttons: [
-        { label: "اجرا", action: "runCommand" }
+    screen: "home",
+    schema: {
+      title: state.title,
+      components: [
+        {
+          type: "textarea",
+          id: "commandInput",
+          placeholder: "مثال:\nset title تست\nscreen note"
+        },
+        {
+          type: "button",
+          label: "اجرا",
+          action: "runCommand"
+        }
       ]
-    },
-    logic: alertText ? `alert("${alertText}")` : ""
+    }
   };
 }
