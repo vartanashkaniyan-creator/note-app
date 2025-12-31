@@ -1,16 +1,25 @@
 // engine.js
-// Advanced Engine v2 — Command Based
+// Engine v3 — JSON Based Commands
 
 function runEngine(input) {
-  const command = input.trim().toLowerCase();
-
   let result = {
-    ui: `<p>دستور نامعتبر</p>`,
+    ui: "<p>دستور نامعتبر</p>",
     logic: ""
   };
 
-  // ---------- CREATE NOTE ----------
-  if (command === "create note") {
+  let command;
+
+  try {
+    command = JSON.parse(input);
+  } catch (e) {
+    return {
+      ui: "<p>فرمت دستور اشتباه است (JSON)</p>",
+      logic: ""
+    };
+  }
+
+  // ---------- NOTE ----------
+  if (command.type === "note") {
     result.ui = `
       <h2>Note</h2>
       <textarea id="noteText" placeholder="یادداشت..."></textarea>
@@ -26,10 +35,9 @@ function runEngine(input) {
     `;
   }
 
-  // ---------- CREATE CALCULATOR ----------
-  else if (command === "create calculator") {
-    result.ui = `<p>Calculator فعلاً غیرفعال است</p>`;
-    result.logic = "";
+  // ---------- CALCULATOR (فعلاً خاموش) ----------
+  else if (command.type === "calculator") {
+    result.ui = "<p>Calculator هنوز فعال نشده</p>";
   }
 
   return result;
