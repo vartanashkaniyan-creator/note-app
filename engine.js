@@ -1,5 +1,5 @@
 // engine.js
-// Engine v5 — Smart Text Commands
+// Engine v6 — FIXED Back Button
 
 function runEngine(input) {
   let result = {
@@ -11,24 +11,22 @@ function runEngine(input) {
 
   input = input.toLowerCase();
 
-  // تشخیص نوع اپ
   let type = null;
   if (input.includes("note")) type = "note";
   if (input.includes("calc")) type = "calculator";
 
   if (!type) return result;
 
-  // قابلیت‌ها
   const hasSave = input.includes("save");
   const hasBack = input.includes("back");
 
   return buildApp(type, { hasSave, hasBack });
 }
 
-// ===== APP BUILDER =====
+// ===== BUILDER =====
 function buildApp(type, options) {
 
-  // ---------- NOTE ----------
+  // NOTE
   if (type === "note") {
     return {
       ui: `
@@ -46,13 +44,13 @@ function buildApp(type, options) {
         }
 
         function goHome() {
-          location.reload();
+          renderHome();
         }
       `
     };
   }
 
-  // ---------- CALCULATOR ----------
+  // CALCULATOR
   if (type === "calculator") {
     return {
       ui: `
@@ -72,7 +70,7 @@ function buildApp(type, options) {
         }
 
         function goHome() {
-          location.reload();
+          renderHome();
         }
       `
     };
