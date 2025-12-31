@@ -1,17 +1,16 @@
 // engine.js
-// موتور پایه حرفه‌ای (Pure Function)
+// Advanced Engine v2 — Command Based
 
 function runEngine(input) {
   const command = input.trim().toLowerCase();
 
-  // خروجی پیش‌فرض
   let result = {
     ui: `<p>دستور نامعتبر</p>`,
     logic: ""
   };
 
-  // دستور note
-  if (command === "note") {
+  // ---------- CREATE NOTE ----------
+  if (command === "create note") {
     result.ui = `
       <h2>Note</h2>
       <textarea id="noteText" placeholder="یادداشت..."></textarea>
@@ -27,8 +26,8 @@ function runEngine(input) {
     `;
   }
 
-  // دستور calculator (فعلاً خالی طبق خواسته تو)
-  else if (command === "calculator") {
+  // ---------- CREATE CALCULATOR ----------
+  else if (command === "create calculator") {
     result.ui = `<p>Calculator فعلاً غیرفعال است</p>`;
     result.logic = "";
   }
