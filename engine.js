@@ -16,6 +16,7 @@ function runEngine(input) {
     }
   });
 
+  // ===== NOTE SCREEN =====
   if (screen === "note") {
     return {
       screen: "note",
@@ -30,14 +31,22 @@ function runEngine(input) {
     };
   }
 
-  // HOME
+  // ===== HOME SCREEN =====
   return {
     screen: "home",
     schema: {
       title,
       components: [
-        { type: "textarea", id: "commandInput", placeholder: "مثال: screen note" },
-        { type: "button", label: "اجرا", action: "runCommand" }
+        {
+          type: "textarea",
+          id: "commandInput",
+          placeholder: "مثال:\nscreen note"
+        },
+        {
+          type: "button",
+          label: "اجرا",
+          action: "runCommand"
+        }
       ]
     }
   };
