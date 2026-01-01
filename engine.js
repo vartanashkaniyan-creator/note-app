@@ -1,131 +1,107 @@
-// engine.js
-// ===== STABLE COMMAND ENGINE v2 =====
+// ===== GLOBAL STATE =====
+const AppState = {
+  items: JSON.parse(localStorage.getItem("items") || "[]")
+};
 
-function runEngine(input) {
-  const lines = input
-    .split("\n")
-    .map(l => l.trim())
-    .filter(Boolean);
+// ===== START =====
+window.onload = () => {
+  renderFromEngine("");
+};
 
-  let title = "Advanced App Builder";
-  let screen = "home";
-  let alertText = null;
-  let autoSave = false;
+// ===== CORE =====
+function runCommand() {
+  const input = document.getElementById("commandInput")?.value || "";
+  renderFromEngine(input);
+}
 
-  // ===== PARSER =====
-  lines.forEach(line => {
-    const parts = line.split(" ");
+function renderFromEngine(input) {
+  const result = runEngine(input);
 
-    // set title ...
-    if (parts[0] === "set" && parts[1] === "title") {
-      title = parts.slice(2).join(" ");
+  // 👈 اجرای متا
+  handleMeta(result.meta);
+
+  renderUI(result.schema);
+}
+
+// ===== META HANDLER =====
+function handleMeta(meta) {
+  if (!meta) return;
+
+  if (meta.alertText) {
+    alert(meta.alertText);
+  }
+
+  if (meta.autoSave) {
+    const note = document.getElementById("noteText")?.value;
+    if (note) {
+      localStorage.setItem("note", note);
+    }
+  }
+}
+
+// ===== UI RENDERER =====
+function renderUI(schema) {
+  const app = document.getElementById("app");
+  let html = `<h2>${schema.title}</h2>`;
+
+  schema.components.forEach(c => {
+    if (c.type === "textarea") {
+      html += `<textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>`;
     }
 
-    // screen note | screen list
-    if (parts[0] === "screen") {
-      screen = parts[1];
+    if (c.type === "button") {
+      html += `<button data-action="${c.action}">${c.label}</button>`;
     }
 
-    // alert متن
-    if (parts[0] === "alert") {
-      alertText = parts.slice(1).join(" ");
-    }
-
-    // save auto
-    if (parts[0] === "save" && parts[1] === "auto") {
-      autoSave = true;
-    }
-
-    // clear
-    if (parts[0] === "clear") {
-      screen = "home";
-      title = "Advanced App Builder";
+    if (c.type === "list") {
+      html += `<ul id="${c.id}"></ul>`;
     }
   });
 
-  // ===== NOTE SCREEN =====
-  if (screen === "note") {
-    return {
-      meta: {
-        alertText,
-        autoSave
-      },
-      schema: {
-        title,
-        components: [
-          {
-            type: "textarea",
-            id: "noteText",
-            placeholder: "یادداشت بنویس..."
-          },
-          {
-            type: "button",
-            label: "ذخیره",
-            action: "saveNote"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
-        ]
-      }
-    };
+  app.innerHTML = html;
+
+  // رندر لیست
+  const listEl = document.getElementById("itemList");
+  if (listEl) {
+    AppState.items.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      listEl.appendChild(li);
+    });
   }
 
-  // ===== LIST SCREEN =====
-  if (screen === "list") {
-    return {
-      meta: {
-        alertText
-      },
-      schema: {
-        title,
-        components: [
-          {
-            type: "textarea",
-            id: "itemInput",
-            placeholder: "آیتم جدید..."
-          },
-          {
-            type: "button",
-            label: "اضافه کن",
-            action: "addItem"
-          },
-          {
-            type: "list",
-            id: "itemList"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
-        ]
-      }
-    };
-  }
-
-  // ===== HOME SCREEN =====
-  return {
-    meta: {
-      alertText
-    },
-    schema: {
-      title,
-      components: [
-        {
-          type: "textarea",
-          id: "commandInput",
-          placeholder:
-            "مثال:\nset title تست\nscreen note\nalert سلام\nsave auto"
-        },
-        {
-          type: "button",
-          label: "اجرا",
-          action: "runCommand"
-        }
-      ]
-    }
-  };
+  // اکشن‌ها
+  app.querySelectorAll("button[data-action]").forEach(btn => {
+    btn.onclick = () => dispatchAction(btn.dataset.action);
+  });
 }
+
+// ===== ACTION DISPATCHER =====
+function dispatchAction(action) {
+  actions[action]?.();
+}
+
+// ===== ACTIONS =====
+const actions = {
+  runCommand,
+
+  goHomeAction() {
+    renderFromEngine("");
+  },
+
+  saveNote() {
+    const text = document.getElementById("noteText")?.value || "";
+    localStorage.setItem("note", text);
+    alert("ذخیره شد ✅");
+  },
+
+  addItem() {
+    const input = document.getElementById("itemInput");
+    if (!input || !input.value) return;
+
+    AppState.items.push(input.value);
+    localStorage.setItem("items", JSON.stringify(AppState.items));
+    input.value = "";
+    renderFromEngine("screen list");
+  }
+};
