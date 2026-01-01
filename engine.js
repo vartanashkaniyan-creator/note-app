@@ -1,37 +1,39 @@
 // engine.js
 
 function runEngine(input) {
-  const lines = input
-    .split("\n")
-    .map(l => l.trim())
-    .filter(Boolean);
+  const cmd = (input || "").trim().toLowerCase();
 
-  let title = "Advanced App Builder";
-  let screen = "home";
-
-  // ===== PARSE COMMANDS =====
-  lines.forEach(line => {
-    const parts = line.split(" ");
-
-    if (parts[0] === "set" && parts[1] === "title") {
-      title = parts.slice(2).join(" ");
-    }
-
-    if (parts[0] === "screen") {
-      screen = parts[1];
-    }
-  });
-
-  // ===== NOTE SCREEN =====
-  if (screen === "note") {
+  // ===== HOME =====
+  if (cmd === "" || cmd === "screen home") {
     return {
       schema: {
-        title,
+        title: "🏠 صفحه اصلی",
+        components: [
+          {
+            type: "textarea",
+            id: "commandInput",
+            placeholder: "دستور را وارد کن (مثلاً: screen note)"
+          },
+          {
+            type: "button",
+            label: "اجرا",
+            action: "runCommand"
+          }
+        ]
+      }
+    };
+  }
+
+  // ===== NOTE =====
+  if (cmd === "screen note") {
+    return {
+      schema: {
+        title: "📝 یادداشت",
         components: [
           {
             type: "textarea",
             id: "noteText",
-            placeholder: "یادداشت بنویس..."
+            placeholder: "یادداشت خود را بنویس"
           },
           {
             type: "button",
@@ -48,21 +50,16 @@ function runEngine(input) {
     };
   }
 
-  // ===== LIST SCREEN =====
-  if (screen === "list") {
+  // ===== LIST =====
+  if (cmd === "screen list") {
     return {
       schema: {
-        title,
+        title: "📋 لیست ساده",
         components: [
           {
             type: "textarea",
-            id: "itemInput",
-            placeholder: "آیتم جدید..."
-          },
-          {
-            type: "button",
-            label: "اضافه کن",
-            action: "addItem"
+            id: "listInput",
+            placeholder: "هر خط = یک آیتم"
           },
           {
             type: "button",
@@ -74,26 +71,33 @@ function runEngine(input) {
     };
   }
 
-  // ===== HOME SCREEN =====
+  // ===== COUNTER =====
+  if (cmd === "screen counter") {
+    return {
+      schema: {
+        title: "🔢 شمارنده (نمایشی)",
+        components: [
+          {
+            type: "button",
+            label: "بازگشت",
+            action: "goHomeAction"
+          }
+        ]
+      }
+    };
+  }
+
+  // ===== UNKNOWN COMMAND =====
   return {
     schema: {
-      title,
+      title: "❌ دستور ناشناخته",
       components: [
         {
-          type: "textarea",
-          id: "commandInput",
-          placeholder:
-`مثال:
-set title تست
-screen note
-screen list`
-        },
-        {
           type: "button",
-          label: "اجرا",
-          action: "runCommand"
+          label: "بازگشت به خانه",
+          action: "goHomeAction"
         }
       ]
     }
   };
-}
+          }
