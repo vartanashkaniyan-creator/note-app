@@ -1,78 +1,98 @@
+// engine.js
+// ===== BILINGUAL ENGINE v1 (FA + EN) =====
+
+function normalize(cmd) {
+  return cmd
+    .toLowerCase()
+    .replace(/صفحه/g, "screen")
+    .replace(/یادداشت/g, "note")
+    .replace(/لیست/g, "list")
+    .replace(/عنوان/g, "title")
+    .replace(/هشدار/g, "alert")
+    .replace(/برو/g, "go")
+    .trim();
+}
+
 function runEngine(input) {
-  input = (input || "").trim();
+  const lines = input
+    .split("\n")
+    .map(l => normalize(l))
+    .filter(Boolean);
 
-  let currentPage = "home";
+  let screen = "home";
+  let title = "Advanced App Builder";
+  let alertText = null;
 
-  if (input === "note") currentPage = "note";
-  if (input === "list") currentPage = "list";
-  if (input === "home") currentPage = "home";
+  lines.forEach(line => {
+    const parts = line.split(" ");
 
-  const pages = {
-    home: {
-      title: "صفحه اصلی",
+    // title / عنوان
+    if (parts[0] === "title") {
+      title = parts.slice(1).join(" ");
+    }
+
+    // screen / صفحه
+    if (parts[0] === "screen" || parts[0] === "go") {
+      screen = parts[1];
+    }
+
+    // alert / هشدار
+    if (parts[0] === "alert") {
+      alertText = parts.slice(1).join(" ");
+    }
+  });
+
+  // ===== SCREENS =====
+  if (screen === "note") {
+    return {
+      meta: { alertText },
+      schema: {
+        title,
+        components: [
+          { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
+          { type: "button", label: "ذخیره", action: "saveNote" },
+          { type: "button", label: "بازگشت", action: "goHomeAction" }
+        ]
+      }
+    };
+  }
+
+  if (screen === "list") {
+    return {
+      meta: { alertText },
+      schema: {
+        title,
+        components: [
+          { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
+          { type: "button", label: "اضافه کن", action: "addItem" },
+          { type: "list", id: "itemsList" },
+          { type: "button", label: "بازگشت", action: "goHomeAction" }
+        ]
+      }
+    };
+  }
+
+  // ===== HOME =====
+  return {
+    meta: { alertText },
+    schema: {
+      title,
       components: [
         {
           type: "textarea",
           id: "commandInput",
-          placeholder: "دستور بنویس (note / list)..."
-        },
-        {
-          type: "button",
-          label: "اجرا",
-          action: "runCommand"
-        }
-      ]
-    },
+          placeholder:
+`مثال:
+title یادداشت‌های من
+صفحه note
 
-    note: {
-      title: "یادداشت‌های من",
-      components: [
-        {
-          type: "textarea",
-          id: "noteText",
-          placeholder: "یادداشت بنویس..."
-        },
-        {
-          type: "button",
-          label: "ذخیره",
-          action: "saveNote"
-        },
-        {
-          type: "button",
-          label: "بازگشت",
-          action: "goHomeAction"
-        }
-      ]
-    },
+یا:
 
-    list: {
-      title: "لیست من",
-      components: [
-        {
-          type: "textarea",
-          id: "itemInput",
-          placeholder: "آیتم جدید..."
+title My Notes
+screen note`
         },
-        {
-          type: "button",
-          label: "اضافه کن",
-          action: "addItem"
-        },
-        {
-          type: "list",
-          id: "itemsList"
-        },
-        {
-          type: "button",
-          label: "بازگشت",
-          action: "goHomeAction"
-        }
+        { type: "button", label: "اجرا", action: "runCommand" }
       ]
     }
-  };
-
-  return {
-    schema: pages[currentPage],
-    meta: null
   };
 }
