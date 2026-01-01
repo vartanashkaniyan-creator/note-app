@@ -1,16 +1,23 @@
 // main.js
 let currentState = null;
-let savedNote = "";
-let savedList = [];
 
-// اجرای موتور
+// ===== STORAGE =====
+function getNote() {
+  return localStorage.getItem("note") || "";
+}
+
+function getList() {
+  return JSON.parse(localStorage.getItem("items") || "[]");
+}
+
+// ===== RUN =====
 function runApp(input) {
   currentState = runEngine(input);
   render(currentState);
   handleMeta(currentState.meta);
 }
 
-// رندر UI
+// ===== RENDER =====
 function render(state) {
   const app = document.getElementById("app");
   app.innerHTML = "";
@@ -24,6 +31,9 @@ function render(state) {
       const t = document.createElement("textarea");
       t.id = c.id;
       t.placeholder = c.placeholder || "";
+
+      if (c.id === "noteText") t.value = getNote();
+
       app.appendChild(t);
     }
 
@@ -37,17 +47,19 @@ function render(state) {
     if (c.type === "list") {
       const ul = document.createElement("ul");
       ul.id = c.id;
-      savedList.forEach(i => {
+
+      getList().forEach(i => {
         const li = document.createElement("li");
         li.innerText = i;
         ul.appendChild(li);
       });
+
       app.appendChild(ul);
     }
   });
 }
 
-// اکشن‌ها
+// ===== ACTIONS =====
 function handleAction(action) {
   if (action === "runCommand") {
     const v = document.getElementById("commandInput").value;
@@ -59,33 +71,27 @@ function handleAction(action) {
   }
 
   if (action === "saveNote") {
-    savedNote = document.getElementById("noteText").value;
-    alert("ذخیره شد");
+    const v = document.getElementById("noteText").value;
+    localStorage.setItem("note", v);
+    alert("ذخیره شد ✅");
   }
 
   if (action === "addItem") {
-    const v = document.getElementById("itemInput").value;
-    if (v) {
-      savedList.push(v);
-      render(currentState);
-    }
+    const input = document.getElementById("itemInput");
+    if (!input.value) return;
+
+    const items = getList();
+    items.push(input.value);
+    localStorage.setItem("items", JSON.stringify(items));
+    render(currentState);
   }
 }
 
-// اجرای meta
+// ===== META =====
 function handleMeta(meta) {
   if (!meta) return;
 
   if (meta.alertText) {
     alert(meta.alertText);
-  }
-
-  if (meta.autoSave) {
-    const note = document.getElementById("noteText");
-    if (note) {
-      note.oninput = () => {
-        savedNote = note.value;
-      };
-    }
   }
 }
