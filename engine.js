@@ -1,5 +1,5 @@
 // engine.js
-// ===== ADVANCED ENGINE v2 =====
+// ===== ENGINE v2 with BACK COMMAND =====
 
 function runEngine(input) {
   const lines = input
@@ -7,95 +7,73 @@ function runEngine(input) {
     .map(l => l.trim())
     .filter(Boolean);
 
-  // ----- STATE -----
-  let state = {
-    title: "Advanced App Builder",
-    screen: "home"
-  };
+  let title = "Advanced App Builder";
+  let screen = "home";
+  let command = null;
 
-  // ----- PARSER -----
+  // ===== PARSER =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // set title ...
-    if (parts[0] === "set" && parts[1] === "title") {
-      state.title = parts.slice(2).join(" ");
+    if (line === "back") {
+      command = "back";
     }
 
-    // screen note | list | home
+    if (parts[0] === "set" && parts[1] === "title") {
+      title = parts.slice(2).join(" ");
+    }
+
     if (parts[0] === "screen") {
-      state.screen = parts[1];
+      screen = parts[1];
     }
   });
 
-  // ----- SCREENS -----
+  // ===== BACK COMMAND =====
+  if (command === "back") {
+    return {
+      command: "back"
+    };
+  }
 
-  // NOTE
-  if (state.screen === "note") {
+  // ===== NOTE SCREEN =====
+  if (screen === "note") {
     return {
       schema: {
-        title: state.title,
+        title,
         components: [
-          {
-            type: "textarea",
-            id: "noteText",
-            placeholder: "یادداشت بنویس..."
-          },
-          {
-            type: "button",
-            label: "ذخیره",
-            action: "saveNote"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
+          { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
+          { type: "button", label: "ذخیره", action: "saveNote" },
+          { type: "button", label: "بازگشت", action: "goBack" }
         ]
       }
     };
   }
 
-  // LIST
-  if (state.screen === "list") {
+  // ===== LIST SCREEN =====
+  if (screen === "list") {
     return {
       schema: {
-        title: state.title,
+        title,
         components: [
-          {
-            type: "textarea",
-            id: "itemInput",
-            placeholder: "آیتم جدید..."
-          },
-          {
-            type: "button",
-            label: "اضافه کن",
-            action: "addItem"
-          },
-          {
-            type: "list",
-            id: "itemList"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
+          { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
+          { type: "button", label: "اضافه کن", action: "addItem" },
+          { type: "list", id: "itemList" },
+          { type: "button", label: "بازگشت", action: "goBack" }
         ]
       }
     };
   }
 
-  // HOME (پیش‌فرض)
+  // ===== HOME =====
   return {
     schema: {
-      title: state.title,
+      title,
       components: [
         {
           type: "textarea",
           id: "commandInput",
           placeholder:
-            "مثال:\nset title تست\nscreen note\nscreen list"
+            "مثال:\nscreen note\nscreen list\nback"
         },
         {
           type: "button",
