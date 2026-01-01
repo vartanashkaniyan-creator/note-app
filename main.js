@@ -1,118 +1,90 @@
-// ================== GLOBAL STATE (مغز اپ) ==================
-const State = {
-  title: "Advanced App Builder",
-  screen: "home", // home | note | list
-  notes: []
+// ===== GLOBAL STATE =====
+const AppState = {
+  history: []
 };
 
-// ================== START ==================
+// ===== START =====
 window.onload = () => {
-  render();
+  renderFromEngine("");
 };
 
-// ================== COMMAND RUNNER ==================
+// ===== CORE =====
 function runCommand() {
-  const inputEl = document.getElementById("commandInput");
-  if (!inputEl) return;
+  const input = document.getElementById("commandInput")?.value || "";
+  renderFromEngine(input, true);
+}
 
-  const raw = inputEl.value.trim();
-  if (!raw) return;
+function renderFromEngine(input, pushHistory = false) {
+  if (pushHistory) {
+    AppState.history.push(input);
+  }
 
-  const lines = raw.split("\n");
+  const result = runEngine(input);
+  renderUI(result.schema);
+}
 
-  lines.forEach(line => {
-    executeCommand(line.trim());
+// ===== UI RENDERER =====
+function renderUI(schema) {
+  const app = document.getElementById("app");
+  let html = `<h2>${schema.title}</h2>`;
+
+  schema.components.forEach(c => {
+    if (c.type === "textarea") {
+      html += `
+        <textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>
+      `;
+    }
+
+    if (c.type === "button") {
+      html += `
+        <button data-action="${c.action}">${c.label}</button>
+      `;
+    }
   });
 
-  inputEl.value = "";
-  render();
-}
-
-// ================== COMMAND ENGINE ==================
-function executeCommand(cmd) {
-  if (cmd.startsWith("set title")) {
-    State.title = cmd.replace("set title", "").trim() || State.title;
-    return;
-  }
-
-  if (cmd === "screen home") {
-    State.screen = "home";
-    return;
-  }
-
-  if (cmd === "screen note") {
-    State.screen = "note";
-    return;
-  }
-
-  if (cmd === "screen list") {
-    State.screen = "list";
-    return;
-  }
-
-  if (cmd.startsWith("add note")) {
-    const text = cmd.replace("add note", "").trim();
-    if (text) State.notes.push(text);
-    return;
-  }
-
-  alert("دستور ناشناخته ❌\n" + cmd);
-}
-
-// ================== RENDER ==================
-function render() {
-  const app = document.getElementById("app");
-  if (!app) return;
-
-  let html = `<h2>${State.title}</h2>`;
-
-  // ---------- HOME ----------
-  if (State.screen === "home") {
-    html += `
-      <textarea id="commandInput" placeholder="مثال:
-set title تست
-screen note
-add note سلام"></textarea>
-
-      <button onclick="runCommand()">اجرا</button>
-    `;
-  }
-
-  // ---------- NOTE ----------
-  if (State.screen === "note") {
-    html += `
-      <textarea id="noteText" placeholder="یادداشت..."></textarea>
-
-      <button onclick="saveNote()">اضافه کن</button>
-      <button onclick="goHome()">بازگشت</button>
-    `;
-  }
-
-  // ---------- LIST ----------
-  if (State.screen === "list") {
-    html += `
-      <ul>
-        ${State.notes.map(n => `<li>${n}</li>`).join("")}
-      </ul>
-
-      <button onclick="goHome()">بازگشت</button>
-    `;
-  }
-
   app.innerHTML = html;
+
+  // اتصال اکشن‌ها
+  app.querySelectorAll("button[data-action]").forEach(btn => {
+    btn.onclick = () => {
+      dispatchAction(btn.dataset.action);
+    };
+  });
 }
 
-// ================== ACTIONS ==================
-function goHome() {
-  State.screen = "home";
-  render();
+// ===== ACTION DISPATCHER =====
+function dispatchAction(action) {
+  if (actions[action]) {
+    actions[action]();
+  } else {
+    alert("اکشن ناشناخته ❌");
+  }
 }
 
-function saveNote() {
-  const el = document.getElementById("noteText");
-  if (!el || !el.value.trim()) return;
+// ===== ACTIONS =====
+const actions = {
+  runCommand,
 
-  State.notes.push(el.value.trim());
-  el.value = "";
-  alert("ذخیره شد ✅");
-}
+  goHomeAction() {
+    AppState.history.pop(); // صفحه فعلی
+    const prev = AppState.history.pop() || "";
+    renderFromEngine(prev);
+  },
+
+  saveNote() {
+    const text = document.getElementById("noteText")?.value || "";
+    localStorage.setItem("note", text);
+    alert("ذخیره شد ✅");
+  },
+
+  addItem() {
+    const input = document.getElementById("itemInput");
+    if (!input || !input.value.trim()) return;
+
+    const items = JSON.parse(localStorage.getItem("items") || "[]");
+    items.push(input.value.trim());
+    localStorage.setItem("items", JSON.stringify(items));
+    input.value = "";
+    alert("آیتم اضافه شد ✅");
+  }
+};
