@@ -1,107 +1,104 @@
-// ===== GLOBAL STATE =====
-const AppState = {
-  items: JSON.parse(localStorage.getItem("items") || "[]")
-};
+// engine.js
+// ===== CONDITIONAL ENGINE v3 =====
 
-// ===== START =====
-window.onload = () => {
-  renderFromEngine("");
-};
+function runEngine(input) {
+  const lines = input
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
 
-// ===== CORE =====
-function runCommand() {
-  const input = document.getElementById("commandInput")?.value || "";
-  renderFromEngine(input);
-}
+  let title = "Advanced App Builder";
+  let screen = "home";
+  let alertText = null;
 
-function renderFromEngine(input) {
-  const result = runEngine(input);
+  let conditionPassed = true;
 
-  // 👈 اجرای متا
-  handleMeta(result.meta);
+  lines.forEach((line, index) => {
+    const parts = line.split(" ");
 
-  renderUI(result.schema);
-}
+    // ===== IF CONDITION =====
+    if (parts[0] === "if") {
+      conditionPassed = false;
 
-// ===== META HANDLER =====
-function handleMeta(meta) {
-  if (!meta) return;
+      // if note not_empty
+      if (parts[1] === "note" && parts[2] === "not_empty") {
+        const note = localStorage.getItem("note");
+        conditionPassed = !!note;
+      }
 
-  if (meta.alertText) {
-    alert(meta.alertText);
-  }
+      // if list count > 0
+      if (parts[1] === "list" && parts[2] === "count" && parts[3] === ">" && parts[4] === "0") {
+        const items = JSON.parse(localStorage.getItem("items") || "[]");
+        conditionPassed = items.length > 0;
+      }
 
-  if (meta.autoSave) {
-    const note = document.getElementById("noteText")?.value;
-    if (note) {
-      localStorage.setItem("note", note);
-    }
-  }
-}
-
-// ===== UI RENDERER =====
-function renderUI(schema) {
-  const app = document.getElementById("app");
-  let html = `<h2>${schema.title}</h2>`;
-
-  schema.components.forEach(c => {
-    if (c.type === "textarea") {
-      html += `<textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>`;
+      return;
     }
 
-    if (c.type === "button") {
-      html += `<button data-action="${c.action}">${c.label}</button>`;
+    // اگر شرط رد شده، این خط اجرا نشه
+    if (!conditionPassed) return;
+
+    // set title ...
+    if (parts[0] === "set" && parts[1] === "title") {
+      title = parts.slice(2).join(" ");
     }
 
-    if (c.type === "list") {
-      html += `<ul id="${c.id}"></ul>`;
+    // screen ...
+    if (parts[0] === "screen") {
+      screen = parts[1];
+    }
+
+    // alert ...
+    if (parts[0] === "alert") {
+      alertText = parts.slice(1).join(" ");
     }
   });
 
-  app.innerHTML = html;
-
-  // رندر لیست
-  const listEl = document.getElementById("itemList");
-  if (listEl) {
-    AppState.items.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      listEl.appendChild(li);
-    });
+  // ===== NOTE SCREEN =====
+  if (screen === "note") {
+    return {
+      meta: { alertText },
+      schema: {
+        title,
+        components: [
+          { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
+          { type: "button", label: "ذخیره", action: "saveNote" },
+          { type: "button", label: "بازگشت", action: "goHomeAction" }
+        ]
+      }
+    };
   }
 
-  // اکشن‌ها
-  app.querySelectorAll("button[data-action]").forEach(btn => {
-    btn.onclick = () => dispatchAction(btn.dataset.action);
-  });
-}
-
-// ===== ACTION DISPATCHER =====
-function dispatchAction(action) {
-  actions[action]?.();
-}
-
-// ===== ACTIONS =====
-const actions = {
-  runCommand,
-
-  goHomeAction() {
-    renderFromEngine("");
-  },
-
-  saveNote() {
-    const text = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", text);
-    alert("ذخیره شد ✅");
-  },
-
-  addItem() {
-    const input = document.getElementById("itemInput");
-    if (!input || !input.value) return;
-
-    AppState.items.push(input.value);
-    localStorage.setItem("items", JSON.stringify(AppState.items));
-    input.value = "";
-    renderFromEngine("screen list");
+  // ===== LIST SCREEN =====
+  if (screen === "list") {
+    return {
+      meta: { alertText },
+      schema: {
+        title,
+        components: [
+          { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
+          { type: "button", label: "اضافه کن", action: "addItem" },
+          { type: "list", id: "itemList" },
+          { type: "button", label: "بازگشت", action: "goHomeAction" }
+        ]
+      }
+    };
   }
-};
+
+  // ===== HOME =====
+  return {
+    meta: { alertText },
+    schema: {
+      title,
+      components: [
+        {
+          type: "textarea",
+          id: "commandInput",
+          placeholder:
+            "مثال:\nif note not_empty\nalert یادداشت داری\nscreen note"
+        },
+        { type: "button", label: "اجرا", action: "runCommand" }
+      ]
+    }
+  };
+}
