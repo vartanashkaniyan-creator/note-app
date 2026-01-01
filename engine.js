@@ -1,86 +1,48 @@
-// engine.js
-// ===== SIMPLE APP ENGINE v1.0 =====
-
 function runEngine(input) {
-  const lines = input
-    .split("\n")
-    .map(l => l.trim())
-    .filter(Boolean);
+  const lines = input.split("\n").map(l => l.trim()).filter(Boolean);
 
   let currentPage = "home";
 
   const pages = {
     home: {
-      title: "اپ شخصی من",
-      components: []
+      title: "صفحه اصلی",
+      components: [
+        { type: "textarea", id: "commandInput", placeholder: "دستور بنویس..." },
+        { type: "button", label: "اجرا", action: "runCommand" }
+      ]
+    },
+    note: {
+      title: "یادداشت‌ها",
+      components: [
+        { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
+        { type: "button", label: "ذخیره", action: "saveNote" },
+        { type: "button", label: "بازگشت", action: "go home" }
+      ]
+    },
+    list: {
+      title: "لیست من",
+      components: [
+        { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
+        { type: "button", label: "اضافه کن", action: "addItem" },
+        { type: "list", id: "itemsList" },
+        { type: "button", label: "بازگشت", action: "go home" }
+      ]
     }
   };
-
-  let activeSchema = pages.home;
-  let alertText = null;
 
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // ===== PAGE =====
-    if (parts[0] === "page") {
-      const pageName = parts[1];
-      if (!pages[pageName]) {
-        pages[pageName] = {
-          title: "صفحه جدید",
-          components: []
-        };
+    if (parts[0] === "go") {
+      const target = parts[1];
+      if (pages[target]) {
+        currentPage = target;
       }
-      currentPage = pageName;
-      activeSchema = pages[pageName];
-      return;
-    }
-
-    // ===== TITLE =====
-    if (parts[0] === "title") {
-      activeSchema.title = parts.slice(1).join(" ");
-      return;
-    }
-
-    // ===== NOTE =====
-    if (line === "note") {
-      activeSchema.components.push({
-        type: "textarea",
-        id: "noteText",
-        placeholder: "یادداشت بنویس..."
-      });
-      return;
-    }
-
-    // ===== LIST =====
-    if (line === "list") {
-      activeSchema.components.push({
-        type: "list",
-        id: "itemsList"
-      });
-      return;
-    }
-
-    // ===== BUTTON =====
-    if (parts[0] === "button") {
-      activeSchema.components.push({
-        type: "button",
-        label: parts[1],
-        action: parts[2],
-        target: parts[3] || null
-      });
-      return;
-    }
-
-    // ===== ALERT =====
-    if (parts[0] === "alert") {
-      alertText = parts.slice(1).join(" ");
-      return;
     }
   });
 
   return {
     schema: pages[currentPage],
-    meta: { alertText }
+    meta: null
   };
 }
