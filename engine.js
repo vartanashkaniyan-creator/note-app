@@ -1,7 +1,5 @@
-// engine.js
-// ===== BILINGUAL ENGINE v1 (FA + EN) =====
 
-function normalize(cmd) {
+      function normalize(cmd) {
   return cmd
     .toLowerCase()
     .replace(/صفحه/g, "screen")
@@ -26,23 +24,19 @@ function runEngine(input) {
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // title / عنوان
     if (parts[0] === "title") {
       title = parts.slice(1).join(" ");
     }
 
-    // screen / صفحه
     if (parts[0] === "screen" || parts[0] === "go") {
       screen = parts[1];
     }
 
-    // alert / هشدار
     if (parts[0] === "alert") {
       alertText = parts.slice(1).join(" ");
     }
   });
 
-  // ===== SCREENS =====
   if (screen === "note") {
     return {
       meta: { alertText },
@@ -72,7 +66,6 @@ function runEngine(input) {
     };
   }
 
-  // ===== HOME =====
   return {
     meta: { alertText },
     schema: {
@@ -82,12 +75,11 @@ function runEngine(input) {
           type: "textarea",
           id: "commandInput",
           placeholder:
-`مثال:
-title یادداشت‌های من
+`مثال فارسی:
+عنوان یادداشت‌های من
 صفحه note
 
-یا:
-
+Example English:
 title My Notes
 screen note`
         },
