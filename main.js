@@ -10,6 +10,11 @@ function getList() {
   return JSON.parse(localStorage.getItem("items") || "[]");
 }
 
+// ===== START APP (خیلی مهم) =====
+window.addEventListener("DOMContentLoaded", () => {
+  runApp("");
+});
+
 // ===== RUN =====
 function runApp(input) {
   currentState = runEngine(input);
@@ -20,6 +25,8 @@ function runApp(input) {
 // ===== RENDER =====
 function render(state) {
   const app = document.getElementById("app");
+  if (!app) return;
+
   app.innerHTML = "";
 
   const h1 = document.createElement("h1");
@@ -62,7 +69,7 @@ function render(state) {
 // ===== ACTIONS =====
 function handleAction(action) {
   if (action === "runCommand") {
-    const v = document.getElementById("commandInput").value;
+    const v = document.getElementById("commandInput")?.value || "";
     runApp(v);
   }
 
@@ -71,14 +78,14 @@ function handleAction(action) {
   }
 
   if (action === "saveNote") {
-    const v = document.getElementById("noteText").value;
+    const v = document.getElementById("noteText")?.value || "";
     localStorage.setItem("note", v);
     alert("ذخیره شد ✅");
   }
 
   if (action === "addItem") {
     const input = document.getElementById("itemInput");
-    if (!input.value) return;
+    if (!input || !input.value) return;
 
     const items = getList();
     items.push(input.value);
