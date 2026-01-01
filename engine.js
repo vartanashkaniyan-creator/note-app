@@ -1,5 +1,5 @@
 // engine.js
-// ===== CONDITIONAL ENGINE v3 =====
+// ===== CONDITIONAL ENGINE v3.1 (STABLE) =====
 
 function runEngine(input) {
   const lines = input
@@ -13,21 +13,23 @@ function runEngine(input) {
 
   let conditionPassed = true;
 
-  lines.forEach((line, index) => {
+  lines.forEach(line => {
     const parts = line.split(" ");
 
-    // ===== IF CONDITION =====
+    // ===== IF =====
     if (parts[0] === "if") {
       conditionPassed = false;
 
-      // if note not_empty
       if (parts[1] === "note" && parts[2] === "not_empty") {
-        const note = localStorage.getItem("note");
-        conditionPassed = !!note;
+        conditionPassed = !!localStorage.getItem("note");
       }
 
-      // if list count > 0
-      if (parts[1] === "list" && parts[2] === "count" && parts[3] === ">" && parts[4] === "0") {
+      if (
+        parts[1] === "list" &&
+        parts[2] === "count" &&
+        parts[3] === ">" &&
+        parts[4] === "0"
+      ) {
         const items = JSON.parse(localStorage.getItem("items") || "[]");
         conditionPassed = items.length > 0;
       }
@@ -35,26 +37,24 @@ function runEngine(input) {
       return;
     }
 
-    // اگر شرط رد شده، این خط اجرا نشه
     if (!conditionPassed) return;
 
-    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
       title = parts.slice(2).join(" ");
     }
 
-    // screen ...
     if (parts[0] === "screen") {
       screen = parts[1];
+      conditionPassed = true; // ریست شرط
     }
 
-    // alert ...
     if (parts[0] === "alert") {
       alertText = parts.slice(1).join(" ");
+      conditionPassed = true; // ریست شرط
     }
   });
 
-  // ===== NOTE SCREEN =====
+  // ===== SCREENS =====
   if (screen === "note") {
     return {
       meta: { alertText },
@@ -69,7 +69,6 @@ function runEngine(input) {
     };
   }
 
-  // ===== LIST SCREEN =====
   if (screen === "list") {
     return {
       meta: { alertText },
@@ -85,7 +84,6 @@ function runEngine(input) {
     };
   }
 
-  // ===== HOME =====
   return {
     meta: { alertText },
     schema: {
