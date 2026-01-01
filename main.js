@@ -1,6 +1,7 @@
 // ===== GLOBAL STATE =====
 const AppState = {
-  history: []
+  history: [],
+  items: JSON.parse(localStorage.getItem("items") || "[]")
 };
 
 // ===== START =====
@@ -11,14 +12,11 @@ window.onload = () => {
 // ===== CORE =====
 function runCommand() {
   const input = document.getElementById("commandInput")?.value || "";
-  renderFromEngine(input, true);
+  AppState.history.push(input);
+  renderFromEngine(input);
 }
 
-function renderFromEngine(input, pushHistory = false) {
-  if (pushHistory) {
-    AppState.history.push(input);
-  }
-
+function renderFromEngine(input) {
   const result = runEngine(input);
   renderUI(result.schema);
 }
@@ -30,35 +28,39 @@ function renderUI(schema) {
 
   schema.components.forEach(c => {
     if (c.type === "textarea") {
-      html += `
-        <textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>
-      `;
+      html += `<textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>`;
     }
 
     if (c.type === "button") {
-      html += `
-        <button data-action="${c.action}">${c.label}</button>
-      `;
+      html += `<button data-action="${c.action}">${c.label}</button>`;
+    }
+
+    if (c.type === "list") {
+      html += `<ul id="${c.id}"></ul>`;
     }
   });
 
   app.innerHTML = html;
 
-  // اتصال اکشن‌ها
+  // رندر لیست
+  const listEl = document.getElementById("itemList");
+  if (listEl) {
+    AppState.items.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      listEl.appendChild(li);
+    });
+  }
+
+  // اکشن‌ها
   app.querySelectorAll("button[data-action]").forEach(btn => {
-    btn.onclick = () => {
-      dispatchAction(btn.dataset.action);
-    };
+    btn.onclick = () => dispatchAction(btn.dataset.action);
   });
 }
 
 // ===== ACTION DISPATCHER =====
 function dispatchAction(action) {
-  if (actions[action]) {
-    actions[action]();
-  } else {
-    alert("اکشن ناشناخته ❌");
-  }
+  actions[action]?.();
 }
 
 // ===== ACTIONS =====
@@ -66,9 +68,7 @@ const actions = {
   runCommand,
 
   goHomeAction() {
-    AppState.history.pop(); // صفحه فعلی
-    const prev = AppState.history.pop() || "";
-    renderFromEngine(prev);
+    renderFromEngine("");
   },
 
   saveNote() {
@@ -79,12 +79,11 @@ const actions = {
 
   addItem() {
     const input = document.getElementById("itemInput");
-    if (!input || !input.value.trim()) return;
+    if (!input || !input.value) return;
 
-    const items = JSON.parse(localStorage.getItem("items") || "[]");
-    items.push(input.value.trim());
-    localStorage.setItem("items", JSON.stringify(items));
+    AppState.items.push(input.value);
+    localStorage.setItem("items", JSON.stringify(AppState.items));
     input.value = "";
-    alert("آیتم اضافه شد ✅");
+    renderFromEngine(AppState.history.at(-1) || "");
   }
 };
