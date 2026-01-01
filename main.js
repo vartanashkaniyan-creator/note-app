@@ -2,7 +2,7 @@
 
 // ===== GLOBAL STATE =====
 const AppState = {
-  lastCommand: "",
+  lastScreen: "home",
   note: localStorage.getItem("note") || "",
   list: JSON.parse(localStorage.getItem("list") || "[]")
 };
@@ -13,10 +13,15 @@ window.onload = () => {
 
 // ===== CORE =====
 function runCommand() {
-  const inputEl = document.getElementById("commandInput");
-  const input = inputEl ? inputEl.value : "";
+  const input = document.getElementById("commandInput")?.value || "";
 
-  AppState.lastCommand = input;
+  // تشخیص آخرین screen
+  input.split("\n").forEach(line => {
+    if (line.trim().startsWith("screen")) {
+      AppState.lastScreen = line.trim().split(" ")[1];
+    }
+  });
+
   renderFromEngine(input);
 }
 
@@ -28,7 +33,6 @@ function renderFromEngine(input) {
 // ===== UI RENDERER =====
 function renderUI(schema) {
   const app = document.getElementById("app");
-
   let html = `<h2>${schema.title}</h2>`;
 
   schema.components.forEach(c => {
@@ -52,37 +56,30 @@ function renderUI(schema) {
   app.innerHTML = html;
 
   app.querySelectorAll("button[data-action]").forEach(btn => {
-    btn.onclick = () => {
-      dispatchAction(btn.dataset.action);
-    };
+    btn.onclick = () => dispatchAction(btn.dataset.action);
   });
 
-  // پر کردن نوت قبلی
-  const noteEl = document.getElementById("noteText");
-  if (noteEl) noteEl.value = AppState.note;
-}
-
-// ===== ACTION DISPATCHER =====
-function dispatchAction(name) {
-  if (actions[name]) {
-    actions[name]();
-  } else {
-    alert("اکشن ناشناخته ❌");
+  if (document.getElementById("noteText")) {
+    document.getElementById("noteText").value = AppState.note;
   }
 }
 
 // ===== ACTIONS =====
+function dispatchAction(name) {
+  actions[name]?.();
+}
+
 const actions = {
   runCommand,
 
   goHomeAction() {
-    renderFromEngine(AppState.lastCommand);
+    AppState.lastScreen = "home";
+    renderFromEngine("");
   },
 
   saveNote() {
-    const text = document.getElementById("noteText")?.value || "";
-    AppState.note = text;
-    localStorage.setItem("note", text);
+    AppState.note = document.getElementById("noteText")?.value || "";
+    localStorage.setItem("note", AppState.note);
     alert("ذخیره شد ✅");
   },
 
@@ -93,6 +90,7 @@ const actions = {
     AppState.list.push(input.value.trim());
     localStorage.setItem("list", JSON.stringify(AppState.list));
     input.value = "";
-    renderFromEngine(AppState.lastCommand);
+
+    renderFromEngine("screen list");
   }
 };
