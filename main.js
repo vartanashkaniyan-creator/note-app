@@ -1,7 +1,14 @@
+// ================================
+// main.js – Stable Core v2
+// ================================
+
 // ===== GLOBAL STATE =====
 const AppState = {
   history: [],
-  items: JSON.parse(localStorage.getItem("items") || "[]")
+
+  items: JSON.parse(localStorage.getItem("items") || "[]"),
+
+  lastSchema: null
 };
 
 // ===== START =====
@@ -12,12 +19,15 @@ window.onload = () => {
 // ===== CORE =====
 function runCommand() {
   const input = document.getElementById("commandInput")?.value || "";
+
   AppState.history.push(input);
   renderFromEngine(input);
 }
 
 function renderFromEngine(input) {
   const result = runEngine(input);
+
+  AppState.lastSchema = result.schema;
   renderUI(result.schema);
 }
 
@@ -28,11 +38,20 @@ function renderUI(schema) {
 
   schema.components.forEach(c => {
     if (c.type === "textarea") {
-      html += `<textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>`;
+      html += `
+        <textarea
+          id="${c.id}"
+          placeholder="${c.placeholder || ""}"
+        ></textarea>
+      `;
     }
 
     if (c.type === "button") {
-      html += `<button data-action="${c.action}">${c.label}</button>`;
+      html += `
+        <button data-action="${c.action}">
+          ${c.label}
+        </button>
+      `;
     }
 
     if (c.type === "list") {
@@ -42,17 +61,27 @@ function renderUI(schema) {
 
   app.innerHTML = html;
 
-  // رندر لیست
+  // ===== RENDER LIST ITEMS =====
   const listEl = document.getElementById("itemList");
   if (listEl) {
-    AppState.items.forEach(item => {
+    listEl.innerHTML = "";
+
+    AppState.items.forEach((item, index) => {
       const li = document.createElement("li");
-      li.textContent = item;
+      li.innerHTML = `
+        ${item}
+        <button data-index="${index}" style="margin-right:8px">❌</button>
+      `;
+
+      li.querySelector("button").onclick = () => {
+        deleteItem(index);
+      };
+
       listEl.appendChild(li);
     });
   }
 
-  // اکشن‌ها
+  // ===== ACTION BINDING =====
   app.querySelectorAll("button[data-action]").forEach(btn => {
     btn.onclick = () => dispatchAction(btn.dataset.action);
   });
@@ -60,7 +89,11 @@ function renderUI(schema) {
 
 // ===== ACTION DISPATCHER =====
 function dispatchAction(action) {
-  actions[action]?.();
+  if (actions[action]) {
+    actions[action]();
+  } else {
+    alert("اکشن ناشناخته ❌");
+  }
 }
 
 // ===== ACTIONS =====
@@ -68,7 +101,10 @@ const actions = {
   runCommand,
 
   goHomeAction() {
-    renderFromEngine("");
+    // برگشت واقعی
+    AppState.history.pop(); // صفحه فعلی
+    const prev = AppState.history.pop() || "";
+    renderFromEngine(prev);
   },
 
   saveNote() {
@@ -79,11 +115,19 @@ const actions = {
 
   addItem() {
     const input = document.getElementById("itemInput");
-    if (!input || !input.value) return;
+    if (!input || !input.value.trim()) return;
 
-    AppState.items.push(input.value);
+    AppState.items.push(input.value.trim());
     localStorage.setItem("items", JSON.stringify(AppState.items));
     input.value = "";
-    renderFromEngine(AppState.history.at(-1) || "");
+
+    renderUI(AppState.lastSchema);
   }
 };
+
+// ===== HELPERS =====
+function deleteItem(index) {
+  AppState.items.splice(index, 1);
+  localStorage.setItem("items", JSON.stringify(AppState.items));
+  renderUI(AppState.lastSchema);
+}
