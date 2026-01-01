@@ -1,114 +1,91 @@
-// ===== GLOBAL STATE =====
-const AppState = {
-  history: [],        // تاریخچه ورودی‌ها
-  currentInput: ""    // ورودی فعلی
-};
+// main.js
+let currentState = null;
+let savedNote = "";
+let savedList = [];
 
-// ===== START =====
-window.onload = () => {
-  renderFromEngine("");
-};
-
-// ===== CORE =====
-function runCommand() {
-  const input = document.getElementById("commandInput")?.value || "";
-
-  if (AppState.currentInput) {
-    AppState.history.push(AppState.currentInput);
-  }
-
-  AppState.currentInput = input;
-  renderFromEngine(input);
+// اجرای موتور
+function runApp(input) {
+  currentState = runEngine(input);
+  render(currentState);
+  handleMeta(currentState.meta);
 }
 
-function renderFromEngine(input) {
-  const result = runEngine(input);
-  renderUI(result.schema);
-}
-
-// ===== UI RENDERER =====
-function renderUI(schema) {
+// رندر UI
+function render(state) {
   const app = document.getElementById("app");
-  let html = `<h2>${schema.title}</h2>`;
+  app.innerHTML = "";
 
-  schema.components.forEach(c => {
+  const h1 = document.createElement("h1");
+  h1.innerText = state.schema.title;
+  app.appendChild(h1);
+
+  state.schema.components.forEach(c => {
     if (c.type === "textarea") {
-      html += `
-        <textarea
-          id="${c.id}"
-          placeholder="${c.placeholder || ""}"
-        ></textarea>
-      `;
+      const t = document.createElement("textarea");
+      t.id = c.id;
+      t.placeholder = c.placeholder || "";
+      app.appendChild(t);
     }
 
     if (c.type === "button") {
-      html += `
-        <button data-action="${c.action}">
-          ${c.label}
-        </button>
-      `;
+      const b = document.createElement("button");
+      b.innerText = c.label;
+      b.onclick = () => handleAction(c.action);
+      app.appendChild(b);
     }
 
     if (c.type === "list") {
-      html += `<ul id="${c.id}"></ul>`;
+      const ul = document.createElement("ul");
+      ul.id = c.id;
+      savedList.forEach(i => {
+        const li = document.createElement("li");
+        li.innerText = i;
+        ul.appendChild(li);
+      });
+      app.appendChild(ul);
     }
-  });
-
-  app.innerHTML = html;
-
-  // رندر لیست
-  const listEl = document.getElementById("itemList");
-  if (listEl) {
-    const items = JSON.parse(localStorage.getItem("items") || "[]");
-    items.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      listEl.appendChild(li);
-    });
-  }
-
-  // اتصال اکشن‌ها
-  app.querySelectorAll("button[data-action]").forEach(btn => {
-    btn.onclick = () => dispatchAction(btn.dataset.action);
   });
 }
 
-// ===== ACTION DISPATCHER =====
-function dispatchAction(action) {
-  if (actions[action]) actions[action]();
+// اکشن‌ها
+function handleAction(action) {
+  if (action === "runCommand") {
+    const v = document.getElementById("commandInput").value;
+    runApp(v);
+  }
+
+  if (action === "goHomeAction") {
+    runApp("clear");
+  }
+
+  if (action === "saveNote") {
+    savedNote = document.getElementById("noteText").value;
+    alert("ذخیره شد");
+  }
+
+  if (action === "addItem") {
+    const v = document.getElementById("itemInput").value;
+    if (v) {
+      savedList.push(v);
+      render(currentState);
+    }
+  }
 }
 
-// ===== ACTIONS =====
-const actions = {
-  runCommand,
+// اجرای meta
+function handleMeta(meta) {
+  if (!meta) return;
 
-  goHomeAction() {
-    if (AppState.history.length === 0) {
-      AppState.currentInput = "";
-      renderFromEngine("");
-      return;
-    }
-
-    const prev = AppState.history.pop();
-    AppState.currentInput = prev;
-    renderFromEngine(prev);
-  },
-
-  saveNote() {
-    const text = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", text);
-    alert("ذخیره شد ✅");
-  },
-
-  addItem() {
-    const input = document.getElementById("itemInput");
-    if (!input || !input.value) return;
-
-    const items = JSON.parse(localStorage.getItem("items") || "[]");
-    items.push(input.value);
-    localStorage.setItem("items", JSON.stringify(items));
-    input.value = "";
-
-    renderFromEngine(AppState.currentInput);
+  if (meta.alertText) {
+    alert(meta.alertText);
   }
-};
+
+  if (meta.autoSave) {
+    const note = document.getElementById("noteText");
+    if (note) {
+      note.oninput = () => {
+        savedNote = note.value;
+      };
+    }
+  }
+}
