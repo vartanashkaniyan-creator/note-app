@@ -1,5 +1,5 @@
 // engine.js
-// ===== SIMPLE & STABLE ENGINE v2 =====
+// ===== PROFESSIONAL ENGINE v2 =====
 
 function runEngine(input) {
   const lines = input
@@ -7,36 +7,49 @@ function runEngine(input) {
     .map(l => l.trim())
     .filter(Boolean);
 
-  let title = "Advanced App Builder";
-  let screen = "home";
-  let addValue = null;
+  // ===== DEFAULT STATE =====
+  const state = {
+    title: "Advanced App Builder",
+    screen: "home"
+  };
 
   // ===== PARSER =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
-      title = parts.slice(2).join(" ");
+      state.title = parts.slice(2).join(" ");
     }
 
-    // screen note | screen list
     if (parts[0] === "screen") {
-      screen = parts[1];
-    }
-
-    // add something
-    if (parts[0] === "add") {
-      addValue = parts.slice(1).join(" ");
-      screen = "list";
+      state.screen = parts[1];
     }
   });
 
-  // ===== NOTE SCREEN =====
-  if (screen === "note") {
-    return {
+  // ===== SCREEN REGISTRY =====
+  const screens = {
+    home: () => ({
       schema: {
-        title,
+        title: state.title,
+        components: [
+          {
+            type: "textarea",
+            id: "commandInput",
+            placeholder:
+              "مثال:\nset title تست\nscreen note\nscreen list"
+          },
+          {
+            type: "button",
+            label: "اجرا",
+            action: "runCommand"
+          }
+        ]
+      }
+    }),
+
+    note: () => ({
+      schema: {
+        title: state.title,
         components: [
           {
             type: "textarea",
@@ -55,17 +68,11 @@ function runEngine(input) {
           }
         ]
       }
-    };
-  }
+    }),
 
-  // ===== LIST SCREEN =====
-  if (screen === "list") {
-    return {
+    list: () => ({
       schema: {
-        title,
-        meta: {
-          addValue
-        },
+        title: state.title,
         components: [
           {
             type: "textarea",
@@ -78,32 +85,24 @@ function runEngine(input) {
             action: "addItem"
           },
           {
+            type: "list",
+            id: "itemList"
+          },
+          {
             type: "button",
             label: "بازگشت",
             action: "goHomeAction"
           }
         ]
       }
-    };
+    })
+  };
+
+  // ===== SAFE SCREEN LOAD =====
+  if (screens[state.screen]) {
+    return screens[state.screen]();
   }
 
-  // ===== HOME SCREEN =====
-  return {
-    schema: {
-      title,
-      components: [
-        {
-          type: "textarea",
-          id: "commandInput",
-          placeholder:
-            "دستورها:\nset title تست\nscreen note\nscreen list\nadd سیب"
-        },
-        {
-          type: "button",
-          label: "اجرا",
-          action: "runCommand"
-        }
-      ]
-    }
-  };
+  // ===== FALLBACK =====
+  return screens.home();
 }
