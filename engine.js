@@ -1,66 +1,104 @@
 // engine.js
 
+const EngineState = {
+  title: "Advanced App Builder",
+  screen: "home"
+};
+
 function runEngine(input) {
   const lines = input
     .split("\n")
     .map(l => l.trim())
     .filter(Boolean);
 
-  let title = "Advanced App Builder";
-  let screen = "home";
-
+  // پردازش همه دستورات (نه فقط آخری)
   lines.forEach(line => {
     const parts = line.split(" ");
 
+    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
-      title = parts.slice(2).join(" ");
+      EngineState.title = parts.slice(2).join(" ");
     }
 
+    // screen xxx
     if (parts[0] === "screen") {
-      screen = parts[1];
+      EngineState.screen = parts[1];
     }
   });
 
-  // ===== NOTE =====
-  if (screen === "note") {
+  return buildSchema();
+}
+
+// =====================
+// SCHEMA BUILDER
+// =====================
+function buildSchema() {
+  if (EngineState.screen === "note") {
     return {
       schema: {
-        title,
+        title: EngineState.title,
         components: [
-          { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
-          { type: "button", label: "ذخیره", action: "saveNote" },
-          { type: "button", label: "بازگشت", action: "goHomeAction" }
+          {
+            type: "textarea",
+            id: "noteText",
+            placeholder: "یادداشت بنویس..."
+          },
+          {
+            type: "button",
+            label: "ذخیره",
+            action: "saveNote"
+          },
+          {
+            type: "button",
+            label: "بازگشت",
+            action: "goHomeAction"
+          }
         ]
       }
     };
   }
 
-  // ===== LIST =====
-  if (screen === "list") {
+  if (EngineState.screen === "list") {
     return {
       schema: {
-        title,
+        title: EngineState.title,
         components: [
-          { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
-          { type: "button", label: "اضافه کن", action: "addItem" },
-          { type: "list", id: "itemList" },
-          { type: "button", label: "بازگشت", action: "goHomeAction" }
+          {
+            type: "textarea",
+            id: "itemInput",
+            placeholder: "آیتم جدید..."
+          },
+          {
+            type: "button",
+            label: "اضافه کن",
+            action: "addItem"
+          },
+          {
+            type: "button",
+            label: "بازگشت",
+            action: "goHomeAction"
+          }
         ]
       }
     };
   }
 
-  // ===== HOME =====
+  // HOME
   return {
     schema: {
-      title,
+      title: EngineState.title,
       components: [
         {
           type: "textarea",
           id: "commandInput",
-          placeholder: "مثال:\nset title تست\nscreen note\nscreen list"
+          placeholder:
+            "مثال:\nset title تست\nscreen note\nscreen list"
         },
-        { type: "button", label: "اجرا", action: "runCommand" }
+        {
+          type: "button",
+          label: "اجرا",
+          action: "runCommand"
+        }
       ]
     }
   };
