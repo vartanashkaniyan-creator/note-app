@@ -1,4 +1,5 @@
-// ===== SMART ENGINE v3 (STATEFUL) =====
+// engine.js
+// ===== STABLE COMMAND ENGINE v2 =====
 
 function runEngine(input) {
   const lines = input
@@ -8,47 +9,47 @@ function runEngine(input) {
 
   let title = "Advanced App Builder";
   let screen = "home";
-
-  // ===== STATE =====
-  const state = {
-    hasNote: !!localStorage.getItem("note"),
-    hasItems: JSON.parse(localStorage.getItem("items") || "[]").length > 0
-  };
+  let alertText = null;
+  let autoSave = false;
 
   // ===== PARSER =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // set title xxx
+    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
       title = parts.slice(2).join(" ");
     }
 
-    // screen xxx
+    // screen note | screen list
     if (parts[0] === "screen") {
       screen = parts[1];
     }
 
-    // شرط ساده
-    // if hasNote screen note
-    if (parts[0] === "if") {
-      const condition = parts[1];
-      const action = parts[2];
-      const target = parts[3];
+    // alert متن
+    if (parts[0] === "alert") {
+      alertText = parts.slice(1).join(" ");
+    }
 
-      if (condition === "hasNote" && state.hasNote) {
-        if (action === "screen") screen = target;
-      }
+    // save auto
+    if (parts[0] === "save" && parts[1] === "auto") {
+      autoSave = true;
+    }
 
-      if (condition === "hasItems" && state.hasItems) {
-        if (action === "screen") screen = target;
-      }
+    // clear
+    if (parts[0] === "clear") {
+      screen = "home";
+      title = "Advanced App Builder";
     }
   });
 
-  // ===== SCREENS =====
+  // ===== NOTE SCREEN =====
   if (screen === "note") {
     return {
+      meta: {
+        alertText,
+        autoSave
+      },
       schema: {
         title,
         components: [
@@ -72,8 +73,12 @@ function runEngine(input) {
     };
   }
 
+  // ===== LIST SCREEN =====
   if (screen === "list") {
     return {
+      meta: {
+        alertText
+      },
       schema: {
         title,
         components: [
@@ -101,8 +106,11 @@ function runEngine(input) {
     };
   }
 
-  // ===== HOME =====
+  // ===== HOME SCREEN =====
   return {
+    meta: {
+      alertText
+    },
     schema: {
       title,
       components: [
@@ -110,10 +118,7 @@ function runEngine(input) {
           type: "textarea",
           id: "commandInput",
           placeholder:
-`مثال‌ها:
-if hasNote screen note
-if hasItems screen list
-screen note`
+            "مثال:\nset title تست\nscreen note\nalert سلام\nsave auto"
         },
         {
           type: "button",
@@ -123,4 +128,4 @@ screen note`
       ]
     }
   };
-      }
+}
