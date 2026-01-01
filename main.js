@@ -1,10 +1,10 @@
-// ===== GLOBAL STATE =====
+// main.js
+
 const AppState = {
   history: [],
   items: JSON.parse(localStorage.getItem("items") || "[]")
 };
 
-// ===== START =====
 window.onload = () => {
   renderFromEngine("");
 };
@@ -12,18 +12,19 @@ window.onload = () => {
 // ===== CORE =====
 function runCommand() {
   const input = document.getElementById("commandInput")?.value || "";
-
-  if (!input.trim()) {
-    alert("دستوری وارد نکردی ⚠️");
-    return;
-  }
-
   AppState.history.push(input);
   renderFromEngine(input);
 }
 
 function renderFromEngine(input) {
   const result = runEngine(input);
+
+  // دستور back از داخل متن
+  if (result.command === "back") {
+    goBack();
+    return;
+  }
+
   renderUI(result.schema);
 }
 
@@ -34,20 +35,11 @@ function renderUI(schema) {
 
   schema.components.forEach(c => {
     if (c.type === "textarea") {
-      html += `
-        <textarea
-          id="${c.id}"
-          placeholder="${c.placeholder || ""}"
-        ></textarea>
-      `;
+      html += `<textarea id="${c.id}" placeholder="${c.placeholder || ""}"></textarea>`;
     }
 
     if (c.type === "button") {
-      html += `
-        <button data-action="${c.action}">
-          ${c.label}
-        </button>
-      `;
+      html += `<button data-action="${c.action}">${c.label}</button>`;
     }
 
     if (c.type === "list") {
@@ -75,46 +67,35 @@ function renderUI(schema) {
 
 // ===== ACTION DISPATCHER =====
 function dispatchAction(action) {
-  if (!actions[action]) {
-    alert("اکشن ناشناخته ❌");
-    return;
-  }
-  actions[action]();
+  actions[action]?.();
 }
 
-// ===== ACTIONS (هوشمند) =====
+// ===== ACTIONS =====
 const actions = {
   runCommand,
 
-  goHomeAction() {
-    renderFromEngine("");
-  },
+  goBack,
 
   saveNote() {
     const text = document.getElementById("noteText")?.value || "";
-
-    if (!text.trim()) {
-      alert("یادداشت خالیه ⚠️");
-      return;
-    }
-
     localStorage.setItem("note", text);
-    alert("یادداشت ذخیره شد ✅");
+    alert("ذخیره شد ✅");
   },
 
   addItem() {
     const input = document.getElementById("itemInput");
+    if (!input || !input.value) return;
 
-    if (!input || !input.value.trim()) {
-      alert("آیتم خالیه ⚠️");
-      return;
-    }
-
-    AppState.items.push(input.value.trim());
+    AppState.items.push(input.value);
     localStorage.setItem("items", JSON.stringify(AppState.items));
     input.value = "";
-
-    // رفرش همان صفحه
     renderFromEngine(AppState.history.at(-1) || "");
   }
 };
+
+// ===== REAL BACK =====
+function goBack() {
+  AppState.history.pop(); // صفحه فعلی
+  const prev = AppState.history.pop() || "";
+  renderFromEngine(prev);
+}
