@@ -1,105 +1,111 @@
 // engine.js
 
+// ===== GLOBAL ENGINE STATE =====
+const EngineState = {
+  notes: [],
+  list: []
+};
+
 function runEngine(input) {
-  const raw = (input || "").trim();
-  const cmd = raw.toLowerCase();
+  const lines = input
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  let title = "Advanced App Builder";
+  let screen = "home";
+
+  lines.forEach(line => {
+    const parts = line.split(" ");
+
+    // set title ...
+    if (parts[0] === "set" && parts[1] === "title") {
+      title = parts.slice(2).join(" ");
+    }
+
+    // screen note / list
+    if (parts[0] === "screen") {
+      screen = parts[1];
+    }
+
+    // add item ...
+    if (parts[0] === "add" && parts[1] === "item") {
+      const text = parts.slice(2).join(" ");
+      if (text) EngineState.list.push(text);
+    }
+  });
+
+  // ===== NOTE SCREEN =====
+  if (screen === "note") {
+    return {
+      schema: {
+        title,
+        components: [
+          {
+            type: "textarea",
+            id: "noteText",
+            placeholder: "یادداشت بنویس..."
+          },
+          {
+            type: "button",
+            label: "ذخیره",
+            action: "saveNote"
+          },
+          {
+            type: "button",
+            label: "بازگشت",
+            action: "goHomeAction"
+          }
+        ]
+      }
+    };
+  }
+
+  // ===== LIST SCREEN =====
+  if (screen === "list") {
+    return {
+      schema: {
+        title,
+        components: [
+          {
+            type: "textarea",
+            id: "itemInput",
+            placeholder: "آیتم جدید..."
+          },
+          {
+            type: "button",
+            label: "اضافه کن",
+            action: "addItemAction"
+          },
+          {
+            type: "list",
+            items: EngineState.list
+          },
+          {
+            type: "button",
+            label: "بازگشت",
+            action: "goHomeAction"
+          }
+        ]
+      }
+    };
+  }
 
   // ===== HOME =====
-  if (cmd === "" || cmd === "home" || cmd === "screen home") {
-    return homeScreen();
-  }
-
-  // ===== NOTE WITH TEXT =====
-  if (cmd.startsWith("note")) {
-    const text = raw.slice(4).trim(); // متن بعد از note
-    return noteScreen(text);
-  }
-
-  // ===== LIST =====
-  if (cmd === "screen list") {
-    return listScreen();
-  }
-
-  // ===== UNKNOWN =====
-  return unknownScreen();
-}
-
-// ===== SCREENS =====
-
-function homeScreen() {
   return {
     schema: {
-      title: "🏠 صفحه اصلی",
+      title,
       components: [
         {
           type: "textarea",
           id: "commandInput",
-          placeholder: "مثلاً: note خرید نان"
+          placeholder:
+            "مثال:\nset title تست\nscreen note\nscreen list\nadd item خرید نان"
         },
         {
           type: "button",
           label: "اجرا",
           action: "runCommand"
-        }
-      ]
-    }
-  };
-}
-
-function noteScreen(prefillText = "") {
-  return {
-    schema: {
-      title: "📝 یادداشت",
-      components: [
-        {
-          type: "textarea",
-          id: "noteText",
-          placeholder: "یادداشت...",
-        },
-        {
-          type: "button",
-          label: "ذخیره",
-          action: "saveNote"
-        },
-        {
-          type: "button",
-          label: "بازگشت",
-          action: "goHomeAction"
-        }
-      ]
-    }
-  };
-}
-
-function listScreen() {
-  return {
-    schema: {
-      title: "📋 لیست",
-      components: [
-        {
-          type: "textarea",
-          id: "listText",
-          placeholder: "هر خط یک آیتم"
-        },
-        {
-          type: "button",
-          label: "بازگشت",
-          action: "goHomeAction"
-        }
-      ]
-    }
-  };
-}
-
-function unknownScreen() {
-  return {
-    schema: {
-      title: "❌ دستور نامعتبر",
-      components: [
-        {
-          type: "button",
-          label: "بازگشت",
-          action: "goHomeAction"
         }
       ]
     }
