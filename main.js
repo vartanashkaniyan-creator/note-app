@@ -1,109 +1,118 @@
-// ===== GLOBAL STATE =====
-const AppState = {
-  history: [],       // تاریخچه دستورات
-  lastCommand: ""    // آخرین دستور
+// ================== GLOBAL STATE (مغز اپ) ==================
+const State = {
+  title: "Advanced App Builder",
+  screen: "home", // home | note | list
+  notes: []
 };
 
-// ===== START =====
+// ================== START ==================
 window.onload = () => {
-  renderFromEngine("");
+  render();
 };
 
-// ===== CORE =====
+// ================== COMMAND RUNNER ==================
 function runCommand() {
   const inputEl = document.getElementById("commandInput");
-  const input = inputEl ? inputEl.value : "";
+  if (!inputEl) return;
 
-  AppState.lastCommand = input;
-  renderFromEngine(input, true);
+  const raw = inputEl.value.trim();
+  if (!raw) return;
+
+  const lines = raw.split("\n");
+
+  lines.forEach(line => {
+    executeCommand(line.trim());
+  });
+
+  inputEl.value = "";
+  render();
 }
 
-function renderFromEngine(input, pushHistory = false) {
-  const result = runEngine(input);
-
-  if (pushHistory) {
-    AppState.history.push(input);
+// ================== COMMAND ENGINE ==================
+function executeCommand(cmd) {
+  if (cmd.startsWith("set title")) {
+    State.title = cmd.replace("set title", "").trim() || State.title;
+    return;
   }
 
-  renderUI(result.schema);
+  if (cmd === "screen home") {
+    State.screen = "home";
+    return;
+  }
+
+  if (cmd === "screen note") {
+    State.screen = "note";
+    return;
+  }
+
+  if (cmd === "screen list") {
+    State.screen = "list";
+    return;
+  }
+
+  if (cmd.startsWith("add note")) {
+    const text = cmd.replace("add note", "").trim();
+    if (text) State.notes.push(text);
+    return;
+  }
+
+  alert("دستور ناشناخته ❌\n" + cmd);
 }
 
-// ===== UI RENDERER =====
-function renderUI(schema) {
+// ================== RENDER ==================
+function render() {
   const app = document.getElementById("app");
+  if (!app) return;
 
-  let html = `<h2>${schema.title}</h2>`;
+  let html = `<h2>${State.title}</h2>`;
 
-  schema.components.forEach(c => {
-    if (c.type === "textarea") {
-      const value =
-        c.id === "noteText"
-          ? localStorage.getItem("note") || ""
-          : "";
+  // ---------- HOME ----------
+  if (State.screen === "home") {
+    html += `
+      <textarea id="commandInput" placeholder="مثال:
+set title تست
+screen note
+add note سلام"></textarea>
 
-      html += `
-        <textarea
-          id="${c.id}"
-          placeholder="${c.placeholder || ""}"
-        >${value}</textarea>
-      `;
-    }
+      <button onclick="runCommand()">اجرا</button>
+    `;
+  }
 
-    if (c.type === "button") {
-      html += `
-        <button data-action="${c.action}">
-          ${c.label}
-        </button>
-      `;
-    }
-  });
+  // ---------- NOTE ----------
+  if (State.screen === "note") {
+    html += `
+      <textarea id="noteText" placeholder="یادداشت..."></textarea>
+
+      <button onclick="saveNote()">اضافه کن</button>
+      <button onclick="goHome()">بازگشت</button>
+    `;
+  }
+
+  // ---------- LIST ----------
+  if (State.screen === "list") {
+    html += `
+      <ul>
+        ${State.notes.map(n => `<li>${n}</li>`).join("")}
+      </ul>
+
+      <button onclick="goHome()">بازگشت</button>
+    `;
+  }
 
   app.innerHTML = html;
-
-  // اتصال اکشن‌ها
-  app.querySelectorAll("button[data-action]").forEach(btn => {
-    btn.onclick = () => {
-      const action = btn.getAttribute("data-action");
-      dispatchAction(action);
-    };
-  });
 }
 
-// ===== ACTION DISPATCHER =====
-function dispatchAction(actionName) {
-  if (actions[actionName]) {
-    actions[actionName]();
-  } else {
-    alert("اکشن ناشناخته ❌");
-  }
+// ================== ACTIONS ==================
+function goHome() {
+  State.screen = "home";
+  render();
 }
 
-// ===== ACTIONS =====
-const actions = {
-  runCommand,
+function saveNote() {
+  const el = document.getElementById("noteText");
+  if (!el || !el.value.trim()) return;
 
-  goHomeAction() {
-    // اگر تاریخچه خالی بود، مستقیم خانه
-    if (AppState.history.length === 0) {
-      renderFromEngine("");
-      return;
-    }
-
-    // حذف صفحه فعلی
-    AppState.history.pop();
-
-    // گرفتن قبلی
-    const prevCommand =
-      AppState.history.length > 0
-        ? AppState.history[AppState.history.length - 1]
-        : "";
-
-    renderFromEngine(prevCommand);
-  },
-
-  saveNote() {
-    const text = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", text);
-    alert("ذخیره شد ✅");
-  }
-};
+  State.notes.push(el.value.trim());
+  el.value = "";
+  alert("ذخیره شد ✅");
+}
