@@ -1,5 +1,5 @@
 // engine.js
-// ===== PROFESSIONAL ENGINE v2 =====
+// ===== ADVANCED ENGINE v2 =====
 
 function runEngine(input) {
   const lines = input
@@ -7,47 +7,32 @@ function runEngine(input) {
     .map(l => l.trim())
     .filter(Boolean);
 
-  // ===== DEFAULT STATE =====
-  const state = {
+  // ----- STATE -----
+  let state = {
     title: "Advanced App Builder",
     screen: "home"
   };
 
-  // ===== PARSER =====
+  // ----- PARSER -----
   lines.forEach(line => {
     const parts = line.split(" ");
 
+    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
       state.title = parts.slice(2).join(" ");
     }
 
+    // screen note | list | home
     if (parts[0] === "screen") {
       state.screen = parts[1];
     }
   });
 
-  // ===== SCREEN REGISTRY =====
-  const screens = {
-    home: () => ({
-      schema: {
-        title: state.title,
-        components: [
-          {
-            type: "textarea",
-            id: "commandInput",
-            placeholder:
-              "مثال:\nset title تست\nscreen note\nscreen list"
-          },
-          {
-            type: "button",
-            label: "اجرا",
-            action: "runCommand"
-          }
-        ]
-      }
-    }),
+  // ----- SCREENS -----
 
-    note: () => ({
+  // NOTE
+  if (state.screen === "note") {
+    return {
       schema: {
         title: state.title,
         components: [
@@ -68,9 +53,12 @@ function runEngine(input) {
           }
         ]
       }
-    }),
+    };
+  }
 
-    list: () => ({
+  // LIST
+  if (state.screen === "list") {
+    return {
       schema: {
         title: state.title,
         components: [
@@ -95,14 +83,26 @@ function runEngine(input) {
           }
         ]
       }
-    })
-  };
-
-  // ===== SAFE SCREEN LOAD =====
-  if (screens[state.screen]) {
-    return screens[state.screen]();
+    };
   }
 
-  // ===== FALLBACK =====
-  return screens.home();
+  // HOME (پیش‌فرض)
+  return {
+    schema: {
+      title: state.title,
+      components: [
+        {
+          type: "textarea",
+          id: "commandInput",
+          placeholder:
+            "مثال:\nset title تست\nscreen note\nscreen list"
+        },
+        {
+          type: "button",
+          label: "اجرا",
+          action: "runCommand"
+        }
+      ]
+    }
+  };
 }
