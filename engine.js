@@ -1,8 +1,12 @@
 // engine.js
 
-const EngineState = {
+const engineState = {
   title: "Advanced App Builder",
-  screen: "home"
+  screen: "home",
+  data: {
+    note: localStorage.getItem("note") || "",
+    list: JSON.parse(localStorage.getItem("list") || "[]")
+  }
 };
 
 function runEngine(input) {
@@ -11,37 +15,29 @@ function runEngine(input) {
     .map(l => l.trim())
     .filter(Boolean);
 
-  // پردازش همه دستورات (نه فقط آخری)
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
-      EngineState.title = parts.slice(2).join(" ");
+      engineState.title = parts.slice(2).join(" ");
     }
 
-    // screen xxx
     if (parts[0] === "screen") {
-      EngineState.screen = parts[1];
+      engineState.screen = parts[1];
     }
   });
 
-  return buildSchema();
-}
-
-// =====================
-// SCHEMA BUILDER
-// =====================
-function buildSchema() {
-  if (EngineState.screen === "note") {
+  // ===== NOTE SCREEN =====
+  if (engineState.screen === "note") {
     return {
       schema: {
-        title: EngineState.title,
+        title: engineState.title,
         components: [
           {
             type: "textarea",
             id: "noteText",
-            placeholder: "یادداشت بنویس..."
+            placeholder: "یادداشت...",
+            value: engineState.data.note
           },
           {
             type: "button",
@@ -58,41 +54,15 @@ function buildSchema() {
     };
   }
 
-  if (EngineState.screen === "list") {
-    return {
-      schema: {
-        title: EngineState.title,
-        components: [
-          {
-            type: "textarea",
-            id: "itemInput",
-            placeholder: "آیتم جدید..."
-          },
-          {
-            type: "button",
-            label: "اضافه کن",
-            action: "addItem"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
-        ]
-      }
-    };
-  }
-
-  // HOME
+  // ===== HOME SCREEN =====
   return {
     schema: {
-      title: EngineState.title,
+      title: engineState.title,
       components: [
         {
           type: "textarea",
           id: "commandInput",
-          placeholder:
-            "مثال:\nset title تست\nscreen note\nscreen list"
+          placeholder: "مثال:\nset title تست\nscreen note\nscreen list"
         },
         {
           type: "button",
@@ -102,4 +72,10 @@ function buildSchema() {
       ]
     }
   };
+}
+
+// ===== STATE HELPERS =====
+function updateNote(value) {
+  engineState.data.note = value;
+  localStorage.setItem("note", value);
 }
