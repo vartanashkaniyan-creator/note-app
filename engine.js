@@ -1,91 +1,54 @@
 // engine.js
 
-// ===== GLOBAL ENGINE STATE =====
-const EngineState = {
-  notes: [],
-  list: []
-};
-
 function runEngine(input) {
   const lines = input
     .split("\n")
     .map(l => l.trim())
     .filter(Boolean);
 
-  let title = "Advanced App Builder";
-  let screen = "home";
+  // ===== STATE =====
+  const state = {
+    title: "Advanced App Builder",
+    screen: "home"
+  };
 
+  // ===== PARSE COMMANDS =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // set title ...
+    // set title xxx
     if (parts[0] === "set" && parts[1] === "title") {
-      title = parts.slice(2).join(" ");
+      state.title = parts.slice(2).join(" ");
     }
 
-    // screen note / list
+    // screen note / screen list
     if (parts[0] === "screen") {
-      screen = parts[1];
-    }
-
-    // add item ...
-    if (parts[0] === "add" && parts[1] === "item") {
-      const text = parts.slice(2).join(" ");
-      if (text) EngineState.list.push(text);
+      state.screen = parts[1];
     }
   });
 
-  // ===== NOTE SCREEN =====
-  if (screen === "note") {
+  // ===== SCREENS =====
+  if (state.screen === "note") {
     return {
       schema: {
-        title,
+        title: state.title,
         components: [
-          {
-            type: "textarea",
-            id: "noteText",
-            placeholder: "یادداشت بنویس..."
-          },
-          {
-            type: "button",
-            label: "ذخیره",
-            action: "saveNote"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
+          { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
+          { type: "button", label: "ذخیره", action: "saveNote" },
+          { type: "button", label: "بازگشت", action: "goHomeAction" }
         ]
       }
     };
   }
 
-  // ===== LIST SCREEN =====
-  if (screen === "list") {
+  if (state.screen === "list") {
     return {
       schema: {
-        title,
+        title: state.title,
         components: [
-          {
-            type: "textarea",
-            id: "itemInput",
-            placeholder: "آیتم جدید..."
-          },
-          {
-            type: "button",
-            label: "اضافه کن",
-            action: "addItemAction"
-          },
-          {
-            type: "list",
-            items: EngineState.list
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
+          { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
+          { type: "button", label: "اضافه کن", action: "addItem" },
+          { type: "button", label: "بازگشت", action: "goHomeAction" }
         ]
       }
     };
@@ -94,19 +57,18 @@ function runEngine(input) {
   // ===== HOME =====
   return {
     schema: {
-      title,
+      title: state.title,
       components: [
         {
           type: "textarea",
           id: "commandInput",
           placeholder:
-            "مثال:\nset title تست\nscreen note\nscreen list\nadd item خرید نان"
+`مثال:
+set title برنامه من
+screen note
+screen list`
         },
-        {
-          type: "button",
-          label: "اجرا",
-          action: "runCommand"
-        }
+        { type: "button", label: "اجرا", action: "runCommand" }
       ]
     }
   };
