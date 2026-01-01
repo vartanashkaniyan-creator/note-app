@@ -12,31 +12,50 @@ function runEngine(input) {
   };
 
   lines.forEach(line => {
-    const parts = line.split(" ");
-
-    // set title
-    if (parts[0] === "set" && parts[1] === "title") {
-      state.title = parts.slice(2).join(" ");
-    }
-
-    // screen
-    if (parts[0] === "screen") {
-      state.screen = parts[1];
-    }
+    executeLine(line, state);
   });
 
-  // ===== NOTE =====
-  if (state.screen === "note") {
-    return buildNote(state.title);
+  switch (state.screen) {
+    case "note":
+      return buildNote(state.title);
+    case "list":
+      return buildList(state.title);
+    default:
+      return buildHome(state.title);
+  }
+}
+
+// ===== LINE EXECUTOR =====
+function executeLine(line, state) {
+  // شرط ساده
+  if (line.startsWith("if ")) {
+    const parts = line.replace("if ", "").split(" ");
+    if (parts[0] === "screen=home" && state.screen === "home") {
+      if (parts[1] === "screen" && parts[2]) {
+        state.screen = parts[2];
+      }
+    }
+    return;
   }
 
-  // ===== LIST =====
-  if (state.screen === "list") {
-    return buildList(state.title);
+  const parts = line.split(" ");
+
+  // set title
+  if (parts[0] === "set" && parts[1] === "title") {
+    state.title = parts.slice(2).join(" ");
   }
 
-  // ===== DEFAULT (HOME) =====
-  return buildHome(state.title);
+  // screen + پارامتر
+  if (parts[0] === "screen") {
+    state.screen = parts[1];
+
+    parts.slice(2).forEach(p => {
+      const [key, value] = p.split("=");
+      if (key === "title") {
+        state.title = value.replaceAll("_", " ");
+      }
+    });
+  }
 }
 
 // ===== SCHEMA BUILDERS =====
@@ -49,10 +68,11 @@ function buildHome(title) {
           type: "textarea",
           id: "commandInput",
           placeholder:
-`دستور بنویس:
-set title تست
+`مثال:
 screen note
-screen list`
+screen list
+screen note title=یادداشت_من
+if screen=home screen note`
         },
         { type: "button", label: "اجرا", action: "runCommand" }
       ]
@@ -78,7 +98,7 @@ function buildList(title) {
     schema: {
       title,
       components: [
-        { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
+        { type: "textarea", id: "itemInput", placeholder: "آیتم..." },
         { type: "button", label: "اضافه کن", action: "addItem" },
         { type: "list", id: "itemList" },
         { type: "button", label: "بازگشت", action: "goHomeAction" }
