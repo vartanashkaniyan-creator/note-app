@@ -1,4 +1,5 @@
 // engine.js
+// ===== SIMPLE & STABLE ENGINE v1 =====
 
 function runEngine(input) {
   const lines = input
@@ -9,17 +10,15 @@ function runEngine(input) {
   let title = "Advanced App Builder";
   let screen = "home";
 
-  // ===== PARSE COMMANDS =====
+  // ===== PARSER =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
       title = parts.slice(2).join(" ");
     }
 
-    // screen note | screen home | screen list
-    if (parts[0] === "screen" && parts[1]) {
+    if (parts[0] === "screen") {
       screen = parts[1];
     }
   });
@@ -50,7 +49,7 @@ function runEngine(input) {
     };
   }
 
-  // ===== LIST SCREEN (آماده برای آینده) =====
+  // ===== LIST SCREEN (فعلاً نمایشی) =====
   if (screen === "list") {
     return {
       schema: {
@@ -60,6 +59,11 @@ function runEngine(input) {
             type: "textarea",
             id: "itemInput",
             placeholder: "آیتم جدید..."
+          },
+          {
+            type: "button",
+            label: "اضافه کن (بعداً)",
+            action: "noop"
           },
           {
             type: "button",
@@ -80,9 +84,7 @@ function runEngine(input) {
           type: "textarea",
           id: "commandInput",
           placeholder:
-`مثال:
-set title تست
-screen note`
+            "مثال:\nset title تست\nscreen note\nscreen list"
         },
         {
           type: "button",
