@@ -1,103 +1,107 @@
 // engine.js
 
 function runEngine(input) {
-  const cmd = (input || "").trim().toLowerCase();
+  const raw = (input || "").trim();
+  const cmd = raw.toLowerCase();
 
   // ===== HOME =====
-  if (cmd === "" || cmd === "screen home") {
-    return {
-      schema: {
-        title: "🏠 صفحه اصلی",
-        components: [
-          {
-            type: "textarea",
-            id: "commandInput",
-            placeholder: "دستور را وارد کن (مثلاً: screen note)"
-          },
-          {
-            type: "button",
-            label: "اجرا",
-            action: "runCommand"
-          }
-        ]
-      }
-    };
+  if (cmd === "" || cmd === "home" || cmd === "screen home") {
+    return homeScreen();
   }
 
-  // ===== NOTE =====
-  if (cmd === "screen note") {
-    return {
-      schema: {
-        title: "📝 یادداشت",
-        components: [
-          {
-            type: "textarea",
-            id: "noteText",
-            placeholder: "یادداشت خود را بنویس"
-          },
-          {
-            type: "button",
-            label: "ذخیره",
-            action: "saveNote"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
-        ]
-      }
-    };
+  // ===== NOTE WITH TEXT =====
+  if (cmd.startsWith("note")) {
+    const text = raw.slice(4).trim(); // متن بعد از note
+    return noteScreen(text);
   }
 
   // ===== LIST =====
   if (cmd === "screen list") {
-    return {
-      schema: {
-        title: "📋 لیست ساده",
-        components: [
-          {
-            type: "textarea",
-            id: "listInput",
-            placeholder: "هر خط = یک آیتم"
-          },
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
-        ]
-      }
-    };
+    return listScreen();
   }
 
-  // ===== COUNTER =====
-  if (cmd === "screen counter") {
-    return {
-      schema: {
-        title: "🔢 شمارنده (نمایشی)",
-        components: [
-          {
-            type: "button",
-            label: "بازگشت",
-            action: "goHomeAction"
-          }
-        ]
-      }
-    };
-  }
+  // ===== UNKNOWN =====
+  return unknownScreen();
+}
 
-  // ===== UNKNOWN COMMAND =====
+// ===== SCREENS =====
+
+function homeScreen() {
   return {
     schema: {
-      title: "❌ دستور ناشناخته",
+      title: "🏠 صفحه اصلی",
       components: [
         {
+          type: "textarea",
+          id: "commandInput",
+          placeholder: "مثلاً: note خرید نان"
+        },
+        {
           type: "button",
-          label: "بازگشت به خانه",
+          label: "اجرا",
+          action: "runCommand"
+        }
+      ]
+    }
+  };
+}
+
+function noteScreen(prefillText = "") {
+  return {
+    schema: {
+      title: "📝 یادداشت",
+      components: [
+        {
+          type: "textarea",
+          id: "noteText",
+          placeholder: "یادداشت...",
+        },
+        {
+          type: "button",
+          label: "ذخیره",
+          action: "saveNote"
+        },
+        {
+          type: "button",
+          label: "بازگشت",
           action: "goHomeAction"
         }
       ]
     }
   };
-          }
+}
+
+function listScreen() {
+  return {
+    schema: {
+      title: "📋 لیست",
+      components: [
+        {
+          type: "textarea",
+          id: "listText",
+          placeholder: "هر خط یک آیتم"
+        },
+        {
+          type: "button",
+          label: "بازگشت",
+          action: "goHomeAction"
+        }
+      ]
+    }
+  };
+}
+
+function unknownScreen() {
+  return {
+    schema: {
+      title: "❌ دستور نامعتبر",
+      components: [
+        {
+          type: "button",
+          label: "بازگشت",
+          action: "goHomeAction"
+        }
+      ]
+    }
+  };
+}
