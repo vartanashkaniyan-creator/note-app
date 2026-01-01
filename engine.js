@@ -6,34 +6,30 @@ function runEngine(input) {
     .map(l => l.trim())
     .filter(Boolean);
 
-  // ===== STATE =====
   const state = {
     title: "Advanced App Builder",
     screen: "home"
   };
 
-  // ===== PARSE COMMANDS =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    // set title xxx
     if (parts[0] === "set" && parts[1] === "title") {
       state.title = parts.slice(2).join(" ");
     }
 
-    // screen note / screen list
     if (parts[0] === "screen") {
       state.screen = parts[1];
     }
   });
 
-  // ===== SCREENS =====
+  // ===== NOTE =====
   if (state.screen === "note") {
     return {
       schema: {
         title: state.title,
         components: [
-          { type: "textarea", id: "noteText", placeholder: "یادداشت بنویس..." },
+          { type: "textarea", id: "noteText", placeholder: "یادداشت..." },
           { type: "button", label: "ذخیره", action: "saveNote" },
           { type: "button", label: "بازگشت", action: "goHomeAction" }
         ]
@@ -41,6 +37,7 @@ function runEngine(input) {
     };
   }
 
+  // ===== LIST =====
   if (state.screen === "list") {
     return {
       schema: {
@@ -48,6 +45,7 @@ function runEngine(input) {
         components: [
           { type: "textarea", id: "itemInput", placeholder: "آیتم جدید..." },
           { type: "button", label: "اضافه کن", action: "addItem" },
+          { type: "list", id: "itemList" },
           { type: "button", label: "بازگشت", action: "goHomeAction" }
         ]
       }
@@ -64,8 +62,7 @@ function runEngine(input) {
           id: "commandInput",
           placeholder:
 `مثال:
-set title برنامه من
-screen note
+set title لیست من
 screen list`
         },
         { type: "button", label: "اجرا", action: "runCommand" }
