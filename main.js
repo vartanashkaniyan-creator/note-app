@@ -1,4 +1,3 @@
-// main.js
 let currentState = null;
 
 // ===== STORAGE =====
@@ -10,16 +9,15 @@ function getList() {
   return JSON.parse(localStorage.getItem("items") || "[]");
 }
 
-// ===== START APP (خیلی مهم) =====
+// ===== START =====
 window.addEventListener("DOMContentLoaded", () => {
-  runApp("");
+  runApp("home");
 });
 
 // ===== RUN =====
 function runApp(input) {
   currentState = runEngine(input);
   render(currentState);
-  handleMeta(currentState.meta);
 }
 
 // ===== RENDER =====
@@ -74,7 +72,7 @@ function handleAction(action) {
   }
 
   if (action === "goHomeAction") {
-    runApp("clear");
+    runApp("home");
   }
 
   if (action === "saveNote") {
@@ -91,14 +89,5 @@ function handleAction(action) {
     items.push(input.value);
     localStorage.setItem("items", JSON.stringify(items));
     render(currentState);
-  }
-}
-
-// ===== META =====
-function handleMeta(meta) {
-  if (!meta) return;
-
-  if (meta.alertText) {
-    alert(meta.alertText);
   }
 }
