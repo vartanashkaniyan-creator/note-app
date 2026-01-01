@@ -1,5 +1,5 @@
 // engine.js
-// ===== SIMPLE & STABLE ENGINE v1 =====
+// ===== SIMPLE & STABLE ENGINE v2 =====
 
 function runEngine(input) {
   const lines = input
@@ -9,17 +9,26 @@ function runEngine(input) {
 
   let title = "Advanced App Builder";
   let screen = "home";
+  let addValue = null;
 
   // ===== PARSER =====
   lines.forEach(line => {
     const parts = line.split(" ");
 
+    // set title ...
     if (parts[0] === "set" && parts[1] === "title") {
       title = parts.slice(2).join(" ");
     }
 
+    // screen note | screen list
     if (parts[0] === "screen") {
       screen = parts[1];
+    }
+
+    // add something
+    if (parts[0] === "add") {
+      addValue = parts.slice(1).join(" ");
+      screen = "list";
     }
   });
 
@@ -49,11 +58,14 @@ function runEngine(input) {
     };
   }
 
-  // ===== LIST SCREEN (فعلاً نمایشی) =====
+  // ===== LIST SCREEN =====
   if (screen === "list") {
     return {
       schema: {
         title,
+        meta: {
+          addValue
+        },
         components: [
           {
             type: "textarea",
@@ -62,8 +74,8 @@ function runEngine(input) {
           },
           {
             type: "button",
-            label: "اضافه کن (بعداً)",
-            action: "noop"
+            label: "اضافه کن",
+            action: "addItem"
           },
           {
             type: "button",
@@ -84,7 +96,7 @@ function runEngine(input) {
           type: "textarea",
           id: "commandInput",
           placeholder:
-            "مثال:\nset title تست\nscreen note\nscreen list"
+            "دستورها:\nset title تست\nscreen note\nscreen list\nadd سیب"
         },
         {
           type: "button",
