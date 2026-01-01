@@ -1,14 +1,7 @@
-// ================================
-// main.js – Stable Core v2
-// ================================
-
 // ===== GLOBAL STATE =====
 const AppState = {
   history: [],
-
-  items: JSON.parse(localStorage.getItem("items") || "[]"),
-
-  lastSchema: null
+  items: JSON.parse(localStorage.getItem("items") || "[]")
 };
 
 // ===== START =====
@@ -20,14 +13,17 @@ window.onload = () => {
 function runCommand() {
   const input = document.getElementById("commandInput")?.value || "";
 
+  if (!input.trim()) {
+    alert("دستوری وارد نکردی ⚠️");
+    return;
+  }
+
   AppState.history.push(input);
   renderFromEngine(input);
 }
 
 function renderFromEngine(input) {
   const result = runEngine(input);
-
-  AppState.lastSchema = result.schema;
   renderUI(result.schema);
 }
 
@@ -61,27 +57,17 @@ function renderUI(schema) {
 
   app.innerHTML = html;
 
-  // ===== RENDER LIST ITEMS =====
+  // رندر لیست
   const listEl = document.getElementById("itemList");
   if (listEl) {
-    listEl.innerHTML = "";
-
-    AppState.items.forEach((item, index) => {
+    AppState.items.forEach(item => {
       const li = document.createElement("li");
-      li.innerHTML = `
-        ${item}
-        <button data-index="${index}" style="margin-right:8px">❌</button>
-      `;
-
-      li.querySelector("button").onclick = () => {
-        deleteItem(index);
-      };
-
+      li.textContent = item;
       listEl.appendChild(li);
     });
   }
 
-  // ===== ACTION BINDING =====
+  // اتصال اکشن‌ها
   app.querySelectorAll("button[data-action]").forEach(btn => {
     btn.onclick = () => dispatchAction(btn.dataset.action);
   });
@@ -89,45 +75,46 @@ function renderUI(schema) {
 
 // ===== ACTION DISPATCHER =====
 function dispatchAction(action) {
-  if (actions[action]) {
-    actions[action]();
-  } else {
+  if (!actions[action]) {
     alert("اکشن ناشناخته ❌");
+    return;
   }
+  actions[action]();
 }
 
-// ===== ACTIONS =====
+// ===== ACTIONS (هوشمند) =====
 const actions = {
   runCommand,
 
   goHomeAction() {
-    // برگشت واقعی
-    AppState.history.pop(); // صفحه فعلی
-    const prev = AppState.history.pop() || "";
-    renderFromEngine(prev);
+    renderFromEngine("");
   },
 
   saveNote() {
     const text = document.getElementById("noteText")?.value || "";
+
+    if (!text.trim()) {
+      alert("یادداشت خالیه ⚠️");
+      return;
+    }
+
     localStorage.setItem("note", text);
-    alert("ذخیره شد ✅");
+    alert("یادداشت ذخیره شد ✅");
   },
 
   addItem() {
     const input = document.getElementById("itemInput");
-    if (!input || !input.value.trim()) return;
+
+    if (!input || !input.value.trim()) {
+      alert("آیتم خالیه ⚠️");
+      return;
+    }
 
     AppState.items.push(input.value.trim());
     localStorage.setItem("items", JSON.stringify(AppState.items));
     input.value = "";
 
-    renderUI(AppState.lastSchema);
+    // رفرش همان صفحه
+    renderFromEngine(AppState.history.at(-1) || "");
   }
 };
-
-// ===== HELPERS =====
-function deleteItem(index) {
-  AppState.items.splice(index, 1);
-  localStorage.setItem("items", JSON.stringify(AppState.items));
-  renderUI(AppState.lastSchema);
-}
