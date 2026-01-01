@@ -1,7 +1,7 @@
 // ===== GLOBAL STATE =====
 const AppState = {
-  history: [],      // تاریخچه اسکرین‌ها
-  lastCommand: ""   // آخرین دستور اجرا شده
+  history: [],       // تاریخچه دستورات
+  lastCommand: ""    // آخرین دستور
 };
 
 // ===== START =====
@@ -36,11 +36,16 @@ function renderUI(schema) {
 
   schema.components.forEach(c => {
     if (c.type === "textarea") {
+      const value =
+        c.id === "noteText"
+          ? localStorage.getItem("note") || ""
+          : "";
+
       html += `
         <textarea
           id="${c.id}"
           placeholder="${c.placeholder || ""}"
-        ></textarea>
+        >${value}</textarea>
       `;
     }
 
@@ -55,7 +60,7 @@ function renderUI(schema) {
 
   app.innerHTML = html;
 
-  // اتصال اکشن‌ها بعد از رندر
+  // اتصال اکشن‌ها
   app.querySelectorAll("button[data-action]").forEach(btn => {
     btn.onclick = () => {
       const action = btn.getAttribute("data-action");
@@ -78,10 +83,22 @@ const actions = {
   runCommand,
 
   goHomeAction() {
-    // برگشت واقعی
-    AppState.history.pop(); // صفحه فعلی
-    const prev = AppState.history.pop() || "";
-    renderFromEngine(prev);
+    // اگر تاریخچه خالی بود، مستقیم خانه
+    if (AppState.history.length === 0) {
+      renderFromEngine("");
+      return;
+    }
+
+    // حذف صفحه فعلی
+    AppState.history.pop();
+
+    // گرفتن قبلی
+    const prevCommand =
+      AppState.history.length > 0
+        ? AppState.history[AppState.history.length - 1]
+        : "";
+
+    renderFromEngine(prevCommand);
   },
 
   saveNote() {
