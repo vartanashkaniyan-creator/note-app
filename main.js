@@ -1,12 +1,11 @@
-// main.js
+// main.js — STABLE VERSION WITH REAL BACK
 
 const AppState = {
-  history: [],
-  items: JSON.parse(localStorage.getItem("items") || "[]")
+  history: []
 };
 
 window.onload = () => {
-  renderFromEngine("");
+  goHome();
 };
 
 // ===== CORE =====
@@ -19,7 +18,7 @@ function runCommand() {
 function renderFromEngine(input) {
   const result = runEngine(input);
 
-  // دستور back از داخل متن
+  // دستور متنی back
   if (result.command === "back") {
     goBack();
     return;
@@ -28,7 +27,7 @@ function renderFromEngine(input) {
   renderUI(result.schema);
 }
 
-// ===== UI RENDERER =====
+// ===== UI =====
 function renderUI(schema) {
   const app = document.getElementById("app");
   let html = `<h2>${schema.title}</h2>`;
@@ -39,7 +38,7 @@ function renderUI(schema) {
     }
 
     if (c.type === "button") {
-      html += `<button data-action="${c.action}">${c.label}</button>`;
+      html += `<button onclick="${c.action}()">${c.label}</button>`;
     }
 
     if (c.type === "list") {
@@ -48,54 +47,26 @@ function renderUI(schema) {
   });
 
   app.innerHTML = html;
-
-  // رندر لیست
-  const listEl = document.getElementById("itemList");
-  if (listEl) {
-    AppState.items.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      listEl.appendChild(li);
-    });
-  }
-
-  // اتصال اکشن‌ها
-  app.querySelectorAll("button[data-action]").forEach(btn => {
-    btn.onclick = () => dispatchAction(btn.dataset.action);
-  });
-}
-
-// ===== ACTION DISPATCHER =====
-function dispatchAction(action) {
-  actions[action]?.();
 }
 
 // ===== ACTIONS =====
-const actions = {
-  runCommand,
+function goHome() {
+  AppState.history = [];
+  renderFromEngine("");
+}
 
-  goBack,
-
-  saveNote() {
-    const text = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", text);
-    alert("ذخیره شد ✅");
-  },
-
-  addItem() {
-    const input = document.getElementById("itemInput");
-    if (!input || !input.value) return;
-
-    AppState.items.push(input.value);
-    localStorage.setItem("items", JSON.stringify(AppState.items));
-    input.value = "";
-    renderFromEngine(AppState.history.at(-1) || "");
-  }
-};
-
-// ===== REAL BACK =====
 function goBack() {
   AppState.history.pop(); // صفحه فعلی
   const prev = AppState.history.pop() || "";
   renderFromEngine(prev);
 }
+
+function saveNote() {
+  const text = document.getElementById("noteText")?.value || "";
+  localStorage.setItem("note", text);
+  alert("ذخیره شد ✅");
+}
+
+function addItem() {
+  alert("فعلاً نمایشی است");
+    }
