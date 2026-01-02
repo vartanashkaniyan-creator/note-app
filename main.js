@@ -1,4 +1,3 @@
-// main.js
 let currentState = null;
 
 // ===== STORAGE =====
@@ -10,7 +9,7 @@ function getList() {
   return JSON.parse(localStorage.getItem("items") || "[]");
 }
 
-// ===== START APP (خیلی مهم) =====
+// ===== START =====
 window.addEventListener("DOMContentLoaded", () => {
   runApp("home");
 });
