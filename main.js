@@ -4,12 +4,11 @@ let currentState = null;
 function getNote() {
   return localStorage.getItem("note") || "";
 }
-
 function getList() {
   return JSON.parse(localStorage.getItem("items") || "[]");
 }
 
-// ===== START =====
+// ===== START APP =====
 window.addEventListener("DOMContentLoaded", () => {
   runApp("home");
 });
@@ -18,6 +17,7 @@ window.addEventListener("DOMContentLoaded", () => {
 function runApp(input) {
   currentState = runEngine(input);
   render(currentState);
+  handleMeta(currentState.meta);
 }
 
 // ===== RENDER =====
@@ -26,7 +26,6 @@ function render(state) {
   if (!app) return;
 
   app.innerHTML = "";
-
   const h1 = document.createElement("h1");
   h1.innerText = state.schema.title;
   app.appendChild(h1);
@@ -36,29 +35,23 @@ function render(state) {
       const t = document.createElement("textarea");
       t.id = c.id;
       t.placeholder = c.placeholder || "";
-
       if (c.id === "noteText") t.value = getNote();
-
       app.appendChild(t);
     }
-
     if (c.type === "button") {
       const b = document.createElement("button");
       b.innerText = c.label;
       b.onclick = () => handleAction(c.action);
       app.appendChild(b);
     }
-
     if (c.type === "list") {
       const ul = document.createElement("ul");
       ul.id = c.id;
-
       getList().forEach(i => {
         const li = document.createElement("li");
         li.innerText = i;
         ul.appendChild(li);
       });
-
       app.appendChild(ul);
     }
   });
@@ -70,10 +63,10 @@ function handleAction(action) {
     const v = document.getElementById("commandInput")?.value || "";
     runApp(v);
   }
+  if (action === "goHomeAction") runApp("home");
 
-  if (action === "goHomeAction") {
-    runApp("home");
-  }
+  if (action === "openNote") runApp("note");
+  if (action === "openList") runApp("list");
 
   if (action === "saveNote") {
     const v = document.getElementById("noteText")?.value || "";
@@ -84,28 +77,15 @@ function handleAction(action) {
   if (action === "addItem") {
     const input = document.getElementById("itemInput");
     if (!input || !input.value) return;
-
     const items = getList();
     items.push(input.value);
     localStorage.setItem("items", JSON.stringify(items));
     render(currentState);
-  }
-
-  // ===== NEW ACTIONS FOR MAIN PAGE BUTTONS =====
-  if (action === "openNote") {
-    runApp("note");
-  }
-
-  if (action === "openList") {
-    runApp("list");
   }
 }
 
 // ===== META =====
 function handleMeta(meta) {
   if (!meta) return;
-
-  if (meta.alertText) {
-    alert(meta.alertText);
-  }
+  if (meta.alertText) alert(meta.alertText);
 }
