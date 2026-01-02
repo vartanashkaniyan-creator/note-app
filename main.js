@@ -1,3 +1,4 @@
+// main.js
 let currentState = null;
 
 // ===== STORAGE =====
@@ -9,15 +10,16 @@ function getList() {
   return JSON.parse(localStorage.getItem("items") || "[]");
 }
 
-// ===== START =====
+// ===== START APP =====
 window.addEventListener("DOMContentLoaded", () => {
   runApp("home");
 });
 
-// ===== RUN =====
+// ===== RUN ENGINE =====
 function runApp(input) {
   currentState = runEngine(input);
   render(currentState);
+  handleMeta(currentState.meta);
 }
 
 // ===== RENDER =====
@@ -27,10 +29,12 @@ function render(state) {
 
   app.innerHTML = "";
 
+  // عنوان صفحه
   const h1 = document.createElement("h1");
   h1.innerText = state.schema.title;
   app.appendChild(h1);
 
+  // کامپوننت‌ها
   state.schema.components.forEach(c => {
     if (c.type === "textarea") {
       const t = document.createElement("textarea");
@@ -38,6 +42,7 @@ function render(state) {
       t.placeholder = c.placeholder || "";
 
       if (c.id === "noteText") t.value = getNote();
+      if (c.id === "itemInput") t.value = "";
 
       app.appendChild(t);
     }
@@ -66,29 +71,35 @@ function render(state) {
 
 // ===== ACTIONS =====
 function handleAction(action) {
-  if (action === "runCommand") {
-    const v = document.getElementById("commandInput")?.value || "";
-    runApp(v);
-  }
+  switch (action) {
+    case "runCommand":
+      const v = document.getElementById("commandInput")?.value || "";
+      runApp(v);
+      break;
 
-  if (action === "goHomeAction") {
-    runApp("home");
-  }
+    case "goHomeAction":
+      runApp("home");
+      break;
 
-  if (action === "saveNote") {
-    const v = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", v);
-    alert("ذخیره شد ✅");
-  }
+    case "saveNote":
+      const note = document.getElementById("noteText")?.value || "";
+      localStorage.setItem("note", note);
+      alert("ذخیره شد ✅");
+      break;
 
-  if (action === "addItem") {
-    const input = document.getElementById("itemInput");
-    if (!input || !input.value) return;
+    case "addItem":
+      const input = document.getElementById("itemInput");
+      if (!input || !input.value) return;
 
-    const items = getList();
-    items.push(input.value);
-    localStorage.setItem("items", JSON.stringify(items));
-    render(currentState);
+      const items = getList();
+      items.push(input.value);
+      localStorage.setItem("items", JSON.stringify(items));
+      input.value = ""; // پاک کردن ورودی بعد از اضافه کردن
+      render(currentState);
+      break;
+
+    default:
+      console.warn("Action not recognized:", action);
   }
 }
 
