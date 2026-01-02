@@ -1,5 +1,4 @@
-// engine.js - FINAL STABLE + PLUGIN SUPPORT
-
+// engine.js - FIXED & STABLE
 const ALLOWED_SCREENS = new Set(["home", "note", "list"]);
 
 function normalize(cmd) {
@@ -10,14 +9,16 @@ function normalize(cmd) {
     .replace(/یادداشت/g, "note")
     .replace(/لیست/g, "list")
     .replace(/برو/g, "go")
+    .replace(/سلام/g, "alert سلام") // مثال ساده alert فارسی
     .trim();
 }
 
 function runEngine(input) {
   let screen = "home";
   let alertText = null;
+  let pluginCommand = null;
 
-  if (typeof input === "string" && input !== "home") {
+  if (typeof input === "string" && input.trim() !== "") {
     const lines = input
       .split("\n")
       .map(l => normalize(l))
@@ -25,39 +26,28 @@ function runEngine(input) {
 
     lines.forEach(line => {
       const parts = line.split(" ");
+      const cmd = parts[0];
 
-      // تغییر صفحه
-      if ((parts[0] === "screen" || parts[0] === "go") && parts[1]) {
-        if (ALLOWED_SCREENS.has(parts[1])) {
-          screen = parts[1];
-        }
+      // صفحه‌ها
+      if ((cmd === "screen" || cmd === "go") && parts[1]) {
+        if (ALLOWED_SCREENS.has(parts[1])) screen = parts[1];
       }
 
-      // نمایش alert
-      if (parts[0] === "alert") {
+      // alert
+      if (cmd === "alert") {
         alertText = parts.slice(1).join(" ");
       }
 
-      // اجرای پلاگین
-      if (parts[0] === "plugin" && parts[1]) {
-        if (window.PluginSystem) {
-          try {
-            const pluginOutput = window.PluginSystem.execute(parts[1], ...parts.slice(2));
-            alertText = pluginOutput; // نتیجه پلاگین در alert
-          } catch (e) {
-            console.error("Plugin execution error:", e);
-            alertText = `خطا در اجرای پلاگین ${parts[1]}`;
-          }
-        } else {
-          alertText = "سیستم پلاگین بارگذاری نشده است";
-        }
+      // plugin
+      if (cmd === "plugin" && parts[1]) {
+        pluginCommand = parts.slice(1).join(" ");
       }
     });
   }
 
   return {
     schema: getScreenSchema(screen),
-    meta: { alertText }
+    meta: { alertText, pluginCommand, currentScreen: screen }
   };
 }
 
@@ -86,12 +76,10 @@ function getScreenSchema(screen) {
     };
   }
 
-  // ===== HOME =====
+  // HOME
   return {
     title: "title",
     components: [
-      { type: "button", label: "note", action: "openNote" },
-      { type: "button", label: "list", action: "openList" },
       { type: "textarea", id: "commandInput", placeholder: "commands" },
       { type: "button", label: "execute", action: "runCommand" }
     ]
