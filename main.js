@@ -5,54 +5,103 @@ let currentLanguage = 'fa';
 let history = [];
 const MAX_HISTORY = 50;
 
+// ===== SECURITY CONFIG =====
 const SECURITY = {
   ALLOWED_ACTIONS: new Set([
     'runCommand','goHomeAction','saveNote','addItem','openNote','openList'
   ]),
+  
   ALLOWED_LANGUAGES: new Set(['fa','en']),
-  sanitizeHTML: function(text){
-    if(typeof text!=='string') return '';
-    const div=document.createElement('div');
-    div.textContent=text;
+  
+  sanitizeHTML: function(text) {
+    if (typeof text !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = text;
     return div.innerHTML;
   }
 };
 
-function handleLanguageChange(event){
-  const lang=event.target.value;
-  if(SECURITY.ALLOWED_LANGUAGES.has(lang)){
-    currentLanguage=lang;
-    runApp("home");
+// ===== LANGUAGE MANAGEMENT =====
+function handleLanguageChange(event) {
+  const lang = event.target.value;
+  if (SECURITY.ALLOWED_LANGUAGES.has(lang)) {
+    currentLanguage = lang;
+    changeLanguage();
   }
 }
 
+function changeLanguage() {
+  try {
+    currentState = runEngine("");
+    if (currentState && currentState.schema) render(currentState);
+  } catch (error) {
+    console.error("Language change error:", error);
+    showError("خطا در تغییر زبان");
+  }
+}
+
+// ===== TRANSLATIONS =====
 const translations = {
-  en:{title:"Advanced App Builder",note:"Note",list:"List",save:"Save",back:"Back",execute:"Run Command",add:"Add",placeholder_commands:"Example:\ntitle My Notes\nscreen note",placeholder_note:"Write note...",placeholder_item:"New item..."},
-  fa:{title:"سازنده اپ پیشرفته",note:"یادداشت",list:"لیست",save:"ذخیره",back:"بازگشت",execute:"اجرا",add:"اضافه کن",placeholder_commands:"مثال:\ntitle یادداشت‌های من\nscreen note",placeholder_note:"یادداشت بنویس...",placeholder_item:"آیتم جدید..."}
+  en: {
+    title: "Advanced App Builder", note: "Note", list: "List",
+    save: "Save", back: "Back", execute: "Run Command", add: "Add",
+    placeholder_commands: "Example:\ntitle My Notes\nscreen note",
+    placeholder_note: "Write note...", placeholder_item: "New item..."
+  },
+  fa: {
+    title: "سازنده اپ پیشرفته", note: "یادداشت", list: "لیست",
+    save: "ذخیره", back: "بازگشت", execute: "اجرا", add: "اضافه کن",
+    placeholder_commands: "مثال:\ntitle یادداشت‌های من\nscreen note",
+    placeholder_note: "یادداشت بنویس...", placeholder_item: "آیتم جدید..."
+  }
 };
 
-function getNote(){return localStorage.getItem("note")||"";}
-function getList(){try{const items=localStorage.getItem("items");return items?JSON.parse(items):[]}catch(e){return [];}}
+// ===== SECURE STORAGE =====
+function getNote() {
+  try { const note = localStorage.getItem("note"); return note ? SECURITY.sanitizeHTML(note) : ""; }
+  catch (e) { console.error("Storage error:", e); return ""; }
+}
 
-window.addEventListener("DOMContentLoaded",()=>{
-  const langSelect=document.getElementById("languageSelect");
-  if(langSelect) langSelect.value=currentLanguage;
+function getList() {
+  try {
+    const items = localStorage.getItem("items");
+    if (!items) return [];
+    const parsed = JSON.parse(items);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(i => typeof i==='string'?SECURITY.sanitizeHTML(i):'').filter(i=>i.length>0);
+  } catch (e) { console.error("Storage error:", e); return []; }
+}
+
+// ===== APP INITIALIZATION =====
+window.addEventListener("DOMContentLoaded", () => {
+  if (!isLocalStorageAvailable()) { showError("مرورگر شما از ذخیره‌سازی محلی پشتیبانی نمی‌کند"); return; }
+  const langSelect = document.getElementById("languageSelect");
+  if (langSelect) langSelect.value = currentLanguage;
   runApp("home");
 });
 
-function runApp(input){
-  history.push({input,timestamp:new Date().toISOString()});
-  if(history.length>MAX_HISTORY) history.shift();
-  currentState=runEngine(input);
-  render(currentState);
-  if(currentState.meta && currentState.meta.alertText) showAlert(currentState.meta.alertText);
+function isLocalStorageAvailable() {
+  try { const t='__test__'; localStorage.setItem(t,t); localStorage.removeItem(t); return true; } catch { return false; }
 }
 
-function render(state){
-  const app=document.getElementById("app");
-  if(!app||!state||!state.schema){showError("خطا در بارگذاری رابط کاربری");return;}
-  app.innerHTML="";
-  const titleElement=document.createElement("h1");
+// ===== CORE APP LOGIC =====
+function runApp(input) {
+  try {
+    history.push({ input: input, timestamp: new Date().toISOString() });
+    if (history.length>MAX_HISTORY) history.shift();
+    currentState = runEngine(input);
+    render(currentState);
+    if(currentState.meta && currentState.meta.alertText) setTimeout(()=>showAlert(currentState.meta.alertText),100);
+  } catch(e){ console.error("App runtime error:", e); showError("خطا در اجرای دستور"); }
+}
+
+// ===== SECURE RENDER ENGINE =====
+function render(state) {
+  const app = document.getElementById("app");
+  if(!app||!state||!state.schema){ showError("خطا در بارگذاری رابط کاربری"); return; }
+  while(app.firstChild) app.removeChild(app.firstChild);
+
+  const titleElement = document.createElement("h1");
   titleElement.id="appTitle";
   titleElement.textContent=translations[currentLanguage].title;
   app.appendChild(titleElement);
@@ -61,72 +110,88 @@ function render(state){
     if(!component||!component.type) return;
     try{
       switch(component.type){
-        case"textarea":renderTextarea(component,app);break;
-        case"button":renderButton(component,app);break;
-        case"list":renderList(component,app);break;
-        default:console.warn("Unknown component type:",component.type);
+        case "textarea": renderTextarea(component,app); break;
+        case "button": renderButton(component,app); break;
+        case "list": renderList(component,app); break;
+        default: console.warn("Unknown component type:",component.type);
       }
-    }catch(e){console.error("Render error:",e,component);}
+    } catch(e){ console.error("Render error:",e,component); }
   });
 }
 
-function renderTextarea(component,parent){
-  const textarea=document.createElement("textarea");
-  textarea.id=component.id||`textarea-${Date.now()}`;
-  if(component.placeholder){
-    const key=`placeholder_${component.placeholder}`;
-    textarea.placeholder=translations[currentLanguage][key]||component.placeholder;
+function renderTextarea(c,p){
+  const t=document.createElement("textarea");
+  t.id=c.id||`textarea-${Date.now()}`;
+  if(c.placeholder){
+    const key=`placeholder_${c.placeholder}`;
+    t.placeholder=translations[currentLanguage][key]||c.placeholder;
   }
-  if(component.id==="noteText") textarea.value=getNote();
-  if(component.value) textarea.value=SECURITY.sanitizeHTML(component.value);
-  parent.appendChild(textarea);
+  if(c.id==="noteText") t.value=getNote();
+  t.maxLength=5000; p.appendChild(t);
 }
 
-function renderButton(component,parent){
-  if(!component.action||!SECURITY.ALLOWED_ACTIONS.has(component.action)){console.error("Blocked unsafe action:",component.action);return;}
-  const button=document.createElement("button");
-  button.id=component.id||`btn-${Date.now()}`;
-  button.textContent=translations[currentLanguage][component.label.toLowerCase()]||component.label||"Button";
-  button.onclick=function(e){e.preventDefault();e.stopPropagation();handleAction(component.action);};
-  parent.appendChild(button);
+function renderButton(c,p){
+  if(!c.action||!SECURITY.ALLOWED_ACTIONS.has(c.action)){ console.error("Blocked unsafe action:",c.action); return; }
+  const b=document.createElement("button");
+  b.id=c.id||`btn-${Date.now()}`;
+  b.textContent=c.label&&translations[currentLanguage][c.label.toLowerCase()]?translations[currentLanguage][c.label.toLowerCase()]:SECURITY.sanitizeHTML(c.label);
+  b.onclick=function(e){ e.preventDefault(); e.stopPropagation(); handleAction(c.action); };
+  b.setAttribute("onclick","");
+  b.onmouseover=null; b.onerror=null;
+  p.appendChild(b);
 }
 
-function renderList(component,parent){
-  const ul=document.createElement("ul");
-  ul.id=component.id||`list-${Date.now()}`;
-  getList().forEach((item,index)=>{const li=document.createElement("li");li.textContent=`${index+1}. ${item}`;ul.appendChild(li);});
-  parent.appendChild(ul);
+function renderList(c,p){
+  const ul=document.createElement("ul"); ul.id=c.id||`list-${Date.now()}`;
+  getList().forEach((item,i)=>{ const li=document.createElement("li"); li.textContent=`${i+1}. ${item}`; ul.appendChild(li); });
+  p.appendChild(ul);
 }
 
+// ===== ACTION HANDLER =====
 function handleAction(action){
-  if(!action||!SECURITY.ALLOWED_ACTIONS.has(action)) return;
-  switch(action){
-    case"runCommand":
-      const cmd=document.getElementById("commandInput");
-      if(cmd && cmd.value) runApp(String(cmd.value).substring(0,1000));
-      break;
-    case"goHomeAction":runApp("home");break;
-    case"saveNote":
-      const note=document.getElementById("noteText");
-      if(note){localStorage.setItem("note",String(note.value).substring(0,5000));showAlert("ذخیره شد ✅");}
-      break;
-    case"addItem":
-      const item=document.getElementById("itemInput");
-      if(item && item.value){
-        const newItem=String(item.value).substring(0,500);
-        const items=getList();
-        if(items.length<100){items.push(newItem);localStorage.setItem("items",JSON.stringify(items));render(currentState);}else{showError("حداکثر ۱۰۰ آیتم مجاز است");}
-      }
-      break;
-  }
+  if(!action||typeof action!=='string') return;
+  if(!SECURITY.ALLOWED_ACTIONS.has(action)){ console.error("Blocked unsafe action:",action); return; }
+  try{
+    switch(action){
+      case "runCommand":
+        const ci=document.getElementById("commandInput");
+        if(ci&&ci.value) runApp(String(ci.value).substring(0,1000));
+        break;
+      case "goHomeAction": runApp("home"); break;
+      case "saveNote":
+        const ni=document.getElementById("noteText");
+        if(ni){ localStorage.setItem("note",String(ni.value).substring(0,5000)); showAlert("ذخیره شد ✅"); }
+        break;
+      case "addItem":
+        const ii=document.getElementById("itemInput");
+        if(ii&&ii.value){
+          const newItem=String(ii.value).substring(0,500);
+          const items=getList();
+          if(items.length<100){ items.push(newItem); localStorage.setItem("items",JSON.stringify(items)); render(currentState); }
+          else showError("حداکثر ۱۰۰ آیتم مجاز است");
+        }
+        break;
+      default: console.warn("Unhandled action:",action);
+    }
+  } catch(e){ console.error("Action handler error:",e); showError("خطا در انجام عملیات"); }
 }
 
-function showAlert(msg){if(msg) alert(SECURITY.sanitizeHTML(msg.substring(0,200)));}
-function showError(msg){const app=document.getElementById("app");if(!app)return;const div=document.createElement("div");div.className="error-message";div.textContent=`خطا: ${msg}`;app.insertBefore(div,app.firstChild);setTimeout(()=>{if(div.parentNode)div.parentNode.removeChild(div);},5000);}
+// ===== UI UTILITIES =====
+function showAlert(msg){ if(!msg||typeof msg!=='string') return; alert(SECURITY.sanitizeHTML(msg.substring(0,200))); }
+function showError(msg){
+  console.error("App Error:",msg);
+  const app=document.getElementById("app");
+  if(!app) return;
+  const eDiv=document.createElement("div"); eDiv.className="error-message"; eDiv.style.cssText="background:#ff4444;color:white;padding:10px;border-radius:5px;margin:10px 0;text-align:center;";
+  eDiv.textContent=`خطا: ${msg}`;
+  if(app.firstChild) app.insertBefore(eDiv,app.firstChild); else app.appendChild(eDiv);
+  setTimeout(()=>{ if(eDiv.parentNode)eDiv.parentNode.removeChild(eDiv); },5000);
+}
 
-window.handleLanguageChange=handleLanguageChange;
-window.runApp=runApp;
+// ===== GLOBAL EXPORTS =====
+window.handleLanguageChange = handleLanguageChange;
+window.runApp = runApp;
 
-if(typeof window!=="undefined"){
+if(typeof window!=='undefined'){
   window.appDebug={getState:()=>currentState,getHistory:()=>[...history],clearHistory:()=>{history=[];}};
 }
