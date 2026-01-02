@@ -18,7 +18,6 @@ window.addEventListener("DOMContentLoaded", () => {
 function runApp(input) {
   currentState = runEngine(input);
   render(currentState);
-  handleMeta(currentState.meta);
 }
 
 // ===== RENDER =====
@@ -76,14 +75,6 @@ function handleAction(action) {
     runApp("home");
   }
 
-  if (action === "openNote") {
-    runApp("note");
-  }
-
-  if (action === "openList") {
-    runApp("list");
-  }
-
   if (action === "saveNote") {
     const v = document.getElementById("noteText")?.value || "";
     localStorage.setItem("note", v);
@@ -98,6 +89,15 @@ function handleAction(action) {
     items.push(input.value);
     localStorage.setItem("items", JSON.stringify(items));
     render(currentState);
+  }
+
+  // ===== NEW ACTIONS FOR MAIN PAGE BUTTONS =====
+  if (action === "openNote") {
+    runApp("note");
+  }
+
+  if (action === "openList") {
+    runApp("list");
   }
 }
 
