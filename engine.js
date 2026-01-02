@@ -1,5 +1,6 @@
+// ===== CONDITIONAL ENGINE v3.1 (STABLE) =====
 
-      function normalize(cmd) {
+function normalize(cmd) {
   return cmd
     .toLowerCase()
     .replace(/صفحه/g, "screen")
@@ -24,19 +25,23 @@ function runEngine(input) {
   lines.forEach(line => {
     const parts = line.split(" ");
 
+    // title / عنوان
     if (parts[0] === "title") {
       title = parts.slice(1).join(" ");
     }
 
+    // screen / صفحه
     if (parts[0] === "screen" || parts[0] === "go") {
       screen = parts[1];
     }
 
+    // alert / هشدار
     if (parts[0] === "alert") {
       alertText = parts.slice(1).join(" ");
     }
   });
 
+  // ===== SCREENS =====
   if (screen === "note") {
     return {
       meta: { alertText },
@@ -66,6 +71,7 @@ function runEngine(input) {
     };
   }
 
+  // ===== HOME =====
   return {
     meta: { alertText },
     schema: {
@@ -75,11 +81,12 @@ function runEngine(input) {
           type: "textarea",
           id: "commandInput",
           placeholder:
-`مثال فارسی:
-عنوان یادداشت‌های من
+`مثال:
+title یادداشت‌های من
 صفحه note
 
-Example English:
+یا:
+
 title My Notes
 screen note`
         },
