@@ -1,49 +1,41 @@
+// ===== BILINGUAL ENGINE v2 (FA + EN) =====
+
 function normalize(cmd) {
   return cmd
     .toLowerCase()
     .replace(/صفحه/g, "screen")
     .replace(/یادداشت/g, "note")
     .replace(/لیست/g, "list")
-    .replace(/خانه|اصلی/g, "home")
     .replace(/عنوان/g, "title")
     .replace(/هشدار/g, "alert")
-    .replace(/برو|باز/g, "go")
+    .replace(/برو/g, "go")
     .trim();
 }
 
 function runEngine(input) {
-  const lines = input
-    .split("\n")
-    .map(l => normalize(l))
-    .filter(Boolean);
+  const lines = input.split("\n").map(l => normalize(l)).filter(Boolean);
 
   let screen = "home";
-  let title = "اپ شخصی من";
+  let title = "Advanced App Builder";
   let alertText = null;
 
   lines.forEach(line => {
     const parts = line.split(" ");
 
-    if (parts[0] === "title") {
-      title = parts.slice(1).join(" ");
-    }
-
-    if (parts[0] === "screen" || parts[0] === "go") {
-      screen = parts[1];
-    }
-
-    if (parts[0] === "alert") {
-      alertText = parts.slice(1).join(" ");
-    }
+    if (parts[0] === "title") title = parts.slice(1).join(" ");
+    if (parts[0] === "screen" || parts[0] === "go") screen = parts[1];
+    if (parts[0] === "alert") alertText = parts.slice(1).join(" ");
   });
 
   // ===== SCREENS =====
-  const pages = {
+  const screens = {
     home: {
       title,
       components: [
         { type: "button", label: "یادداشت‌ها", action: "openNote" },
-        { type: "button", label: "لیست", action: "openList" }
+        { type: "button", label: "لیست من", action: "openList" },
+        { type: "textarea", id: "commandInput", placeholder: "مثال:\ntitle یادداشت‌های من\nصفحه note" },
+        { type: "button", label: "اجرا", action: "runCommand" }
       ]
     },
     note: {
@@ -65,5 +57,8 @@ function runEngine(input) {
     }
   };
 
-  return { schema: pages[screen], meta: { alertText } };
+  return {
+    schema: screens[screen] || screens.home,
+    meta: { alertText }
+  };
 }
