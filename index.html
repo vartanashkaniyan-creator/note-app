@@ -1,74 +1,33 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <meta name="description" content="Advanced App Builder - ساخت اپلیکیشن با دستورات ساده">
-  <meta name="theme-color" content="#0f0f0f">
-  <title>Advanced App Builder | سازنده اپ پیشرفته</title>
-  <link rel="stylesheet" href="style.css" />
-  
-  <!-- Security Headers (شبیه‌سازی) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
-  <meta name="referrer" content="strict-origin">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سازنده اپ پیشرفته | Advanced App Builder</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Language Selector -->
   <div class="header-bar">
-    <select id="languageSelect" onchange="handleLanguageChange(event)" 
-            aria-label="Select language" title="زبان / Language">
+    <select id="languageSelect" onchange="handleLanguageChange(event)">
       <option value="fa">فارسی</option>
       <option value="en">English</option>
     </select>
-    
-    <button onclick="window.appDebug && console.log(window.appDebug.getState())" 
-            class="debug-btn" title="اطلاعات دیباگ">
-      🐞
-    </button>
+    <button onclick="window.appDebug && console.log(window.appDebug.getState())" class="debug-btn">🐞</button>
   </div>
 
-  <!-- Main App Container -->
-  <main id="app" role="main" aria-label="Application Interface">
-    <!-- محتوا به صورت پویا توسط JavaScript ساخته می‌شود -->
-    <noscript>
-      <div class="noscript-warning">
-        <h2>⚠️ جاوااسکریپت لازم است</h2>
-        <p>این اپلیکیشن برای کار کردن نیاز به جاوااسکریپت دارد. لطفاً جاوااسکریپت مرورگر خود را فعال کنید.</p>
-      </div>
-    </noscript>
+  <main id="app">
+    <!-- محتوای پویا -->
   </main>
 
-  <!-- Footer -->
   <footer>
     <p>ساخته شده با ❤️ | Advanced App Builder v2.1</p>
-    <p class="hint">برای شروع: "screen note" یا "صفحه یادداشت" را در کادر دستورات وارد کنید</p>
+    <p class="hint">دستورات: "screen note" یا "صفحه یادداشت" یا "plugin weather"</p>
   </footer>
 
-  <!-- JavaScript Files -->
+  <!-- ترتیب مهم است: اول موتور، سپس برنامه اصلی، بعد سیستم پلاگین -->
   <script src="engine.js"></script>
   <script src="main.js"></script>
-  
-  <!-- Loading Fallback -->
-  <script>
-    // نمایش loading اگر JS فعال است
-    document.addEventListener('DOMContentLoaded', function() {
-      const app = document.getElementById('app');
-      if (app && app.children.length === 0) {
-        const loader = document.createElement('div');
-        loader.className = 'loader';
-        loader.innerHTML = `
-          <div class="spinner"></div>
-          <p>در حال بارگذاری...</p>
-        `;
-        app.appendChild(loader);
-      }
-    });
-    
-    // حذف loader وقتی برنامه آماده شد
-    window.addEventListener('appReady', function() {
-      const loader = document.querySelector('.loader');
-      if (loader) loader.remove();
-    });
-  </script>
+  <script src="plugin-system.js"></script>
+  <!-- پلاگین‌ها بعداً اضافه خواهند شد -->
 </body>
 </html>
