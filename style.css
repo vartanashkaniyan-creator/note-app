@@ -18,7 +18,17 @@ html, body {
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
-  min-height: 100vh; /* باعث میشه صفحه خالی دیده نشه */
+  min-height: 100vh;
+}
+
+/* ===== SELECT LANGUAGE ===== */
+#languageSelect {
+  width: 150px;
+  padding: 10px;
+  background: #333;
+  color: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
 }
 
 /* ===== TITLE ===== */
@@ -30,8 +40,8 @@ h1, h2 {
 /* ===== TEXTAREA ===== */
 textarea {
   width: 100%;
-  min-height: 140px;   /* به جای height */
-  resize: vertical;    /* کاربر بتونه بکشه */
+  min-height: 140px;
+  resize: vertical;
   background: #1e1e1e;
   color: #ffffff;
   border: 1px solid #333;
@@ -60,19 +70,4 @@ button {
 
 button:active {
   transform: scale(0.98);
-}
-
-/* ===== LIST ===== */
-ul {
-  list-style: none;
-  padding: 0;
-  margin-top: 16px;
-}
-
-li {
-  background: #1e1e1e;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  border: 1px solid #333;
 }
