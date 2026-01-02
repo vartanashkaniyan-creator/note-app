@@ -1,5 +1,4 @@
-// engine.js - FINAL FIXED VERSION
-// پشتیبانی از دستورات plugin و صفحات
+// engine.js - FINAL STABLE + PLUGIN SUPPORT
 
 const ALLOWED_SCREENS = new Set(["home", "note", "list"]);
 
@@ -11,14 +10,12 @@ function normalize(cmd) {
     .replace(/یادداشت/g, "note")
     .replace(/لیست/g, "list")
     .replace(/برو/g, "go")
-    .replace(/پلاگین/g, "plugin")
     .trim();
 }
 
 function runEngine(input) {
   let screen = "home";
   let alertText = null;
-  let pluginCommand = null;
 
   if (typeof input === "string" && input !== "home") {
     const lines = input
@@ -28,7 +25,7 @@ function runEngine(input) {
 
     lines.forEach(line => {
       const parts = line.split(" ");
-      
+
       // تغییر صفحه
       if ((parts[0] === "screen" || parts[0] === "go") && parts[1]) {
         if (ALLOWED_SCREENS.has(parts[1])) {
@@ -36,41 +33,35 @@ function runEngine(input) {
         }
       }
 
-      // نمایش هشدار
+      // نمایش alert
       if (parts[0] === "alert") {
         alertText = parts.slice(1).join(" ");
       }
 
-      // فرمان پلاگین
+      // اجرای پلاگین
       if (parts[0] === "plugin" && parts[1]) {
-        pluginCommand = parts.slice(1).join(" ");
+        if (window.PluginSystem) {
+          try {
+            const pluginOutput = window.PluginSystem.execute(parts[1], ...parts.slice(2));
+            alertText = pluginOutput; // نتیجه پلاگین در alert
+          } catch (e) {
+            console.error("Plugin execution error:", e);
+            alertText = `خطا در اجرای پلاگین ${parts[1]}`;
+          }
+        } else {
+          alertText = "سیستم پلاگین بارگذاری نشده است";
+        }
       }
     });
   }
 
-  const schema = pluginCommand ? {
-    title: "plugin",
-    components: [
-      {
-        type: "textarea",
-        id: "pluginOutput",
-        placeholder: "plugin output",
-        value: window.PluginSystem ? window.PluginSystem.execute(pluginCommand) : "پلاگین یافت نشد"
-      },
-      {
-        type: "button",
-        label: "back",
-        action: "goHomeAction"
-      }
-    ]
-  } : getScreenSchema(screen);
-
   return {
-    schema,
+    schema: getScreenSchema(screen),
     meta: { alertText }
   };
 }
 
+// ===== SCHEMA DEFINITIONS =====
 function getScreenSchema(screen) {
   if (screen === "note") {
     return {
@@ -95,8 +86,9 @@ function getScreenSchema(screen) {
     };
   }
 
+  // ===== HOME =====
   return {
-    title: "home",
+    title: "title",
     components: [
       { type: "button", label: "note", action: "openNote" },
       { type: "button", label: "list", action: "openList" },
@@ -106,5 +98,5 @@ function getScreenSchema(screen) {
   };
 }
 
-// EXPORT
+// ===== EXPORT =====
 window.runEngine = runEngine;
