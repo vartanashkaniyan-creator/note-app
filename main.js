@@ -1,3 +1,4 @@
+// main.js
 let currentState = null;
 
 // ===== STORAGE =====
@@ -9,7 +10,7 @@ function getList() {
   return JSON.parse(localStorage.getItem("items") || "[]");
 }
 
-// ===== START =====
+// ===== START APP (خیلی مهم) =====
 window.addEventListener("DOMContentLoaded", () => {
   runApp("home");
 });
@@ -89,5 +90,14 @@ function handleAction(action) {
     items.push(input.value);
     localStorage.setItem("items", JSON.stringify(items));
     render(currentState);
+  }
+}
+
+// ===== META =====
+function handleMeta(meta) {
+  if (!meta) return;
+
+  if (meta.alertText) {
+    alert(meta.alertText);
   }
 }
