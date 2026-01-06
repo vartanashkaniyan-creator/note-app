@@ -1,9 +1,11 @@
-// engine.js - Advanced Engine v4
+// engine.js - Advanced Engine v5
 const ALLOWED_SCREENS = new Set(["home", "note", "list"]);
 
 let variables = {};
+let functions = {};
 let currentScreen = "home";
 let alertText = null;
+let outputBuffer = [];
 
 /* ================= NORMALIZE ================= */
 function normalize(cmd) {
@@ -20,6 +22,10 @@ function normalize(cmd) {
     .replace(/وگرنه/g, "else")
     .replace(/بذار/g, "set")
     .replace(/هشدار/g, "alert")
+    .replace(/چاپ/g, "print")
+    .replace(/پاک/g, "clear")
+    .replace(/تابع/g, "function")
+    .replace(/فراخوانی/g, "call")
     .trim();
 }
 
@@ -37,13 +43,10 @@ function toNumber(val) {
 
 /* ================= ENGINE ================= */
 function runEngine(input) {
-  variables = {};
-  currentScreen = "home";
   alertText = null;
+  outputBuffer = [];
 
-  if (!input || !input.trim()) {
-    return result();
-  }
+  if (!input || !input.trim()) return result();
 
   const lines = input
     .split("\n")
@@ -57,8 +60,20 @@ function runEngine(input) {
     const parts = line.split(" ");
     const cmd = parts[0];
 
+    /* ---------- FUNCTION ---------- */
+    if (cmd === "function") {
+      const name = parts[1];
+      const body = [];
+      i++;
+      while (i < lines.length && lines[i] !== "end") {
+        body.push(lines[i]);
+        i++;
+      }
+      functions[name] = body;
+    }
+
     /* ---------- LOOP ---------- */
-    if (cmd === "loop") {
+    else if (cmd === "loop") {
       const count = toNumber(parts[1]);
       const block = [];
       i++;
@@ -85,18 +100,15 @@ function runEngine(input) {
       let target = ifBlock;
 
       while (i < lines.length && lines[i] !== "end") {
-        if (lines[i] === "else") {
-          target = elseBlock;
-        } else {
-          target.push(lines[i]);
-        }
+        if (lines[i] === "else") target = elseBlock;
+        else target.push(lines[i]);
         i++;
       }
 
       (condition ? ifBlock : elseBlock).forEach(executeLine);
     }
 
-    /* ---------- NORMAL LINE ---------- */
+    /* ---------- NORMAL ---------- */
     else {
       executeLine(line);
     }
@@ -107,7 +119,7 @@ function runEngine(input) {
   return result();
 }
 
-/* ================= LINE EXEC ================= */
+/* ================= EXEC LINE ================= */
 function executeLine(line) {
   const parts = line.split(" ");
   const cmd = parts[0];
@@ -126,6 +138,20 @@ function executeLine(line) {
     alertText = interpolate(parts.slice(1).join(" "));
   }
 
+  else if (cmd === "print") {
+    outputBuffer.push(interpolate(parts.slice(1).join(" ")));
+  }
+
+  else if (cmd === "clear") {
+    outputBuffer = [];
+  }
+
+  else if (cmd === "call") {
+    const fname = parts[1];
+    const body = functions[fname];
+    if (body) body.forEach(executeLine);
+  }
+
   else if (cmd === "plugin" && window.PluginSystem) {
     window.PluginSystem.execute(parts[1]);
   }
@@ -133,7 +159,6 @@ function executeLine(line) {
 
 /* ================= CALC ================= */
 function calc(expr) {
-  // فقط + - * /
   try {
     if (!/^[\d+\-*/ ().]+$/.test(expr)) return expr;
     return eval(expr);
@@ -161,21 +186,27 @@ function evaluate(a, op, b) {
 /* ================= RESULT ================= */
 function result() {
   return {
-    schema: getScreenSchema(currentScreen),
+    schema: getScreenSchema(currentScreen, outputBuffer),
     meta: {
       alertText,
       variables,
+      functions,
       currentScreen
     }
   };
 }
 
-/* ================= UI SCHEMA ================= */
-function getScreenSchema(screen) {
+/* ================= UI ================= */
+function getScreenSchema(screen, output) {
+  const outputBox = output.length
+    ? [{ type: "output", value: output }]
+    : [];
+
   if (screen === "note") {
     return {
       title: "note",
       components: [
+        ...outputBox,
         { type: "textarea", id: "noteText", placeholder: "note" },
         { type: "button", label: "save", action: "saveNote" },
         { type: "button", label: "back", action: "goHomeAction" }
@@ -187,6 +218,7 @@ function getScreenSchema(screen) {
     return {
       title: "list",
       components: [
+        ...outputBox,
         { type: "textarea", id: "itemInput", placeholder: "item" },
         { type: "button", label: "add", action: "addItem" },
         { type: "list", id: "itemsList" },
@@ -198,6 +230,7 @@ function getScreenSchema(screen) {
   return {
     title: "home",
     components: [
+      ...outputBox,
       { type: "textarea", id: "commandInput", placeholder: "commands" },
       { type: "button", label: "execute", action: "runCommand" }
     ]
