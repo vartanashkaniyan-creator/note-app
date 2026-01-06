@@ -1,20 +1,16 @@
 // ===== ENGINE.JS =====
+// موتور تحلیل دستورات (مرحله ۱)
 
 const ALLOWED_SCREENS = new Set(["home", "note", "list"]);
 
-function normalize(cmd) {
-  if (typeof cmd !== "string") return "";
-  return cmd
+function normalize(line) {
+  return line
     .toLowerCase()
+    .trim()
     .replace(/صفحه/g, "screen")
     .replace(/یادداشت/g, "note")
     .replace(/لیست/g, "list")
-    .replace(/برو/g, "go")
-    .replace(/اگر/g, "if")
-    .replace(/خالی/g, "empty")
-    .replace(/نباشد|نیست/g, "not")
-    .replace(/تاخیر|مکث/g, "delay")
-    .trim();
+    .replace(/برو/g, "go");
 }
 
 function runEngine(input) {
@@ -22,12 +18,9 @@ function runEngine(input) {
   let actions = [];
 
   if (typeof input === "string" && input.trim() !== "") {
-    const lines = input
-      .split("\n")
-      .map(l => normalize(l))
-      .filter(Boolean);
+    const lines = input.split("\n").map(normalize).filter(Boolean);
 
-    lines.forEach(line => {
+    for (const line of lines) {
       const parts = line.split(" ");
       const cmd = parts[0];
 
@@ -36,59 +29,67 @@ function runEngine(input) {
         screen = parts[1];
       }
 
-      // alert
+      // پیام
       if (cmd === "alert") {
-        actions.push({ type: "alert", text: parts.slice(1).join(" ") });
+        actions.push({
+          type: "alert",
+          text: parts.slice(1).join(" ")
+        });
       }
 
-      // delay
+      // تأخیر
       if (cmd === "delay") {
-        actions.push({ type: "delay", time: Number(parts[1]) || 1 });
+        const sec = Number(parts[1]);
+        if (!isNaN(sec)) {
+          actions.push({
+            type: "delay",
+            time: sec
+          });
+        }
       }
 
       // شرط
       if (cmd === "if") {
-        actions.push({ type: "if", condition: parts.slice(1).join(" ") });
+        actions.push({
+          type: "if",
+          condition: parts.slice(1).join(" ")
+        });
       }
-    });
+    }
   }
 
   return {
     schema: getScreenSchema(screen),
-    actions,
-    currentScreen: screen
+    actions
   };
 }
 
 function getScreenSchema(screen) {
   if (screen === "note") {
     return {
-      title: "note",
       components: [
-        { type: "textarea", id: "noteText", placeholder: "یادداشت..." },
-        { type: "button", label: "ذخیره", action: "saveNote" },
-        { type: "button", label: "بازگشت", action: "goHomeAction" }
+        { type: "textarea", id: "noteText", placeholder: "note" },
+        { type: "button", label: "save", action: "saveNote" },
+        { type: "button", label: "back", action: "goHomeAction" }
       ]
     };
   }
 
   if (screen === "list") {
     return {
-      title: "list",
       components: [
-        { type: "textarea", id: "itemInput", placeholder: "آیتم..." },
-        { type: "button", label: "افزودن", action: "addItem" },
-        { type: "list", id: "itemsList" },
-        { type: "button", label: "بازگشت", action: "goHomeAction" }
+        { type: "textarea", id: "itemInput", placeholder: "item" },
+        { type: "button", label: "add", action: "addItem" },
+        { type: "list" },
+        { type: "button", label: "back", action: "goHomeAction" }
       ]
     };
   }
 
   return {
-    title: "home",
     components: [
-      { type: "textarea", id: "commandInput", placeholder: "دستور بنویس..." },
-      { type: "button", label: "اجرا", action: "runCommand" }
+      { type: "textarea", id: "commandInput", placeholder: "commands" },
+      { type: "button", label: "execute", action: "runCommand" }
     ]
   };
 }
