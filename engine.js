@@ -1,4 +1,5 @@
-// engine.js - FIXED & STABLE
+// engine.js - FINAL WORKING VERSION
+
 const ALLOWED_SCREENS = new Set(["home", "note", "list"]);
 
 function normalize(cmd) {
@@ -6,19 +7,17 @@ function normalize(cmd) {
   return cmd
     .toLowerCase()
     .replace(/صفحه/g, "screen")
+    .replace(/برو/g, "go")
     .replace(/یادداشت/g, "note")
     .replace(/لیست/g, "list")
-    .replace(/برو/g, "go")
-    .replace(/سلام/g, "alert سلام") // مثال ساده alert فارسی
     .trim();
 }
 
 function runEngine(input) {
   let screen = "home";
   let alertText = null;
-  let pluginCommand = null;
 
-  if (typeof input === "string" && input.trim() !== "") {
+  if (input && input !== "home") {
     const lines = input
       .split("\n")
       .map(l => normalize(l))
@@ -26,36 +25,29 @@ function runEngine(input) {
 
     lines.forEach(line => {
       const parts = line.split(" ");
-      const cmd = parts[0];
 
-      // صفحه‌ها
-      if ((cmd === "screen" || cmd === "go") && parts[1]) {
-        if (ALLOWED_SCREENS.has(parts[1])) screen = parts[1];
+      if (
+        (parts[0] === "screen" || parts[0] === "go") &&
+        ALLOWED_SCREENS.has(parts[1])
+      ) {
+        screen = parts[1];
       }
 
-      // alert
-      if (cmd === "alert") {
+      if (parts[0] === "alert") {
         alertText = parts.slice(1).join(" ");
-      }
-
-      // plugin
-      if (cmd === "plugin" && parts[1]) {
-        pluginCommand = parts.slice(1).join(" ");
       }
     });
   }
 
   return {
     schema: getScreenSchema(screen),
-    meta: { alertText, pluginCommand, currentScreen: screen }
+    meta: { alertText }
   };
 }
 
-// ===== SCHEMA DEFINITIONS =====
 function getScreenSchema(screen) {
   if (screen === "note") {
     return {
-      title: "note",
       components: [
         { type: "textarea", id: "noteText", placeholder: "note" },
         { type: "button", label: "save", action: "saveNote" },
@@ -66,25 +58,23 @@ function getScreenSchema(screen) {
 
   if (screen === "list") {
     return {
-      title: "list",
       components: [
         { type: "textarea", id: "itemInput", placeholder: "item" },
         { type: "button", label: "add", action: "addItem" },
-        { type: "list", id: "itemsList" },
+        { type: "list" },
         { type: "button", label: "back", action: "goHomeAction" }
       ]
     };
   }
 
-  // HOME
   return {
-    title: "title",
     components: [
+      { type: "button", label: "note", action: "openNote" },
+      { type: "button", label: "list", action: "openList" },
       { type: "textarea", id: "commandInput", placeholder: "commands" },
       { type: "button", label: "execute", action: "runCommand" }
     ]
   };
 }
 
-// ===== EXPORT =====
 window.runEngine = runEngine;
