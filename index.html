@@ -1,156 +1,30 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced App Builder</title>
-
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#121212;color:#eee;font-family:tahoma}
-.header-bar{display:flex;justify-content:space-between;padding:10px;background:#1e1e1e}
-select,button,textarea{background:#1e1e1e;color:#fff;border:1px solid #333;border-radius:6px}
-button{padding:10px;margin:5px 0;background:#4caf50;cursor:pointer}
-textarea{width:100%;min-height:100px;padding:10px;margin-bottom:10px}
-#app{max-width:700px;margin:auto;padding:20px}
-ul{list-style:none}
-li{background:#222;margin:5px 0;padding:8px;border-radius:5px}
-footer{text-align:center;color:#777;font-size:13px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سازنده اپ پیشرفته | Advanced App Builder</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="header-bar">
-<select onchange="handleLanguageChange(event)">
-<option value="fa">فارسی</option>
-<option value="en">English</option>
-</select>
-<button onclick="console.log(state)">🐞</button>
-</div>
+  <div class="header-bar">
+    <select id="languageSelect" onchange="handleLanguageChange(event)">
+      <option value="fa">فارسی</option>
+      <option value="en">English</option>
+    </select>
+    <button class="debug-btn" onclick="console.log(currentScreen, currentOutput)">🐞</button>
+  </div>
 
-<main id="app"></main>
+  <main id="app"></main>
 
-<footer>
-<p>Advanced App Builder</p>
-<p>دستور نمونه: screen note | صفحه لیست | alert سلام</p>
-</footer>
+  <footer>
+    <p>ساخته شده با ❤️ | Advanced App Builder</p>
+    <p class="hint">دستورات: "screen note", "screen list", "print پیام" یا "clear"</p>
+  </footer>
 
-<!-- ================= ENGINE ================= -->
-<script>
-const ALLOWED_SCREENS=new Set(["home","note","list"]);
-
-function normalize(cmd){
-return cmd.toLowerCase()
-.replace(/صفحه/g,"screen")
-.replace(/یادداشت/g,"note")
-.replace(/لیست/g,"list")
-.replace(/سلام/g,"alert سلام")
-.trim();
-}
-
-function runEngine(input){
-let screen="home",alertText=null;
-if(input){
-input.split("\n").map(normalize).forEach(l=>{
-const p=l.split(" ");
-if((p[0]==="screen"||p[0]==="go")&&ALLOWED_SCREENS.has(p[1])) screen=p[1];
-if(p[0]==="alert") alertText=p.slice(1).join(" ");
-});
-}
-return{schema:getSchema(screen),meta:{alertText,screen}};
-}
-
-function getSchema(screen){
-if(screen==="note") return{
-components:[
-{type:"textarea",id:"noteText"},
-{type:"button",label:"save",action:"saveNote"},
-{type:"button",label:"back",action:"home"}
-]};
-if(screen==="list") return{
-components:[
-{type:"textarea",id:"itemInput"},
-{type:"button",label:"add",action:"addItem"},
-{type:"list"},
-{type:"button",label:"back",action:"home"}
-]};
-return{
-components:[
-{type:"textarea",id:"commandInput"},
-{type:"button",label:"execute",action:"runCommand"},
-{type:"button",label:"note",action:"note"},
-{type:"button",label:"list",action:"list"}
-]};
-}
-
-window.runEngine=runEngine;
-</script>
-
-<!-- ================= MAIN ================= -->
-<script>
-let state=null;
-let items=JSON.parse(localStorage.getItem("items")||"[]");
-
-function runApp(cmd=""){
-state=runEngine(cmd);
-render();
-if(state.meta.alertText) alert(state.meta.alertText);
-}
-
-function render(){
-const app=document.getElementById("app");
-app.innerHTML="";
-state.schema.components.forEach(c=>{
-if(c.type==="textarea"){
-const t=document.createElement("textarea");
-t.id=c.id;
-if(c.id==="noteText") t.value=localStorage.getItem("note")||"";
-app.appendChild(t);
-}
-if(c.type==="button"){
-const b=document.createElement("button");
-b.textContent=c.label;
-b.onclick=()=>handle(c.action);
-app.appendChild(b);
-}
-if(c.type==="list"){
-const ul=document.createElement("ul");
-items.forEach(i=>{
-const li=document.createElement("li");
-li.textContent=i;
-ul.appendChild(li);
-});
-app.appendChild(ul);
-}
-});
-}
-
-function handle(action){
-if(action==="runCommand"){
-runApp(document.getElementById("commandInput").value);
-}
-if(action==="note") runApp("screen note");
-if(action==="list") runApp("screen list");
-if(action==="home") runApp("home");
-
-if(action==="saveNote"){
-localStorage.setItem("note",document.getElementById("noteText").value);
-alert("ذخیره شد");
-}
-
-if(action==="addItem"){
-const v=document.getElementById("itemInput").value.trim();
-if(v){items.push(v);localStorage.setItem("items",JSON.stringify(items));runApp("screen list")}
-}
-}
-
-function handleLanguageChange(e){
-document.documentElement.dir=e.target.value==="fa"?"rtl":"ltr";
-}
-
-document.addEventListener("DOMContentLoaded",()=>runApp());
-</script>
-
+  <script src="engine.js"></script>
+  <script src="main.js"></script>
+  <script src="plugin-system.js"></script>
 </body>
 </html>
