@@ -1,89 +1,44 @@
-"use strict";
+// main.js - FINAL WORKING VERSION
 
-let currentState = null;
-let history = [];
-const MAX_HISTORY = 50;
+const app = document.getElementById("app");
 
-// ===== SAFE ACTIONS =====
-const ALLOWED_ACTIONS = new Set([
-  "runCommand", "goHomeAction", "saveNote", "addItem"
-]);
+let notes = "";
+let items = [];
 
-function sanitize(text) {
-  const div = document.createElement("div");
-  div.textContent = text || "";
-  return div.innerHTML;
-}
+// اجرای برنامه
+function runApp(command = "home") {
+  const result = window.runEngine(command);
+  render(result.schema);
 
-// ===== STORAGE =====
-function getNote() {
-  return sanitize(localStorage.getItem("note") || "");
-}
-
-function getList() {
-  try {
-    const items = JSON.parse(localStorage.getItem("items") || "[]");
-    return Array.isArray(items) ? items.map(sanitize) : [];
-  } catch { return []; }
-}
-
-// ===== APP =====
-window.addEventListener("DOMContentLoaded", () => {
-  runApp("home");
-});
-
-function runApp(input) {
-  // تاریخچه
-  history.push({ input, ts: new Date().toISOString() });
-  if (history.length > MAX_HISTORY) history.shift();
-
-  currentState = window.runEngine(input || "");
-
-  render(currentState);
-
-  // Alert
-  if (currentState.meta.alertText) {
-    setTimeout(() => alert(currentState.meta.alertText), 50);
-  }
-
-  // Plugin
-  if (currentState.meta.pluginCommand && window.PluginSystem) {
-    const result = window.PluginSystem.execute(currentState.meta.pluginCommand);
-    setTimeout(() => alert(result), 100);
+  if (result.meta?.alertText) {
+    alert(result.meta.alertText);
   }
 }
 
-// ===== RENDER =====
-function render(state) {
-  const app = document.getElementById("app");
-  if (!app || !state || !state.schema) return;
-
+// رندر UI
+function render(schema) {
   app.innerHTML = "";
 
-  state.schema.components.forEach(c => {
-    if (c.type === "textarea") {
-      const t = document.createElement("textarea");
-      t.id = c.id;
-      t.placeholder = c.placeholder;
-
-      if (c.id === "noteText") t.value = getNote();
-      if (c.id === "itemInput") t.value = "";
-
-      app.appendChild(t);
+  schema.components.forEach(comp => {
+    if (comp.type === "button") {
+      const btn = document.createElement("button");
+      btn.innerText = comp.label;
+      btn.onclick = () => handleAction(comp.action);
+      app.appendChild(btn);
     }
 
-    if (c.type === "button") {
-      const b = document.createElement("button");
-      b.textContent = c.label;
-      b.onclick = () => handleAction(c.action);
-      app.appendChild(b);
+    if (comp.type === "textarea") {
+      const ta = document.createElement("textarea");
+      ta.id = comp.id;
+      ta.placeholder = comp.placeholder || "";
+      app.appendChild(ta);
     }
 
-    if (c.type === "list") {
+    if (comp.type === "list") {
       const ul = document.createElement("ul");
-      getList().forEach((item, i) => {
+      items.forEach(i => {
         const li = document.createElement("li");
-        li.textContent = `${i + 1}. ${item}`;
+        li.innerText = i;
         ul.appendChild(li);
       });
       app.appendChild(ul);
@@ -91,30 +46,53 @@ function render(state) {
   });
 }
 
-// ===== HANDLE ACTIONS =====
+// مدیریت اکشن‌ها
 function handleAction(action) {
-  if (!ALLOWED_ACTIONS.has(action)) return;
+  switch (action) {
 
-  if (action === "runCommand") {
-    const cmd = document.getElementById("commandInput")?.value || "";
-    runApp(cmd);
-  }
+    case "runCommand": {
+      const input = document.getElementById("commandInput")?.value || "";
+      runApp(input);
+      break;
+    }
 
-  if (action === "goHomeAction") runApp("home");
+    case "openNote":
+      runApp("screen note");
+      break;
 
-  if (action === "saveNote") {
-    const val = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", val);
-    alert("ذخیره شد ✅");
-  }
+    case "openList":
+      runApp("screen list");
+      break;
 
-  if (action === "addItem") {
-    const val = document.getElementById("itemInput")?.value || "";
-    if (!val) return;
-    const list = getList();
-    if (list.length >= 100) return alert("حداکثر ۱۰۰ آیتم مجاز است");
-    list.push(val);
-    localStorage.setItem("items", JSON.stringify(list));
-    render(currentState);
-  }
+    case "goHomeAction":
+      runApp("home");
+      break;
+
+    case "saveNote": {
+      const ta = document.getElementById("noteText");
+      if (ta) {
+        notes = ta.value;
+        alert("Note saved");
       }
+      break;
+    }
+
+    case "addItem": {
+      const ta = document.getElementById("itemInput");
+      if (ta && ta.value.trim()) {
+        items.push(ta.value.trim());
+        ta.value = "";
+        runApp("screen list");
+      }
+      break;
+    }
+
+    default:
+      console.warn("Unknown action:", action);
+  }
+}
+
+// اجرای اولیه
+document.addEventListener("DOMContentLoaded", () => {
+  runApp();
+});
