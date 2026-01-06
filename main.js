@@ -1,98 +1,30 @@
-// main.js - FINAL WORKING VERSION
+function runApp(input) {
+  currentState = window.runEngine(input || "");
+  render(currentState);
+  executeActions(currentState.actions);
+}
 
-const app = document.getElementById("app");
+async function executeActions(actions = []) {
+  for (const act of actions) {
+    if (act.type === "alert") {
+      alert(act.text);
+    }
 
-let notes = "";
-let items = [];
+    if (act.type === "delay") {
+      await new Promise(r => setTimeout(r, act.time * 1000));
+    }
 
-// اجرای برنامه
-function runApp(command = "home") {
-  const result = window.runEngine(command);
-  render(result.schema);
-
-  if (result.meta?.alertText) {
-    alert(result.meta.alertText);
+    if (act.type === "if") {
+      if (act.condition === "note empty") {
+        if (!localStorage.getItem("note")) alert("یادداشتی وجود ندارد");
+      }
+      if (act.condition === "note not empty") {
+        if (localStorage.getItem("note")) alert("یادداشت داری");
+      }
+      if (act.condition === "list empty") {
+        const list = JSON.parse(localStorage.getItem("items") || "[]");
+        if (list.length === 0) alert("لیست خالی است");
+      }
+    }
   }
 }
-
-// رندر UI
-function render(schema) {
-  app.innerHTML = "";
-
-  schema.components.forEach(comp => {
-    if (comp.type === "button") {
-      const btn = document.createElement("button");
-      btn.innerText = comp.label;
-      btn.onclick = () => handleAction(comp.action);
-      app.appendChild(btn);
-    }
-
-    if (comp.type === "textarea") {
-      const ta = document.createElement("textarea");
-      ta.id = comp.id;
-      ta.placeholder = comp.placeholder || "";
-      app.appendChild(ta);
-    }
-
-    if (comp.type === "list") {
-      const ul = document.createElement("ul");
-      items.forEach(i => {
-        const li = document.createElement("li");
-        li.innerText = i;
-        ul.appendChild(li);
-      });
-      app.appendChild(ul);
-    }
-  });
-}
-
-// مدیریت اکشن‌ها
-function handleAction(action) {
-  switch (action) {
-
-    case "runCommand": {
-      const input = document.getElementById("commandInput")?.value || "";
-      runApp(input);
-      break;
-    }
-
-    case "openNote":
-      runApp("screen note");
-      break;
-
-    case "openList":
-      runApp("screen list");
-      break;
-
-    case "goHomeAction":
-      runApp("home");
-      break;
-
-    case "saveNote": {
-      const ta = document.getElementById("noteText");
-      if (ta) {
-        notes = ta.value;
-        alert("Note saved");
-      }
-      break;
-    }
-
-    case "addItem": {
-      const ta = document.getElementById("itemInput");
-      if (ta && ta.value.trim()) {
-        items.push(ta.value.trim());
-        ta.value = "";
-        runApp("screen list");
-      }
-      break;
-    }
-
-    default:
-      console.warn("Unknown action:", action);
-  }
-}
-
-// اجرای اولیه
-document.addEventListener("DOMContentLoaded", () => {
-  runApp();
-});
