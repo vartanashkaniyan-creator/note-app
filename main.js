@@ -1,174 +1,130 @@
-// ===== MAIN.JS =====
-// نسخه پایدار – اجرای دستورات + رندر UI
+// main.js - FINAL STABLE VERSION
+// Compatible with engine.js (output-enabled)
 
-let currentState = null;
+// ===== STATE =====
+let currentScreen = "home";
+let currentOutput = [];
 
-/* =========================
-   ابزارهای کمکی
-========================= */
-
-function sanitize(text) {
-  const div = document.createElement("div");
-  div.textContent = text || "";
-  return div.innerHTML;
-}
-
-function getNote() {
-  return localStorage.getItem("note") || "";
-}
-
-function getList() {
-  try {
-    const items = JSON.parse(localStorage.getItem("items") || "[]");
-    return Array.isArray(items) ? items : [];
-  } catch {
-    return [];
-  }
-}
-
-/* =========================
-   شروع برنامه
-========================= */
-
+// ===== START APP =====
 window.addEventListener("DOMContentLoaded", () => {
-  runApp("home");
+  renderScreen("home");
 });
 
-/* =========================
-   اجرای موتور
-========================= */
+// ===== RUN APP =====
+function runApp(command) {
+  const result = window.runEngine(command || "");
 
-function runApp(input) {
-  currentState = window.runEngine(input || "");
-  render(currentState);
-  executeActions(currentState.actions || []);
-}
+  if (result.screen) {
+    currentScreen = result.screen;
+    renderScreen(currentScreen);
+  }
 
-/* =========================
-   اجرای دستورات پیشرفته
-========================= */
-
-async function executeActions(actions) {
-  for (const act of actions) {
-
-    // ALERT
-    if (act.type === "alert") {
-      alert(act.text);
-    }
-
-    // DELAY
-    if (act.type === "delay") {
-      await new Promise(res => setTimeout(res, act.time * 1000));
-    }
-
-    // IF CONDITIONS
-    if (act.type === "if") {
-      const condition = act.condition;
-
-      if (condition === "note empty") {
-        if (!getNote()) alert("یادداشت خالی است");
-      }
-
-      if (condition === "note not empty") {
-        if (getNote()) alert("یادداشت داری");
-      }
-
-      if (condition === "list empty") {
-        if (getList().length === 0) alert("لیست خالی است");
-      }
-
-      if (condition === "list not empty") {
-        if (getList().length > 0) alert("لیست پر است");
-      }
-    }
+  if (Array.isArray(result.output)) {
+    currentOutput = result.output;
+    renderOutput();
   }
 }
 
-/* =========================
-   رندر UI
-========================= */
-
-function render(state) {
+// ===== RENDER SCREEN =====
+function renderScreen(screen) {
   const app = document.getElementById("app");
-  if (!app || !state || !state.schema) return;
+  if (!app) return;
 
   app.innerHTML = "";
 
-  state.schema.components.forEach(c => {
+  // ===== OUTPUT BOX =====
+  const outputBox = document.createElement("div");
+  outputBox.id = "outputBox";
+  outputBox.style.marginBottom = "20px";
+  app.appendChild(outputBox);
 
-    // TEXTAREA
-    if (c.type === "textarea") {
-      const t = document.createElement("textarea");
-      t.id = c.id;
-      t.placeholder = c.placeholder || "";
+  // ===== HOME =====
+  if (screen === "home") {
+    const textarea = document.createElement("textarea");
+    textarea.id = "commandInput";
+    textarea.placeholder = "دستور بنویس…";
+    app.appendChild(textarea);
 
-      if (c.id === "noteText") t.value = getNote();
-      if (c.id === "itemInput") t.value = "";
+    const btn = document.createElement("button");
+    btn.textContent = "اجرا";
+    btn.onclick = () => {
+      runApp(textarea.value);
+    };
+    app.appendChild(btn);
+  }
 
-      app.appendChild(t);
-    }
+  // ===== NOTE =====
+  if (screen === "note") {
+    const textarea = document.createElement("textarea");
+    textarea.id = "noteText";
+    textarea.placeholder = "یادداشت…";
+    textarea.value = localStorage.getItem("note") || "";
+    app.appendChild(textarea);
 
-    // BUTTON
-    if (c.type === "button") {
-      const b = document.createElement("button");
-      b.textContent = c.label;
-      b.onclick = () => handleAction(c.action);
-      app.appendChild(b);
-    }
+    const saveBtn = document.createElement("button");
+    saveBtn.textContent = "ذخیره";
+    saveBtn.onclick = () => {
+      localStorage.setItem("note", textarea.value);
+      alert("ذخیره شد ✅");
+    };
+    app.appendChild(saveBtn);
 
-    // LIST
-    if (c.type === "list") {
-      const ul = document.createElement("ul");
-      getList().forEach((item, i) => {
-        const li = document.createElement("li");
-        li.textContent = `${i + 1}. ${sanitize(item)}`;
-        ul.appendChild(li);
-      });
-      app.appendChild(ul);
-    }
+    const backBtn = document.createElement("button");
+    backBtn.textContent = "بازگشت";
+    backBtn.onclick = () => runApp("screen home");
+    app.appendChild(backBtn);
+  }
+
+  // ===== LIST =====
+  if (screen === "list") {
+    const input = document.createElement("textarea");
+    input.id = "itemInput";
+    input.placeholder = "آیتم جدید…";
+    app.appendChild(input);
+
+    const addBtn = document.createElement("button");
+    addBtn.textContent = "اضافه";
+    addBtn.onclick = () => {
+      const val = input.value.trim();
+      if (!val) return;
+      const list = JSON.parse(localStorage.getItem("items") || "[]");
+      list.push(val);
+      localStorage.setItem("items", JSON.stringify(list));
+      renderScreen("list");
+      renderOutput();
+    };
+    app.appendChild(addBtn);
+
+    const ul = document.createElement("ul");
+    const items = JSON.parse(localStorage.getItem("items") || "[]");
+    items.forEach((item, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${i + 1}. ${item}`;
+      ul.appendChild(li);
+    });
+    app.appendChild(ul);
+
+    const backBtn = document.createElement("button");
+    backBtn.textContent = "بازگشت";
+    backBtn.onclick = () => runApp("screen home");
+    app.appendChild(backBtn);
+  }
+
+  renderOutput();
+}
+
+// ===== RENDER OUTPUT =====
+function renderOutput() {
+  const box = document.getElementById("outputBox");
+  if (!box) return;
+
+  box.innerHTML = "";
+
+  currentOutput.forEach(line => {
+    const p = document.createElement("p");
+    p.textContent = line;
+    p.style.padding = "6px 0";
+    p.style.borderBottom = "1px solid #333";
+    box.appendChild(p);
   });
-}
-
-/* =========================
-   اکشن‌ها
-========================= */
-
-function handleAction(action) {
-
-  // اجرای دستور
-  if (action === "runCommand") {
-    const cmd = document.getElementById("commandInput")?.value || "";
-    runApp(cmd);
-  }
-
-  // بازگشت خانه
-  if (action === "goHomeAction") {
-    runApp("home");
-  }
-
-  // ذخیره یادداشت
-  if (action === "saveNote") {
-    const val = document.getElementById("noteText")?.value || "";
-    localStorage.setItem("note", val);
-    alert("یادداشت ذخیره شد ✅");
-  }
-
-  // افزودن به لیست
-  if (action === "addItem") {
-    const val = document.getElementById("itemInput")?.value || "";
-    if (!val) return;
-
-    const list = getList();
-    list.push(val);
-    localStorage.setItem("items", JSON.stringify(list));
-    render(currentState);
-  }
-}
-
-/* =========================
-   زبان (فعلاً نمایشی)
-========================= */
-
-function handleLanguageChange(event) {
-  alert("زبان تغییر کرد: " + event.target.value);
-}
+     }
