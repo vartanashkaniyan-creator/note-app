@@ -1,8 +1,11 @@
-// engine.js - Advanced Engine v3
+// engine.js - Advanced Engine v4
 const ALLOWED_SCREENS = new Set(["home", "note", "list"]);
 
-let variables = {}; // ذخیره متغیرها
+let variables = {};
+let currentScreen = "home";
+let alertText = null;
 
+/* ================= NORMALIZE ================= */
 function normalize(cmd) {
   if (typeof cmd !== "string") return "";
   return cmd
@@ -12,92 +15,162 @@ function normalize(cmd) {
     .replace(/لیست/g, "list")
     .replace(/برو/g, "go")
     .replace(/تکرار/g, "loop")
-    .replace(/پایان تکرار/g, "endloop")
+    .replace(/پایان/g, "end")
+    .replace(/اگر/g, "if")
+    .replace(/وگرنه/g, "else")
     .replace(/بذار/g, "set")
     .replace(/هشدار/g, "alert")
     .trim();
 }
 
-// جایگذاری متغیرها در متن
+/* ================= UTILS ================= */
 function interpolate(text) {
-  return text.replace(/\{([a-zA-Z0-9_]+)\}/g, (m, v) => {
-    return variables[v] !== undefined ? variables[v] : `{${v}}`;
-  });
+  return text.replace(/\{([\w\d_]+)\}/g, (_, v) =>
+    variables[v] !== undefined ? variables[v] : `{${v}}`
+  );
 }
 
+function toNumber(val) {
+  const n = Number(val);
+  return isNaN(n) ? 0 : n;
+}
+
+/* ================= ENGINE ================= */
 function runEngine(input) {
-  let screen = "home";
-  let alertText = null;
-  variables = {}; // ریست متغیرها در هر اجرای جدید
+  variables = {};
+  currentScreen = "home";
+  alertText = null;
 
-  if (typeof input === "string" && input.trim() !== "") {
-    const lines = input
-      .split("\n")
-      .map(l => normalize(l))
-      .filter(Boolean);
-
-    const stack = []; // برای حلقه‌ها
-    let i = 0;
-
-    while (i < lines.length) {
-      const line = lines[i];
-      const parts = line.split(" ");
-      const cmd = parts[0];
-
-      // حلقه
-      if (cmd === "loop" && parts[1]) {
-        const count = parseInt(parts[1]);
-        if (!isNaN(count) && count > 0) {
-          const loopLines = [];
-          i++;
-          // جمع آوری خطوط داخل حلقه
-          while (i < lines.length && lines[i] !== "endloop") {
-            loopLines.push(lines[i]);
-            i++;
-          }
-          // اجرای حلقه
-          for (let j = 0; j < count; j++) {
-            loopLines.forEach(l => executeLine(l));
-          }
-        }
-      } else {
-        executeLine(line);
-      }
-
-      i++;
-    }
+  if (!input || !input.trim()) {
+    return result();
   }
 
-  return {
-    schema: getScreenSchema(screen),
-    meta: { alertText, variables, currentScreen: screen }
-  };
+  const lines = input
+    .split("\n")
+    .map(l => normalize(l))
+    .filter(Boolean);
+
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const parts = line.split(" ");
+    const cmd = parts[0];
+
+    /* ---------- LOOP ---------- */
+    if (cmd === "loop") {
+      const count = toNumber(parts[1]);
+      const block = [];
+      i++;
+      while (i < lines.length && lines[i] !== "end") {
+        block.push(lines[i]);
+        i++;
+      }
+      for (let j = 0; j < count; j++) {
+        block.forEach(executeLine);
+      }
+    }
+
+    /* ---------- IF ---------- */
+    else if (cmd === "if") {
+      const left = interpolate(parts[1]);
+      const op = parts[2];
+      const right = interpolate(parts[3]);
+
+      const condition = evaluate(left, op, right);
+      const ifBlock = [];
+      const elseBlock = [];
+
+      i++;
+      let target = ifBlock;
+
+      while (i < lines.length && lines[i] !== "end") {
+        if (lines[i] === "else") {
+          target = elseBlock;
+        } else {
+          target.push(lines[i]);
+        }
+        i++;
+      }
+
+      (condition ? ifBlock : elseBlock).forEach(executeLine);
+    }
+
+    /* ---------- NORMAL LINE ---------- */
+    else {
+      executeLine(line);
+    }
+
+    i++;
+  }
+
+  return result();
 }
 
-// اجرای یک خط دستور
+/* ================= LINE EXEC ================= */
 function executeLine(line) {
   const parts = line.split(" ");
   const cmd = parts[0];
 
-  if (cmd === "screen" || cmd === "go") {
-    if (parts[1] && ALLOWED_SCREENS.has(parts[1])) {
-      currentScreen = parts[1];
-    }
-  } else if (cmd === "alert") {
-    const text = parts.slice(1).join(" ");
-    alertText = interpolate(text);
-    // alert(alertText); // اجرای alert توسط main.js
-  } else if (cmd === "set" && parts[1]) {
-    const varName = parts[1];
-    const value = parts.slice(2).join(" ");
-    // بررسی جایگذاری متغیرها در مقدار
-    variables[varName] = interpolate(value);
-  } else if (cmd === "plugin" && parts[1] && window.PluginSystem) {
-    window.PluginSystem.execute(parts[1], ...parts.slice(2));
+  if ((cmd === "screen" || cmd === "go") && ALLOWED_SCREENS.has(parts[1])) {
+    currentScreen = parts[1];
+  }
+
+  else if (cmd === "set") {
+    const name = parts[1];
+    const expr = interpolate(parts.slice(2).join(" "));
+    variables[name] = calc(expr);
+  }
+
+  else if (cmd === "alert") {
+    alertText = interpolate(parts.slice(1).join(" "));
+  }
+
+  else if (cmd === "plugin" && window.PluginSystem) {
+    window.PluginSystem.execute(parts[1]);
   }
 }
 
-// ===== SCHEMA DEFINITIONS =====
+/* ================= CALC ================= */
+function calc(expr) {
+  // فقط + - * /
+  try {
+    if (!/^[\d+\-*/ ().]+$/.test(expr)) return expr;
+    return eval(expr);
+  } catch {
+    return expr;
+  }
+}
+
+/* ================= CONDITION ================= */
+function evaluate(a, op, b) {
+  const x = isNaN(a) ? a : Number(a);
+  const y = isNaN(b) ? b : Number(b);
+
+  switch (op) {
+    case "==": return x == y;
+    case "!=": return x != y;
+    case ">": return x > y;
+    case "<": return x < y;
+    case ">=": return x >= y;
+    case "<=": return x <= y;
+    default: return false;
+  }
+}
+
+/* ================= RESULT ================= */
+function result() {
+  return {
+    schema: getScreenSchema(currentScreen),
+    meta: {
+      alertText,
+      variables,
+      currentScreen
+    }
+  };
+}
+
+/* ================= UI SCHEMA ================= */
 function getScreenSchema(screen) {
   if (screen === "note") {
     return {
@@ -122,7 +195,6 @@ function getScreenSchema(screen) {
     };
   }
 
-  // HOME
   return {
     title: "home",
     components: [
